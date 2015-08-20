@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "DASArtClient",
+  "main": "index.html",
   "dependencies": {
     "bower": "^1.4.1"
   }
