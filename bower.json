@@ -1,0 +1,21 @@
+{
+  "name": "artapp",
+  "version": "0.0.0",
+  "homepage": "https://github.com/DesignAShirt/www",
+  "authors": [
+    "shaosh <shaosh0913@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#1.0.0",
+    "iron-elements": "PolymerElements/iron-elements#~1.0.3",
+    "paper-elements": "PolymerElements/paper-elements#~1.0.4"
+  }
+}
