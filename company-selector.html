@@ -9,12 +9,15 @@
 	  paper-item{
 	    cursor:pointer;
 	  }
+	  .dropdown-trigger{
+	    font-size:20px;
+	  }
 	</style>
 	
   <template>
     <paper-menu-button>
       <paper-button class="dropdown-trigger">
-        <span class="title">{{selectedCompany}}</span>
+        <span>{{selectedCompany}}</span>
         <iron-icon icon="expand-more"></iron-icon>
       </paper-button>
       <paper-menu class="dropdown-content" selected="{{selectedIndex}}">

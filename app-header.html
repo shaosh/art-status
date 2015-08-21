@@ -1,5 +1,8 @@
 <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="company-selector.html">
 <link rel="import" href="notify-button.html">
 
@@ -13,6 +16,14 @@
   <template>
     <paper-header-panel mode="scroll">
       <paper-toolbar>
+        <paper-menu-button>
+          <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>
+          <paper-menu class="dropdown-content">
+            <template is="dom-repeat" items="[[letters]]" as="letter">
+              <paper-item>[[letter]]</paper-item>
+            </template>
+          </paper-menu>
+        </paper-menu-button>
     	  <div class="horizontal-center">
           <company-selector></company-selector>
         </div>
