@@ -1,6 +1,7 @@
 <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
 
 <link rel="import" href="job-card.html">
 
@@ -21,15 +22,26 @@
       text-align: center;
       background-color: #F2FD8E;
     }
+    
+    .content{
+      height:2000px;
+    }
+    
   </style>
   <template>
-      <paper-tabs selected="0" noink>
-        <paper-tab>ALL (<span>{{jobs.length}}</span>)</paper-tab>
-        <paper-tab>UNASSIGNED</paper-tab>
-        <paper-tab>MINE</paper-tab>
-      </paper-tabs>
-      <div class="newjob">You have {n} new jobs.</div>
-      <job-card></job-card>
+    <paper-header-panel mode="standard">
+      <div class="paper-header">
+        <paper-tabs selected="0" noink>
+          <paper-tab>ALL (<span>{{jobs.length}}</span>)</paper-tab>
+          <paper-tab>UNASSIGNED</paper-tab>
+          <paper-tab>MINE</paper-tab>
+        </paper-tabs>
+        <div class="newjob"><a href="#">You have {n} new jobs.</a></div>
+      </div>
+        <template is="dom-repeat" items="{{jobs}}">
+          <job-card job="{{item}}"></job-card>
+        </template>
+    </paper-header-panel>
   </template>
   
   <script>
