@@ -54,8 +54,8 @@
   <template>
     <paper-card class='fancy'>
       <div class="card-content">
-        <div class="avatar" style="background-image: url('{{avatarurl}}');"></div>
-        <paper-tooltip>{{assignee}}</paper-tooltip>
+        <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');"></div>
+        <paper-tooltip for="avatar">{{assignee}}</paper-tooltip>
         <div class="title">
           <div class="medium">{{title}}</div>
           <div class="small">{{time}}</div>
