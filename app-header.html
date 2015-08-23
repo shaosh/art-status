@@ -11,10 +11,15 @@
 	  .horizontal-center {
       margin:auto auto;
     }
+    
+    paper-toolbar{
+      box-sizing:content-box;
+      border-bottom: #132584 1px solid;
+    }
 	</style>
 	
   <template>
-    <paper-header-panel mode="scroll">
+    <paper-header-panel mode="seamed">
       <paper-toolbar>
         <paper-menu-button>
           <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>

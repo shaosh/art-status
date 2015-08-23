@@ -1,34 +1,35 @@
 <link rel="import" href="bower_components/paper-card/paper-card.html">
+<link rel="import" href="bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="bower_components/paper-tooltip/paper-tooltip.html">
 
 
 <dom-module id="job-card">
   <style>
-    #cards {
-      @apply(--layout-vertical);
-      @apply(--center-justified);
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
+    :host{
+      --grey-color: #A2A2A2;
     }
     paper-card {
       width: 100%;
-      margin-bottom: 5px;
+      margin-bottom: 2px;
     }
     .avatar {
       display: inline-block;
       height: 64px;
       width: 64px;
       border-radius: 50%;
-      background: var(--paper-pink-500);
+      background-size:contain;
+      background-color:var(--grey-color);
       color: white;
       line-height: 64px;
       font-size: 30px;
       text-align: center;
+      border: var(--grey-color) 2px solid;
     }
     .fancy .title {
       position: absolute;
       top: 20px;
       left: 100px;
+      width: 250px;
     }
     .fancy img {
       width: 100%;
@@ -39,16 +40,29 @@
     }
     .fancy .small {
       font-size: 12px;
+      color: var(--grey-color);
+    }
+    .status{
+      display: inline-block;
+      position: absolute;
+      right: 20px;
+      top: 30px;
+      color: var(--grey-color);
     }
   </style>
   
   <template>
     <paper-card class='fancy'>
       <div class="card-content">
-        <div class="avatar">:)</div>
+        <div class="avatar" style="background-image: url('{{avatarurl}}');"></div>
+        <paper-tooltip>{{assignee}}</paper-tooltip>
         <div class="title">
           <div class="medium">{{title}}</div>
           <div class="small">{{time}}</div>
+        </div>
+        <div class="status">
+          <iron-icon icon="{{statusIcon}}"></iron-icon>
+          <paper-tooltip>{{status}}</paper-tooltip>
         </div>
       </div>
     </paper-card>
@@ -77,6 +91,10 @@
           type: String,
           notify: true
         },
+        statusIcon: {
+          type: String,
+          notify: true
+        },
         assignee: {
           type: String,
           notify: true
@@ -87,7 +105,33 @@
           this.title = newValue.job.id + ' ' + newValue.job.name;
           this.time = newValue.job.time;
           this.assignee = newValue.job.assignee;
-          this.status = newValue.job.status;
+          this.status = newValue.job.status.toLowerCase();
+          
+          if(this.status === STATUSES.DOWNLOADED){
+            this.statusIcon = 'file-download';
+          } 
+          else if(this.status === STATUSES.MODIFIED){
+            this.statusIcon = 'create';
+          }
+          else if(this.status === STATUSES.CHANGESDETECTED){
+            this.statusIcon = 'flag';
+          }
+          else{
+            this.statusIcon = 'file-upload';
+          }
+          
+          //TODO: use api to get the url to the profile img
+          var avatar = this.$$('.avatar');
+          var name = this.assignee.toLowerCase();
+          var url = ''
+          if(['hill', 'jessie', 'mike', 'zack'].indexOf(name) > -1){
+            
+            url = 'img/' + name + '.jpg';
+          }
+          else{
+            url = 'img/default.png';
+          }
+          avatar.style.backgroundImage = 'url(' + url + ')';
         }
       } 
     })

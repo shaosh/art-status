@@ -1,47 +1,9 @@
-<link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
-<link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="bower_components/paper-tabs/paper-tab.html">
-<link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
-
-<link rel="import" href="job-card.html">
 
 
 <dom-module id="app-drawer">
-  <style>
-    paper-tab{
-      background: #5E6FC7;
-      color:#fff;
-    }
-    
-    :host{
-      --paper-tabs-selection-bar-color: #132584;
-    }
-    
-    .newjob{
-      padding: 10px 20px;
-      text-align: center;
-      background-color: #F2FD8E;
-    }
-    
-    .content{
-      height:2000px;
-    }
-    
-  </style>
+  
   <template>
-    <paper-header-panel mode="standard">
-      <div class="paper-header">
-        <paper-tabs selected="0" noink>
-          <paper-tab>ALL (<span>{{jobs.length}}</span>)</paper-tab>
-          <paper-tab>UNASSIGNED</paper-tab>
-          <paper-tab>MINE</paper-tab>
-        </paper-tabs>
-        <div class="newjob"><a href="#">You have {n} new jobs.</a></div>
-      </div>
-        <template is="dom-repeat" items="{{jobs}}">
-          <job-card job="{{item}}"></job-card>
-        </template>
-    </paper-header-panel>
+    
   </template>
   
   <script>
@@ -53,78 +15,78 @@
       },
       
       properties: {
-        jobs:{
-          type: Array,
-          value: [
-            {
-              job: {
-                id: '111111',
-                name: 'For the dogs',
-                time: '2015-08-15 00:00:22',
-                status: 'Uploaded',
-                assignee: 'Jessie'
-              }
-            },
-            {
-              job: {
-                id: '222222',
-                name: 'For the dogs',
-                time: '2015-08-20 23:11:22',
-                status: 'Changes Detected',
-                assignee: 'Mike'
-              }
-            },
-            {
-              job: {
-                id: '333333',
-                name: 'For the dogs',
-                time: '2015-08-19 00:12:45',
-                status: 'Modified',
-                assignee: 'Bob'
-              }
-            },
-            {
-              job: {
-                id: '444444',
-                name: 'For the dogs',
-                time: '2015-08-16 15:33:11',
-                status: 'Downloaded',
-                assignee: 'Zack'
-              }
-            },
-            {
-              job: {
-                id: '555555',
-                name: 'For the dogs',
-                time: '2015-08-17 07:13:56',
-                status: 'Uploaded',
-                assignee: 'Sam'
-              }
-            },
-            {
-              job: {
-                id: '666666',
-                name: 'For the dogs',
-                time: '2015-08-18 18:18:38',
-                status: 'Uploaded',
-                assignee: 'Amy'
-              }
-            },
-            {
-              job: {
-                id: '777777',
-                name: 'For the dogs',
-                time: '2015-08-15 00:00:22',
-                status: 'Uploaded',
-                assignee: 'Hill'
-              }
-            }
-          ]
+        jobnum: {
+          type:Number,
+          value:0
         }
-      },
-      
-      _updateJobnum: function(){
-        
+        // jobs:{
+        //   type: Array,
+        //   value: [
+        //     {
+        //       job: {
+        //         id: '111111',
+        //         name: 'For the dogs',
+        //         time: '2015-08-15 00:00:22',
+        //         status: 'Uploaded',
+        //         assignee: 'Jessie'
+        //       }
+        //     },
+        //     {
+        //       job: {
+        //         id: '222222',
+        //         name: 'For the dogs',
+        //         time: '2015-08-20 23:11:22',
+        //         status: 'Changes Detected',
+        //         assignee: 'Mike'
+        //       }
+        //     },
+        //     {
+        //       job: {
+        //         id: '333333',
+        //         name: 'For the dogs',
+        //         time: '2015-08-19 00:12:45',
+        //         status: 'Modified',
+        //         assignee: 'Bob'
+        //       }
+        //     },
+        //     {
+        //       job: {
+        //         id: '444444',
+        //         name: 'For the dogs',
+        //         time: '2015-08-16 15:33:11',
+        //         status: 'Downloaded',
+        //         assignee: 'Zack'
+        //       }
+        //     },
+        //     {
+        //       job: {
+        //         id: '555555',
+        //         name: 'For the dogs',
+        //         time: '2015-08-17 07:13:56',
+        //         status: 'Uploaded',
+        //         assignee: 'Sam'
+        //       }
+        //     },
+        //     {
+        //       job: {
+        //         id: '666666',
+        //         name: 'For the dogs',
+        //         time: '2015-08-18 18:18:38',
+        //         status: 'Uploaded',
+        //         assignee: 'Amy'
+        //       }
+        //     },
+        //     {
+        //       job: {
+        //         id: '777777',
+        //         name: 'For the dogs',
+        //         time: '2015-08-15 00:00:22',
+        //         status: 'Uploaded',
+        //         assignee: 'Hill'
+        //       }
+        //     }
+        //   ]
+        // }
       }
     });
   </script>
