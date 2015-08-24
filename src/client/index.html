@@ -1,12 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <title>Hello World!</title>
+	<title>Art Desktop App</title>
+	<script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="elements.html">
+	<link rel="import" href="app-header.html">
+	<link rel="import" href="app-drawer-panel.html">
+	<style>
+  	* {
+      font-family: 'Roboto', 'Noto', sans-serif;
+    }
+    
+    a {
+      text-decoration: none;
+    }
+	</style>
 </head>
-<body>
-  <!-- Demo pulled from here: https://github.com/nwjs/nw.js -->
-  <!-- See here for more info: https://github.com/nwjs/nw.js/wiki -->
-  <h1>Hello World!</h1>
-  We are using node.js <script>document.write(process.version)</script>.
+<body class="fullbleed">
+  <script>
+    const STATUSES = {
+      DOWNLOADED: 'downloaded',
+      MODIFIED: 'modified',
+      CHANGESDETECTED: 'changes detected',
+      UPLOADED: 'uploaded'
+    };
+  </script>
+  <app-header>
+    <div class="content">
+    <app-drawer-panel></app-drawer-panel>
+    </div>
+  </app-header>
 </body>
 </html>
