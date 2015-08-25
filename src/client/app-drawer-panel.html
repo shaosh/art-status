@@ -9,7 +9,7 @@
     }
     
     :host{
-      --paper-tabs-selection-bar-color: #2A98EF;
+      --paper-tabs-selection-bar-color: #7EC1F4;
     }
     
     .newjob{
@@ -69,8 +69,20 @@
     Polymer({
       is: 'app-drawer-panel',
       selectJob: function(e){
-        var model = e.model;
-        this.selectedJob = model.item;
+        var card = Polymer.dom(e).localTarget.childNodes[1];
+        if(card.classList.contains('selected')){
+          return;
+        }
+        
+        var prevSelected = Polymer.dom(this.root).querySelectorAll('job-card');
+        if(prevSelected.length > 0){
+          prevSelected.map(function(jobcard){
+            jobcard.childNodes[1].toggleClass('selected', false);
+          });
+        }
+        this.selectedJob = e.model.item;
+        
+        card.toggleClass('selected');
       },
       selectedJob: {
         type: Object,
@@ -91,10 +103,9 @@
                 id: '111111',
                 name: 'For the dogs',
                 time: '2015-08-15 00:00:22',
-                status: 'Uploaded',
+                status: 'Working',
                 assignee: 'Jessie',
                 updater: 'Aaron'
-                //may need updater
               }
             },
             {
@@ -102,7 +113,7 @@
                 id: '222222',
                 name: 'For the dogs',
                 time: '2015-08-20 23:11:22',
-                status: 'Changes Detected',
+                status: 'Waiting',
                 assignee: 'Mike',
                 updater: 'Aaron'
               }
@@ -112,7 +123,7 @@
                 id: '333333',
                 name: 'For the dogs',
                 time: '2015-08-19 00:12:45',
-                status: 'Modified',
+                status: 'Locked',
                 assignee: 'Bob',
                 updater: 'Aaron'
               }
@@ -122,7 +133,7 @@
                 id: '444444',
                 name: 'For the dogs',
                 time: '2015-08-16 15:33:11',
-                status: 'Downloaded',
+                status: 'Done',
                 assignee: 'Zack',
                 updater: 'Aaron'
               }
@@ -132,7 +143,7 @@
                 id: '555555',
                 name: 'For the dogs',
                 time: '2015-08-17 07:13:56',
-                status: 'Uploaded',
+                status: 'Done',
                 assignee: 'Sam',
                 updater: 'Aaron'
               }
@@ -142,7 +153,7 @@
                 id: '666666',
                 name: 'For the dogs',
                 time: '2015-08-18 18:18:38',
-                status: 'Uploaded',
+                status: 'Working',
                 assignee: 'Amy',
                 updater: 'Aaron'
               }
@@ -152,7 +163,7 @@
                 id: '777777',
                 name: 'For the dogs',
                 time: '2015-08-15 00:00:22',
-                status: 'Uploaded',
+                status: 'Waiting',
                 assignee: 'Hill',
                 updater: 'Aaron'
               }

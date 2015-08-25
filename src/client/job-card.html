@@ -1,11 +1,14 @@
 <dom-module id="job-card">
   <style>
     :host{
-      --grey-color: #A2A2A2;
+      --grey-color: #5A5A5A;
     }
     paper-card {
       width: 100%;
       margin-bottom: 2px;
+    }
+    .selected {
+      background-color: #7EC1F4;
     }
     .avatar {
       display: inline-block;
@@ -20,20 +23,17 @@
       text-align: center;
       border: var(--grey-color) 2px solid;
     }
-    .fancy .title {
+    .title {
       position: absolute;
       top: 20px;
       left: 100px;
       width: 250px;
     }
-    .fancy img {
-      width: 100%;
-    }
-    .fancy .medium {
+    .medium {
       font-size: 16px;
       padding-bottom: 15px;
     }
-    .fancy .small {
+    .small {
       font-size: 12px;
       color: var(--grey-color);
     }
@@ -47,7 +47,7 @@
   </style>
   
   <template>
-    <paper-card class='fancy'>
+    <paper-card>
       <div class="card-content">
         <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');"></div>
         <paper-tooltip for="avatar">{{assignee}}</paper-tooltip>
@@ -72,6 +72,10 @@
           value: null,
           notify: true,
           observer: '_setJobData'
+        },
+        selected: {
+          type: String,
+          value: ''
         },
         title: {
           type: String,
@@ -101,17 +105,17 @@
           this.assignee = newValue.job.assignee;
           this.status = newValue.job.status.toLowerCase();
           
-          if(this.status === STATUSES.DOWNLOADED){
-            this.statusIcon = 'file-download';
+          if(this.status === STATUSES.WORKING){
+            this.statusIcon = 'tab';
           } 
-          else if(this.status === STATUSES.MODIFIED){
-            this.statusIcon = 'create';
+          else if(this.status === STATUSES.WAITING){
+            this.statusIcon = 'schedule';
           }
-          else if(this.status === STATUSES.CHANGESDETECTED){
-            this.statusIcon = 'flag';
+          else if(this.status === STATUSES.LOCKED){
+            this.statusIcon = 'announcement';
           }
           else{
-            this.statusIcon = 'file-upload';
+            this.statusIcon = 'check-circle';
           }
           
           //TODO: use api to get the url to the profile img
