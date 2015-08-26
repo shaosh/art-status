@@ -28,7 +28,7 @@
       
       properties:{
         selectedCompany:{
-          type: String,
+          type: String.
           value: ''
         },
         
@@ -47,6 +47,12 @@
       ready: function(){
         this._initCompanies();
         if(this.companies.length !== 0){
+          for(var i = 0; i < this.companies.length; i++){
+            if(window.location.href.indexOf(this.companies[i].name.toLowerCase()) > -1){
+              this.selectedIndex = i;
+              return;
+            }
+          }
           this.selectedIndex = 0;
         }
       },
