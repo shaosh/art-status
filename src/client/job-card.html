@@ -52,7 +52,7 @@
         <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');"></div>
         <paper-tooltip for="avatar">{{assignee}}</paper-tooltip>
         <div class="title">
-          <div class="medium">{{title}}</div>
+          <div class="medium"><span>{{jobid}}</span> - <span>{{jobname}}</span></div>
           <div class="small">{{time}}</div>
         </div>
         <div class="status">
@@ -77,13 +77,13 @@
           type: String,
           notify: true
         },
+        jobname: {
+          type: String,
+          notify: true
+        },
         selected: {
           type: String,
           value: ''
-        },
-        title: {
-          type: String,
-          notify: true
         },
         time: {
           type: String,
@@ -104,7 +104,8 @@
       },
       _setJobData: function(newValue, oldValue){
         if(!!newValue){
-          this.title = newValue.job.id + ' ' + newValue.job.name;
+          this.jobid = newValue.job.id;
+          this.jobname = newValue.job.name;
           this.time = newValue.job.time;
           this.assignee = newValue.job.assignee;
           this.status = newValue.job.status.toLowerCase();
@@ -127,10 +128,10 @@
           var name = this.assignee.toLowerCase();
           var url = ''
           if(['hill', 'jessie', 'mike', 'zack'].indexOf(name) > -1){
-            url = 'img/' + name + '.jpg';
+            url = '/pages/img/' + name + '.jpg';
           }
           else{
-            url = 'img/default.png';
+            url = '/pages/img/default.png';
           }
           avatar.style.backgroundImage = 'url(' + url + ')';
         }
