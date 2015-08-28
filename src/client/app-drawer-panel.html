@@ -68,6 +68,7 @@
   <script>
     Polymer({
       is: 'app-drawer-panel',
+
       selectJob: function(e){
         var card = Polymer.dom(e).localTarget.childNodes[1];
         if(card.classList.contains('selected')){
@@ -84,16 +85,49 @@
         
         card.toggleClass('selected');
       },
+
       selectedJob: {
         type: Object,
         value: null,
         notify: true
       },
+
       ready: function(){
         if(this.jobs.length > 0){
           this.selectedJob = this.jobs[0];
         }
       },
+
+      // ready: function(){
+      //   if(this.jobs.length > 0){
+      //     var fn = function(obj){
+      //       return function(){
+      //         obj._setJobWithHash(obj.jobs);
+      //       };
+      //     };          
+      //     window.onhashchange = fn(this);
+      //     if(this._setCompanyWithHash(this.companies)){
+      //       return;
+      //     }
+      //     this.selectedIndex = 0;
+      //   }
+      // },
+
+      // _setCompanyWithHash: function(companies){
+      //   var hash = window.location.hash;
+      //   console.log(hash);
+      //   if(hash !== ''){
+      //     var params = hash.split('/');
+      //     for (var i = 0; i < companies.length; i++){
+      //       if(params.length > 1 && params[1] === companies[i].name.toLowerCase()){
+      //         this.selectedIndex = i;
+      //         return true;
+      //       }
+      //     }
+      //   }
+      //   return false;
+      // },
+
       properties: {
         jobs:{
           type: Array,

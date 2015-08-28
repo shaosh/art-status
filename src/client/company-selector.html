@@ -46,21 +46,46 @@
       
       ready: function(){
         this._initCompanies();
-        if(this.companies.length !== 0){
-          for(var i = 0; i < this.companies.length; i++){
-            if(window.location.href.indexOf(this.companies[i].name.toLowerCase()) > -1){
-              this.selectedIndex = i;
-              return;
-            }
+        if(this.companies.length > 0){
+          var that = this;
+          var fn = function(){
+            return function(){
+              that._setCompanyWithHash(that.companies);
+            };
+          };
+          var prevOnHashChange = window.onhashchange;
+          window.onhashchange = function(){
+            (fn())();
+            if(typeof prevOnHashChange === 'function'){
+              prevOnHashChange();
+            }            
+          };
+          if(this._setCompanyWithHash(this.companies)){
+            return;
           }
           this.selectedIndex = 0;
         }
       },
+
+      _setCompanyWithHash: function(companies){
+        var hash = window.location.hash;
+        console.log(hash);
+        if(hash !== ''){
+          var params = hash.split('/');
+          for (var i = 0; i < companies.length; i++){
+            if(params.length > 1 && params[1] === companies[i].name.toLowerCase()){
+              this.selectedIndex = i;
+              return true;
+            }
+          }
+        }
+        return false;
+      },
       
       //TODO: hardcode to ajax calls
       _initCompanies: function(){
-        this.push('companies', {name: 'DesignAShirt.com'});
-        this.push('companies', {name: 'AntonSports.com'});
+        this.push('companies', {name: 'DesignAShirt'});
+        this.push('companies', {name: 'AntonSports'});
       },
       
       _updateCompany: function(newValue, oldValue){
