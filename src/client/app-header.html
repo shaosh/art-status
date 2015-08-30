@@ -19,13 +19,13 @@
         <paper-menu-button>
           <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>
           <paper-menu class="dropdown-content">
-            <template is="dom-repeat" items="[[letters]]" as="letter">
+            <!-- <template is="dom-repeat" items="[[letters]]" as="letter">
               <paper-item>[[letter]]</paper-item>
-            </template>
+            </template> -->
           </paper-menu>
         </paper-menu-button>
     	  <div class="horizontal-center">
-          <company-selector></company-selector>
+          <company-selector companies="{{companies}}" selected-company="{{selectedCompany}}"></company-selector>
         </div>
         <notify-button></notify-button>
       </paper-toolbar>

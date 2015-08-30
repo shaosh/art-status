@@ -58,7 +58,7 @@
           type: Object,
           value: null,
           notify: true,
-          observer: '_setJobData'
+          observer: 'setJobData'
         },
         jobid: {
           type: String,
@@ -93,14 +93,14 @@
           notify: true
         }
       },
-      _setJobData: function(newValue, oldValue){
+      setJobData: function(newValue, oldValue){
         if(!!newValue){
-          this.jobid = newValue.job.id;
-          this.jobname = newValue.job.name;
-          this.time = newValue.job.time;
-          this.assignee = newValue.job.assignee;
-          this.updater = newValue.job.updater;
-          this.status = newValue.job.status;
+          this.jobid = newValue.id;
+          this.jobname = newValue.name;
+          this.time = newValue.time;
+          this.assignee = newValue.assignee;
+          this.updater = newValue.updater;
+          this.status = newValue.status;
           
           this.jobTitle = this.jobid + ' - ' + this.jobname;
           this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 

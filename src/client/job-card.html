@@ -52,7 +52,7 @@
         <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');"></div>
         <paper-tooltip for="avatar">{{assignee}}</paper-tooltip>
         <div class="title">
-          <div class="medium"><span>{{jobid}}</span> - <span>{{jobname}}</span></div>
+          <div class="medium"><span class="jobid">{{jobid}}</span> - <span>{{jobname}}</span></div>
           <div class="small">{{time}}</div>
         </div>
         <div class="status">
@@ -104,11 +104,11 @@
       },
       _setJobData: function(newValue, oldValue){
         if(!!newValue){
-          this.jobid = newValue.job.id;
-          this.jobname = newValue.job.name;
-          this.time = newValue.job.time;
-          this.assignee = newValue.job.assignee;
-          this.status = newValue.job.status.toLowerCase();
+          this.jobid = newValue.id;
+          this.jobname = newValue.name;
+          this.time = newValue.time;
+          this.assignee = newValue.assignee;
+          this.status = newValue.status;          
           
           if(this.status === STATUSES.WORKING){
             this.statusIcon = 'tab';
@@ -122,7 +122,6 @@
           else{
             this.statusIcon = 'check-circle';
           }
-          
           //TODO: use api to get the url to the profile img
           var avatar = this.$$('.avatar');
           var name = this.assignee.toLowerCase();

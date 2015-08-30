@@ -1,0 +1,202 @@
+<link rel="import" href="/pages/app-drawer-panel.html">
+<link rel="import" href="/pages/app-header.html">
+
+<dom-module id="app-page">
+	<template>
+		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}">
+	    <div class="content">
+	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
+	    </div>
+	  </app-header>
+	</template>
+
+	<script>
+    Polymer({
+      is: 'app-page',
+      
+      ready: function(){
+        this.initCompanies();
+        this.initJobs();
+        if(this.companies.length > 0){
+        	this.setCompanyAndJob();
+        }
+        this.setOnHashChange();        
+      },
+
+      setOnHashChange: function(){
+      	var fn = function(obj){
+          return function(){
+            obj.setCompanyAndJob();
+          };
+        };
+        window.onhashchange = fn(this);
+      },
+
+      setCompanyAndJob: function(){
+      	var companyInUrl = this.setCompanyWithHash(this.companies);
+      	if(window.location.hash === '' || !companyInUrl){
+      		this.selectedCompany = this.companies[0];
+      	}
+      	this.setJobWithCompany(this.selectedCompany, this.jobs);
+      },
+
+      setCompanyWithHash: function(companies){
+        var hash = window.location.hash;
+        if(hash !== ''){
+          var params = hash.split('/');
+          for (var i = 0; i < companies.length; i++){
+            if(params.length > 1 && params[1].toLowerCase() === companies[i].name.toLowerCase()){
+              this.selectedCompany = companies[i];
+              return true;
+            }
+          }
+          if(params.length > 1){
+          	alert('Invalid company name in url!');
+          }          
+        }
+        return false;
+      },
+
+      setJobWithCompany: function(selectedCompany, jobs){
+      	if(jobs.length > 0){
+      		var joblist = [];
+      		for(var i = 0; i < jobs.length; i++){
+      			if(jobs[i].companyid === selectedCompany.id){
+      				joblist.push(jobs[i]);
+      			}
+      		}
+      		if(joblist.length === 0){
+      			return;
+      		}
+
+      		var jobInUrl = this.setJobWithHash(joblist);
+      		if(window.location.hash === '' || !jobInUrl){
+      			this.selectedJob = joblist[0];
+      		}
+          this.currJobs = joblist;
+      	}
+      },
+
+      setJobWithHash: function(jobs){
+        var hash = window.location.hash;
+        if(hash !== ''){
+          var params = hash.split('/');
+          for (var i = 0; i < jobs.length; i++){
+            if(params.length > 2 && params[2] === jobs[i].id){
+              this.selectedJob = jobs[i];
+              return true;
+            }
+          }
+          if(params.length > 2){
+	        	alert('Invalid job id in url!');
+	        }
+        }        
+        return false;
+      },
+
+      //TODO: hardcode to ajax calls
+      initCompanies: function(){
+        this.push('companies', {name: 'DesignAShirt', id: '0'});
+        this.push('companies', {name: 'AntonSports', id: '1'});
+      },
+
+      initJobs: function(){
+      	this.jobs = [
+          {
+            id: '111111',
+            name: 'For the dogs',
+            time: '2015-08-15 00:00:22',
+            status: 'Working',
+            assignee: 'Jessie',
+            updater: 'Aaron',
+            companyid: '0'
+          },
+          {
+            id: '222222',
+            name: 'For the dogs',
+            time: '2015-08-20 23:11:22',
+            status: 'Waiting',
+            assignee: 'Mike',
+            updater: 'Aaron',
+            companyid: '0'
+          },
+          {
+            id: '333333',
+            name: 'For the dogs',
+            time: '2015-08-19 00:12:45',
+            status: 'Locked',
+            assignee: 'Bob',
+            updater: 'Aaron',
+            companyid: '1'
+          },
+          {
+            id: '444444',
+            name: 'For the dogs',
+            time: '2015-08-16 15:33:11',
+            status: 'Done',
+            assignee: 'Zack',
+            updater: 'Aaron',
+            companyid: '0'
+          },
+          {
+            id: '555555',
+            name: 'For the dogs',
+            time: '2015-08-17 07:13:56',
+            status: 'Done',
+            assignee: 'Sam',
+            updater: 'Aaron',
+            companyid: '1'
+          },
+          {
+            id: '666666',
+            name: 'For the dogs',
+            time: '2015-08-18 18:18:38',
+            status: 'Working',
+            assignee: 'Amy',
+            updater: 'Aaron',
+            companyid: '1'
+          },
+          {
+            id: '777777',
+            name: 'For the dogs',
+            time: '2015-08-15 00:00:22',
+            status: 'Waiting',
+            assignee: 'Hill',
+            updater: 'Aaron',
+            companyid: '0'
+          }
+        ]
+      },
+
+      properties: {
+        selectedCompany: {
+          type: Object,          
+          notify: true
+        },
+        selectedJob: {
+          type: String,
+          notify: true
+        }, 
+        selectedVersion: {
+        	type: String,
+          notify: true
+        },
+        companies: {
+        	type: Array,
+        	value: [],
+        	notify: true
+        },
+        jobs: {
+        	type: Array,
+        	value: [],
+        	notify: true
+        },
+        currJobs:{
+          type: Array,
+          value: [],
+          notify: true
+        }
+      }
+    });
+  </script>
+</dom-module>

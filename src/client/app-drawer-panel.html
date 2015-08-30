@@ -69,141 +69,60 @@
     Polymer({
       is: 'app-drawer-panel',
 
+      attached: function(){
+        this.addSelectedClass(this.selectedJob, null);
+      },
+
       selectJob: function(e){
         var card = Polymer.dom(e).localTarget.childNodes[1];
         if(card.classList.contains('selected')){
           return;
         }
         
+        this.unselectPrevJob();
+        card.toggleClass('selected');
+        this.selectedJob = e.model.item;
+        window.location.hash = '#/' + this.selectedCompany.name + '/' + this.selectedJob.id;       
+      },      
+
+      addSelectedClass: function(newValue, oldValue){
+        var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
+        if(typeof jobcards === 'undefined'){
+          return;
+        }
+        for(var i = 0; i < jobcards.length; i++){
+          var idSpan = Polymer.dom(jobcards[i].childNodes[1]).querySelector('.jobid');
+          if(newValue.id === idSpan.innerText){
+            if(jobcards[i].childNodes[1].classList.contains('selected')){
+            }
+            else{
+              this.unselectPrevJob();
+              jobcards[i].childNodes[1].toggleClass('selected');
+            }
+            return;
+          }
+        }
+      },
+
+      unselectPrevJob: function(){
         var prevSelected = Polymer.dom(this.root).querySelectorAll('job-card');
         if(prevSelected.length > 0){
           prevSelected.map(function(jobcard){
             jobcard.childNodes[1].toggleClass('selected', false);
           });
         }
-        this.selectedJob = e.model.item;
-        
-        card.toggleClass('selected');
       },
-
-      selectedJob: {
-        type: Object,
-        value: null,
-        notify: true
-      },
-
-      ready: function(){
-        if(this.jobs.length > 0){
-          this.selectedJob = this.jobs[0];
-        }
-      },
-
-      // ready: function(){
-      //   if(this.jobs.length > 0){
-      //     var fn = function(obj){
-      //       return function(){
-      //         obj._setJobWithHash(obj.jobs);
-      //       };
-      //     };          
-      //     window.onhashchange = fn(this);
-      //     if(this._setCompanyWithHash(this.companies)){
-      //       return;
-      //     }
-      //     this.selectedIndex = 0;
-      //   }
-      // },
-
-      // _setCompanyWithHash: function(companies){
-      //   var hash = window.location.hash;
-      //   console.log(hash);
-      //   if(hash !== ''){
-      //     var params = hash.split('/');
-      //     for (var i = 0; i < companies.length; i++){
-      //       if(params.length > 1 && params[1] === companies[i].name.toLowerCase()){
-      //         this.selectedIndex = i;
-      //         return true;
-      //       }
-      //     }
-      //   }
-      //   return false;
-      // },
 
       properties: {
         jobs:{
           type: Array,
-          value: [
-            {
-              job: {
-                id: '111111',
-                name: 'For the dogs',
-                time: '2015-08-15 00:00:22',
-                status: 'Working',
-                assignee: 'Jessie',
-                updater: 'Aaron'
-              }
-            },
-            {
-              job: {
-                id: '222222',
-                name: 'For the dogs',
-                time: '2015-08-20 23:11:22',
-                status: 'Waiting',
-                assignee: 'Mike',
-                updater: 'Aaron'
-              }
-            },
-            {
-              job: {
-                id: '333333',
-                name: 'For the dogs',
-                time: '2015-08-19 00:12:45',
-                status: 'Locked',
-                assignee: 'Bob',
-                updater: 'Aaron'
-              }
-            },
-            {
-              job: {
-                id: '444444',
-                name: 'For the dogs',
-                time: '2015-08-16 15:33:11',
-                status: 'Done',
-                assignee: 'Zack',
-                updater: 'Aaron'
-              }
-            },
-            {
-              job: {
-                id: '555555',
-                name: 'For the dogs',
-                time: '2015-08-17 07:13:56',
-                status: 'Done',
-                assignee: 'Sam',
-                updater: 'Aaron'
-              }
-            },
-            {
-              job: {
-                id: '666666',
-                name: 'For the dogs',
-                time: '2015-08-18 18:18:38',
-                status: 'Working',
-                assignee: 'Amy',
-                updater: 'Aaron'
-              }
-            },
-            {
-              job: {
-                id: '777777',
-                name: 'For the dogs',
-                time: '2015-08-15 00:00:22',
-                status: 'Waiting',
-                assignee: 'Hill',
-                updater: 'Aaron'
-              }
-            }
-          ]
-        }
+          notify: true
+        },
+        selectedJob: {
+          type: Object,
+          notify: true,
+          observer: 'addSelectedClass'
+        },
       }
     });
   </script>
