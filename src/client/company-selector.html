@@ -33,11 +33,22 @@
           type: Number,
           notify: true,
           observer: 'updateCompany'
+        }, 
+        selectedCompany: {
+          type: Object, 
+          notify: true,
+          observer: 'updateIndex'
+        }
+      },
+
+      updateIndex: function(newValue, oldValue){
+        if(typeof this.selectedIndex === 'undefined'){
+          this.selectedIndex = this.companies.indexOf(newValue);
         }
       },
       
       updateCompany: function(newValue, oldValue){
-        if(newValue !== oldValue){       
+        if(typeof oldValue !== 'undefined'){       
           this.selectedCompany = this.companies[newValue];
           window.location.hash = '#/' + this.selectedCompany.name;
         }

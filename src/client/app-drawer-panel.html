@@ -87,7 +87,7 @@
 
       addSelectedClass: function(newValue, oldValue){
         var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
-        if(typeof jobcards === 'undefined'){
+        if(typeof jobcards === 'undefined' || jobcards.length === 0){
           return;
         }
         for(var i = 0; i < jobcards.length; i++){
@@ -102,6 +102,8 @@
             return;
           }
         }
+        this.unselectPrevJob();
+        jobcards[0].childNodes[1].toggleClass('selected');
       },
 
       unselectPrevJob: function(){

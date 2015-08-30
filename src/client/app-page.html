@@ -10,7 +10,7 @@
 	  </app-header>
 	</template>
 
-	<script>
+	<script>    
     Polymer({
       is: 'app-page',
       
@@ -21,11 +21,14 @@
         	this.setCompanyAndJob();
         }
         this.setOnHashChange();        
-      },
+      },      
 
       setOnHashChange: function(){
       	var fn = function(obj){
           return function(){
+            if(window.location.hash === obj.expectedHash){
+              return;
+            }
             obj.setCompanyAndJob();
           };
         };
@@ -44,6 +47,9 @@
         var hash = window.location.hash;
         if(hash !== ''){
           var params = hash.split('/');
+          if(params.length <= 1 || params[1] === ''){
+            return false;
+          }
           for (var i = 0; i < companies.length; i++){
             if(params.length > 1 && params[1].toLowerCase() === companies[i].name.toLowerCase()){
               this.selectedCompany = companies[i];
@@ -72,6 +78,8 @@
       		var jobInUrl = this.setJobWithHash(joblist);
       		if(window.location.hash === '' || !jobInUrl){
       			this.selectedJob = joblist[0];
+            this.expectedHash = '#/' + selectedCompany.name + '/' + this.selectedJob.id;
+            window.location.hash = '#/' + selectedCompany.name + '/' + this.selectedJob.id;
       		}
           this.currJobs = joblist;
       	}
@@ -81,6 +89,9 @@
         var hash = window.location.hash;
         if(hash !== ''){
           var params = hash.split('/');
+          if(params.length <= 2 || params[2] === ''){
+            return false;
+          }
           for (var i = 0; i < jobs.length; i++){
             if(params.length > 2 && params[2] === jobs[i].id){
               this.selectedJob = jobs[i];
@@ -195,6 +206,10 @@
           type: Array,
           value: [],
           notify: true
+        },
+        expectedHash:{
+          type: String,
+          value: ''
         }
       }
     });
