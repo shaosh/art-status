@@ -1,5 +1,5 @@
-<link rel="import" href="/pages/app-drawer-panel.html">
-<link rel="import" href="/pages/app-header.html">
+<link rel="import" href="app-drawer-panel.html">
+<link rel="import" href="app-header.html">
 
 <dom-module id="app-page">
 	<template>
@@ -26,6 +26,7 @@
       setOnHashChange: function(){
       	var fn = function(obj){
           return function(){
+            //for case localhost:3000/ ==> localhost:3000/#/designashirt/111111
             if(window.location.hash === obj.expectedHash){
               return;
             }
@@ -120,7 +121,8 @@
             status: 'Working',
             assignee: 'Jessie',
             updater: 'Aaron',
-            companyid: '0'
+            companyid: '0',
+            imagenum: 0
           },
           {
             id: '222222',
@@ -129,7 +131,8 @@
             status: 'Waiting',
             assignee: 'Mike',
             updater: 'Aaron',
-            companyid: '0'
+            companyid: '0',
+            imagenum: 0
           },
           {
             id: '333333',
@@ -138,7 +141,8 @@
             status: 'Locked',
             assignee: 'Bob',
             updater: 'Aaron',
-            companyid: '1'
+            companyid: '1',
+            imagenum: 0
           },
           {
             id: '444444',
@@ -147,7 +151,8 @@
             status: 'Done',
             assignee: 'Zack',
             updater: 'Aaron',
-            companyid: '0'
+            companyid: '0',
+            imagenum: 0
           },
           {
             id: '555555',
@@ -156,7 +161,8 @@
             status: 'Done',
             assignee: 'Sam',
             updater: 'Aaron',
-            companyid: '1'
+            companyid: '1',
+            imagenum: 0
           },
           {
             id: '666666',
@@ -165,7 +171,8 @@
             status: 'Working',
             assignee: 'Amy',
             updater: 'Aaron',
-            companyid: '1'
+            companyid: '1',
+            imagenum: 0
           },
           {
             id: '777777',
@@ -174,7 +181,8 @@
             status: 'Waiting',
             assignee: 'Hill',
             updater: 'Aaron',
-            companyid: '0'
+            companyid: '0',
+            imagenum: 0
           }
         ]
       },

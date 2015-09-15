@@ -71,7 +71,7 @@
           type: Object,
           value: null,
           notify: true,
-          observer: '_setJobData'
+          observer: 'setJobData'
         },
         jobid:{
           type: String,
@@ -102,7 +102,7 @@
           notify: true
         }
       },
-      _setJobData: function(newValue, oldValue){
+      setJobData: function(newValue, oldValue){
         if(!!newValue){
           this.jobid = newValue.id;
           this.jobname = newValue.name;
@@ -127,10 +127,10 @@
           var name = this.assignee.toLowerCase();
           var url = ''
           if(['hill', 'jessie', 'mike', 'zack'].indexOf(name) > -1){
-            url = '/pages/img/' + name + '.jpg';
+            url = 'img/' + name + '.jpg';
           }
           else{
-            url = '/pages/img/default.png';
+            url = 'img/default.png';
           }
           avatar.style.backgroundImage = 'url(' + url + ')';
         }

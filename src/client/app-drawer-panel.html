@@ -1,5 +1,6 @@
-<link rel="import" href="/pages/app-main.html">
-<link rel="import" href="/pages/job-card.html">
+<link rel="import" href="app-main-header.html">
+<link rel="import" href="app-main-body.html">
+<link rel="import" href="job-card.html">
 
 <dom-module id="app-drawer-panel">
   <style>
@@ -25,6 +26,11 @@
     
     job-card{
       cursor: pointer;
+    }
+
+    .content{
+      width:100%;
+      height:auto;
     }
     
   </style>
@@ -58,9 +64,12 @@
       </paper-header-panel>
       <paper-header-panel main mode="standard">
         <div class="paper-header">
-          <app-main job="{{selectedJob}}"></app-main>
+          <app-main-header job="{{selectedJob}}"></app-main-header>
         </div>
-        <div> Main content... </div>
+        <div class="content">
+          <app-main-body job="{{selectedJob}}"></app-main-body>
+        </div>
+        <!-- <div> Main content... </div> -->
       </paper-header-panel>
     </paper-drawer-panel>
   </template>

@@ -1,0 +1,368 @@
+<dom-module id="app-main-body">
+	<style>
+		.container{
+			padding: 50px 20px 0 20px;
+		}
+		.uploadPanel{
+			width: 100%;
+			height: 40px;
+			margin-top:100px;
+			padding: 0 30px;
+			box-sizing: border-box;
+		}
+		.viewPanel{
+			text-align: left;
+		}
+		.horizontal-container{
+			position:relative;
+			margin-bottom:20px;
+		}
+		.horizontal-section {      
+      display:inline-block;
+      height: 360px;
+    }
+    .iframe-section{
+    	margin: 0 20px 0 50px;
+    }
+    .info-section{
+    	position:absolute;
+    	min-width: 100px;
+    }
+    .download-button{
+    	background-color:#4285f4;
+    	color:white
+    }
+    iframe{
+    	width: 640px; 
+    	height: 360px; 
+    	border-radius: 5px; 
+    	border: 1px solid #d9d9d9;
+    }
+	</style>
+	<template>
+		<div class="container">
+			<div class="uploadPanel" style="display:none">
+				<paper-input id="imageurlInput" label="Add the url of the first image..." value="{{imageurl}}" on-keypress="upload">
+					<paper-icon-button suffix onclick="clearInput()" icon="clear" alt="clear" title="clear" tabindex="0">
+        	</paper-icon-button>
+				</paper-input>
+			</div>
+			<div class="viewPanel" style="display:none">
+				<template is="dom-repeat" items="{{versions}}">
+					<div class="horizontal-container">
+						<div class="horizontal-section iframe-section">
+							<iframe src="{{item.viewurl}}" allowfullscreen="allowfullscreen">						
+							</iframe>
+						</div>
+						<div class="horizontal-section info-section">
+							<paper-button class="download-button" raised on-click="download">Download</paper-button>
+							<p>Author: </p>
+							<p>Date:&nbsp;<span>{{item.date}}</span></p>
+							<p>Version:&nbsp;<span>{{item.version}}</span></p>
+						</div>
+					</div>
+        </template>
+			</div>
+		</div>		
+	</template>
+	<script>
+		function clearInput() {
+      document.getElementById('imageurlInput').value = '';
+    }
+
+    var validurl = require('../../node_modules/valid-url'),
+    	  boxViewLib = require('../../node_modules/node-box-view'),
+    	  moment = require('../../node_modules/moment'),
+    	  Q = require('../../node_modules/q'),
+    	  request = require('../../node_modules/request'),	
+    	  fs = require('fs'),
+    	  zamzar = require('./zamzar.js');
+
+    var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7',
+        boxView = new boxViewLib(myKey), 
+        docUrl = 'https://view-api.box.com/1/documents/',
+        PDF = '.pdf',
+        CDR = '.cdr';
+
+		Polymer({
+      is: 'app-main-body',
+      properties: {
+        job: {
+          type: Object,
+          value: null,
+          notify: true,
+          observer: 'setJobData'
+        },
+        jobid: {
+          type: String,
+          notify: true
+        },
+        jobname: {
+          type: String,
+          notify: true
+        },
+        time: {
+          type: String,
+          notify: true
+        },
+        status: {
+          type: String,
+          notify: true
+        },
+        assignee: {
+          type: String,
+          notify: true
+        },
+        updater: {
+          type: String,
+          notify: true
+        },
+        jobTitle: {
+          type: String,
+          notify: true
+        },
+        statusTitle: {
+          type: String,
+          notify: true
+        },
+        imagenum: {
+        	type: Number,
+        	notify: true
+        },
+        imageurl: {
+        	type: String,
+        	notify: true
+        },
+        versions: {
+        	type: Array,
+        	notify: true
+        },
+        viewurl: {
+          type: String,
+          notify: true
+        }
+      },
+      ready: function(){
+        
+        
+        // upload
+        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/text.txt', {}, function(err, res){
+        //   console.log('err', err);
+        //   console.log('res', res);
+        //   boxView.getList(null, function(err, res){console.log('list', res)});
+        // });
+        
+        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/lake.pdf', {}, function(err, res){
+        //   boxView.getList(null, function(err, res){console.log('list', res)});
+        // });
+        // boxView.getList(null, function(err, res){console.log('list', res)});
+
+        // boxView.getDocument('d38857ad016f4a988cddb87bff862052', [], function(err, res){
+          // boxView.getDocumentThumbnail('85f1375815f3480cb55499fcae7df336', 800, 500, '/documents/designashirt/artexpress/src/client/thumb.bmp', function(err,res){
+          //   console.log(err, res);
+          // });
+        // });
+				
+				//Empty list
+				// boxView.getList(null, function(err, res){
+				// 	console.log('list', res, res.document_collection.entries);
+				// 	res.document_collection.entries.forEach(function(obj){
+				// 		boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
+				// 	});
+				// });
+
+        // var that = this;
+        // // boxView.getDocumentSession(documentId, callback)
+        // boxView.getDocumentSession('16d69bd3b4bd460eac35e4f899b7c9ec', function(err, res){
+        //   console.log(err, res);
+        //   that.viewurl = res.urls.view + '?theme=dark';
+        //   console.log(res.urls.view);
+        // });
+
+        //getDocumentThumbnail(documentId, width, height, file, callback)
+        // boxView.getDocumentThumbnail('d38857ad016f4a988cddb87bff862052', 512, 384,  '/documents/designashirt/artexpress/src/client/res.jpg', function(err,res){
+        //   console.log(err, res);
+        // });
+
+        // client.documents.uploadFile(
+        //   '/documents/designashirt/artexpress/src/client/text.txt', null, function(err, res){
+        //     console.log(1111, err, res);
+        //     client.documents.list(function (err, list, res) {console.log('list', list);});
+        //     console.log(2222)
+        //   }
+        // );
+
+        // client.documents.list(function (err, list, res) {console.log('list', list.document_collection);});
+        // client.documents.getContent("e559be00dcbf49dd90be35c90ab7cf6e", function(err, res){console.log(res)})
+      },
+      setJobData: function(newValue, oldValue){
+        if(!!newValue){
+          this.jobid = newValue.id;
+          this.jobname = newValue.name;
+          this.time = newValue.time;
+          this.assignee = newValue.assignee;
+          this.updater = newValue.updater;
+          this.status = newValue.status;
+          this.imagenum = newValue.imagenum;
+          
+          this.jobTitle = this.jobid + ' - ' + this.jobname;
+          this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 
+          this.checkVerList();
+        }
+      },
+      upload: function(e){
+      	if(e.keyCode === 13){
+      		var url = this.$.imageurlInput.value;
+      		console.log(url);
+      		if(validurl.isUri(url) || fs.statSync(url)){
+      			this.uploadFile(url);
+      		}
+      		else{
+      			console.log('Invalid URL');
+      		}
+      		clearInput();
+      		url = '';
+      	}
+      },
+      uploadFile: function(url){    
+      	var now = moment().format('MMDDYYYYHHmmss'),
+      			filename = this.jobid + '-' + now,
+      			that = this;
+      	//convert cdr file to pdf with zamzar, download pdf, upload pdf to box and delete the temp pdf file
+      	zamzar.convert(url, filename + PDF)
+      		.then(
+      			function(localFilename){return that._uploadLocalFile(localFilename, {fileName: filename + '.pdf'});},
+      			function(e){that._outputError(e);})
+      		.then(
+      			function(path){fs.unlinkSync(path);},
+      			function(e){that._outputError(e);});
+    		if(validurl.isUri(url)){
+    			this._uploadFromUrl(url, {fileName: filename + CDR});
+    		}
+    		else{
+    			this._uploadLocalFile(url, {fileName: filename + CDR});
+    		}
+      },
+      checkVerList: function(){
+      	var that = this;
+      	boxView.getList(null, function(err, res){
+					var list = res.document_collection.entries,
+							promiseList =[],
+							verList = [],
+							dict = [],
+							count = 0;
+					list.forEach(function(obj){
+						var name = obj.name,
+								id = name.split('-')[0],
+								date = name.split('-')[1],
+								basename = name.split('.')[0],
+								type = name.split('.')[1];
+						if(type === CDR){
+							dict[basename] = obj.id;
+						}
+					});
+
+					list.forEach(function(obj, index){
+						var name = obj.name,
+								id = name.split('-')[0],
+								date = name.split('-')[1],
+								basename = name.split('.')[0],
+								type = name.split('.')[1];
+						if(id === that.jobid && type === PDF){
+							count++;
+							var o = {};
+							o.viewurl = '';
+							o.filename = basename + CDR;
+							o.downloadurl = docUrl + dict[basename] + '/content.';
+							o.date = that._parseDate(date);
+							o.version = list.length - index - 1;
+							promiseList.push(that._getSession(obj.id, o));
+						}
+					});
+					Q.allSettled(promiseList).then(function(responses){
+						responses.forEach(function(res, index){
+							if(res.state === 'fulfilled' && res.value !== null){
+								verList[index] = res.value;
+							}
+							else{
+								console.log('No version retrieved.');
+							}
+						});
+						if(verList.length === 0){
+							that.$$('.uploadPanel').style.display = 'block';
+							that.$$('.viewPanel').style.display = 'none';
+						}
+						else{
+							that.versions = verList;
+							that.$$('.viewPanel').style.display = 'block';
+							that.$$('.uploadPanel').style.display = 'none';
+						}
+					});					
+				});
+      },
+      _getSession: function(id, obj){
+      	var defer = Q.defer();
+      	boxView.getDocumentSession(id, function(err, res){
+      		if(!!err){
+      			defer.resolve(null);
+      		}
+      		else{
+      			console.log(res.urls);
+      			obj.viewurl = res.urls.view + '?theme=dark';
+      			defer.resolve(obj);
+      		}
+        });	
+        return defer.promise;				
+      },
+      _parseDate: function(date){
+      	var m = date.substring(0, 2),
+      			d = date.substring(2, 4),
+      			y = date.substring(4, 8),
+      			h = date.substring(8, 10),
+      			min = date.substring(10, 12),
+      			s = date.substring(12, 14);
+      	return m + '-' + d + '-' + y + ' ' + h + ':' + min + ':' + s;
+      },
+      _uploadLocalFile: function(path, option){
+      	var deferred = Q.defer();
+      	boxView.uploadFile(path, option, function(err, res){
+      		if(!!err){
+    				var error = 'Unable to upload from url: ' + err;
+      			deferred.rejected(error);
+    			}
+    			else{
+    				console.log('File upload from url complete');
+            deferred.resolve(path);
+    			}
+      	});
+      	return deferred.promise;
+      },
+      _uploadFromUrl: function(url, option){
+      	var deferred = Q.defer();		
+      	boxView.uploadFromUrl(url, option/*{fileName: filename + '.cdr'}*/, function(err, res){
+    			if(!!err){
+    				var error = 'Unable to upload from url: ' + err;
+      			deferred.rejected(error);
+    			}
+    			else{
+    				console.log('File upload from url complete');
+            deferred.resolve(res);
+    			}
+    		});
+    		return deferred.promise;
+      },
+      _outputError: function(err){
+				console.error(err);
+			},
+      download: function(e){
+      	var url = e.model.item.downloadurl;
+      	request.get(url)
+      		.on('error', function(err) {
+			    	console.log(err)
+			  	})
+			  	.pipe(fs.createWriteStream(e.model.item.filename))
+			  	.on('end', function(){console.log(e.model.item.filename + 'is downloaded')});
+			  }
+    });
+	</script>
+</dom-module>
