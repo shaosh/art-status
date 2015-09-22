@@ -8,16 +8,15 @@ var request = require('../../node_modules/request'),
 		jobUrl = 'https://sandbox.zamzar.com/v1/jobs/',
 		fileUrl = 'https://sandbox.zamzar.com/v1/files/',
 		formData ={
-			source_format: 'cdr',
-			target_format: 'pdf',
+			target_format: 'pdf'
 		},
 		interval = 1 * 1000;
 
 var zamzar = {
 	convert: function(file, filename){
 		var stream = _createReadStream(file);
-		formData.source_file = stream;
-		return _startConversion()
+		formData['source_file'] = stream;
+		return _startConversion(formData)
 			.then(function(res){return _waitConversion(res);}, function(e){_outputError(e);})
 			.then(function(res){return _downloadFile(res, filename);}, function(e){_outputError(e);});
 	}
@@ -26,7 +25,7 @@ var zamzar = {
 var _createReadStream = function(file){
 	// Create a readstream from the file input
 	// File input could be a url or filepath
-	var uri = validUrl.is_web_uri(file);
+	var uri = validurl.is_web_uri(file);
 	if (uri){
 		return request(uri);
 	} else {
@@ -39,7 +38,7 @@ var _startConversion = function(formData){
 	request.post({url:jobUrl, formData: formData}, function (err, response, body) {
     if (!!err) {
   		var error = 'Unable to start conversion job' + err;
-      deferred.rejected(error);
+      deferred.reject(error);
     } 
     else {
       console.log('SUCCESS! Conversion job started:', JSON.parse(body));
@@ -52,21 +51,24 @@ var _startConversion = function(formData){
 var _waitConversion = function(data){
 	var jobid = data.id,
 			deferred = Q.defer();
+	var id;
 
 	var checkConversion = function(){
 		request.get (jobUrl + jobid, function (err, response, body) {
 	    if (err) {
 	    	var error = 'Still converting...' + err;
-      	deferred.rejected(error);
+	    	console.log(error);
+      	deferred.reject(error);
 	    } 
 	    else {
-	  		window.clearInterval();
+	  		clearInterval(id);
 	  		console.log('SUCCESS! Conversion job completeded:', JSON.parse(body));
 	  		deferred.resolve(JSON.parse(body));
 	    }
 		}).auth(apiKey, '', true);
 	};
-	setInterval(checkConversion, interval);
+
+	id = setInterval(checkConversion, interval);
 	return deferred.promise;
 };
 
@@ -79,7 +81,7 @@ var _downloadFile = function(data, filename){
 	var r = request.get({url: fileUrl + fileID + '/content', followRedirect: false}, function (err, response, body) {
     if (err) {
     	var error = 'Unable to download file:' + err;
-      deferred.rejected(error);
+      deferred.reject(error);
     } 
     else {
       if (response.statusCode === 307) {
@@ -103,7 +105,7 @@ var _downloadFile = function(data, filename){
 };
 
 var _outputError = function(err){
-	console.error(err);
+	console.log(err);
 }
 
 module.exports = zamzar;

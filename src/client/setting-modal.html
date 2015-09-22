@@ -1,0 +1,144 @@
+<link rel="import" href="custom-validator.html">
+<dom-module id="setting-modal">
+	<style>
+		paper-input{
+			min-width:800px;
+		}
+	</style>
+	<template>
+		<paper-dialog id="setting-modal" modal>
+			<custom-validator id="cdrValidator" validator-name="cdrValidator"></custom-validator>
+      <custom-validator id="downloadValidator" validator-name="downloadValidator"></custom-validator>
+			<paper-input id="cdrInput" label="Set the path to the folder which contains the CorelDRW.exe" value="{{coreldrawPath}}" auto-validate error-message="{{cdrErrMsg}}" validator='cdrValidator'>
+				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+			</paper-input>
+			<paper-input id="downloadInput" label="Set the path to the folder where you'd like to store the downloaded arts" value="{{downloadPath}}" auto-validate error-message="{{downloadErrMsg}}" validator='downloadValidator'>
+				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+			</paper-input>      
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus on-click="save" id='saveButton'>Save</paper-button>
+        <paper-button dialog-dismiss autofocus>Cancel</paper-button>
+      </div>
+    </paper-dialog>
+	</template>
+	<script>		
+		var isValid = require('../../node_modules/is-valid-path'),
+				fileExists = require('../../node_modules/file-exists'),
+				pathExists = require('../../node_modules/path-exists'),
+				CDRNAME = 'CorelDRW.exe',
+				INVALIDPATH = 'Invalid path or path not exist';
+		Polymer({
+      is: 'setting-modal',
+      properties: {
+        coreldrawPath: {
+          type: String,
+          value: '',
+          notify: true,
+          observer: 'checkEmptyInput'
+        },
+        downloadPath: {
+          type: String,
+          value: '',
+          notify: true,
+          observer: 'checkEmptyInput'
+        },
+        cdrErrMsg: {
+        	type: String,
+        	notify: true
+        },
+        downloadErrMsg: {
+        	type: String,
+        	notify: true
+        },
+        validCdrPath: {
+        	type: Boolean,
+        	notify: true
+        },
+        validDownloadPath: {
+        	type: Boolean,
+        	notify: true
+        }
+      },
+      ready: function(){
+      	this.$.cdrValidator.validate = this.validateCdr.bind(this);
+        this.$.downloadValidator.validate = this.validateDownload.bind(this);
+        if(!!localStorage.coreldrawPath){
+        	this.coreldrawPath = localStorage.coreldrawPath;
+        }
+        if(!!localStorage.downloadPath){
+        	this.downloadPath = localStorage.downloadPath;
+        }
+      },
+      clearInput: function(e){
+      	var button = Polymer.dom(e).localTarget;
+      	var input = button.parentElement;
+      	while(input.tagName.toLowerCase() !== 'paper-input'){
+      		input = input.parentElement;
+      	}
+      	input.value = '';
+      },
+      save: function(e){
+      	if(!!this.coreldrawPath){
+      		localStorage.coreldrawPath = this.coreldrawPath;
+      	}
+      	if(!!this.downloadPath){
+      		localStorage.downloadPath = this.downloadPath;
+      	}
+      },
+      validateCdr: function(){
+      	var result;
+				if(this.coreldrawPath === ''){
+					result = true;
+				}
+				else if(!!isValid(this.coreldrawPath) && !!pathExists.sync(this.coreldrawPath)){
+					if(fileExists(this.coreldrawPath + '\\' + CDRNAME)){
+						result = true;
+					}
+					else{
+						this.cdrErrMsg = 'Unable to find the CorelDraw in this folder';
+						result = false;
+					}
+				}
+				else{
+					this.cdrErrMsg = INVALIDPATH;
+					result = false;
+				}
+
+				this.validCdrPath = result;
+				this.setSaveButton();
+				return result;
+      },
+      validateDownload: function(){
+      	var result;
+      	if(this.downloadPath === ''){
+					result = true;
+				}
+				else if(!!isValid(this.downloadPath) && !!pathExists.sync(this.downloadPath)){
+					result = true;					
+				}
+				else{
+					this.downloadErrMsg = INVALIDPATH;
+					result = false;
+				}
+				this.validDownloadPath = result;
+				this.setSaveButton();
+				return result;
+      },
+      setSaveButton: function(){
+      	if(!!this.validCdrPath && !!this.validDownloadPath){
+					this.$.saveButton.removeAttribute('disabled');
+				}
+				else{
+					this.$.saveButton.setAttribute('disabled', true);
+				}
+      },
+      checkEmptyInput: function(){
+      	if(this.coreldrawPath === '' && this.downloadPath === ''){
+      		this.validCdrPath = true;
+      		this.validDownloadPath = true;
+      		this.$.saveButton.removeAttribute('disabled');
+      	}
+      }
+    });    
+  </script>
+</dom-module>

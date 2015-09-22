@@ -1,5 +1,5 @@
 <link rel="import" href="company-selector.html">
-<link rel="import" href="notify-button.html">
+<link rel="import" href="setting-modal.html">
 
 <dom-module id="app-header">
   <style>
@@ -27,15 +27,35 @@
     	  <div class="horizontal-center">
           <company-selector companies="{{companies}}" selected-company="{{selectedCompany}}"></company-selector>
         </div>
-        <notify-button></notify-button>
+        <div>
+          <paper-icon-button icon="settings" id="settingsIcon" onclick="clickHandler(event)" data-dialog="setting-modal"></paper-icon-button>
+          <paper-tooltip for="settingsIcon">Settings</paper-tooltip>
+          <paper-icon-button icon="social:notifications-none"></paper-icon-button>
+        </div>
       </paper-toolbar>
       <content></content>
     </paper-header-panel>
+    <setting-modal></setting-modal>
   </template>
   
   <script>
+    function clickHandler(e) {
+      var button = e.target;
+      while (!button.hasAttribute('data-dialog') && button !== document.body) {
+        button = button.parentElement;
+      }
+      if (!button.hasAttribute('data-dialog')) {
+        return;
+      }
+      var id = button.getAttribute('data-dialog');
+      var dialog = document.getElementById(id);
+      if (dialog) {
+        dialog.open();
+      }
+    }
+
     Polymer({
       is: 'app-header'
-    });
+    });    
   </script>
 </dom-module>
