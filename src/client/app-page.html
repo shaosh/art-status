@@ -3,7 +3,7 @@
 
 <dom-module id="app-page">
 	<template>
-		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}">
+ 		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}">
 	    <div class="content">
 	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
 	    </div>
@@ -18,10 +18,10 @@
         this.initCompanies();
         this.initJobs();
         if(this.companies.length > 0){
-        	this.setCompanyAndJob();
+          this.setCompanyAndJob();
         }
-        this.setOnHashChange();        
-      },      
+        this.setOnHashChange();  
+      },            
 
       setOnHashChange: function(){
       	var fn = function(obj){

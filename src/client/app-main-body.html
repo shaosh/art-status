@@ -100,13 +100,13 @@
       <paper-toast id="toast" text="{{toastText}}"></paper-toast>
 		</div>
     <alert-modal></alert-modal>
-    <paper-dialog id="change-modal" modal>
+    <paper-dialog id="change-modal" modal data-filepath="">
       <h2>Changes Detected</h2>
       <p>
-        Changes has been detected in file {{changedFile}}. Do you want to upload this change to the repo?
+        Changes has been detected in file <span>{{changedFile}}</span>. Do you want to upload this change to the repo?
       </p>
       <div class="buttons">
-        <paper-button dialog-confirm autofocus>Yes, upload.</paper-button>
+        <paper-button dialog-confirm autofocus on-click="uploadChange">Yes, upload.</paper-button>
         <paper-button dialog-dismiss autofocus>No, don't upload.</paper-button>
       </div>
     </paper-dialog>		
@@ -209,6 +209,10 @@
           value: false
         }, 
         changedFile: {
+          type: String,
+          notify: true
+        },
+        tab: {
           type: String,
           notify: true
         }
@@ -427,6 +431,7 @@
             if(!!res){              
               res.version = that.versions.length;
               that.versions.unshift(res);
+              console.log('versions',that.versions);
               if(that.$$('.uploadPanel').style.display === 'block'){
                 that.$$('.uploadPanel').style.display = 'none';
                 that.$$('.viewPanel').style.display = 'block';
@@ -599,7 +604,7 @@
             function(e){that._outputError(e);}
           )
           .then(
-            function(res){console.log("res", res);that.watch(res)}, 
+            function(res){that.watch(res)}, 
             function(e){that._outputError(e);}
           );
         
@@ -650,30 +655,34 @@
             defer.reject(error);
           }       
         });
-        console.log('filepath',filepath)
         return Q.fcall(function(){return filepath});
       },
       watch: function(filepath){
         var defer = Q.defer(),
             that = this;
-        console.log('startwath', filepath);
         fs.watch(filepath, function(event, filename){
-          console.log(event, filename);
           if(!!filename){
             that.changedFile = filename;
           }
           else{
             that.changedFile = filepath;
           }
-          if(event === 'change'){
+          if(event === 'change' && that.tab === '3'){
             var dialog = document.getElementById('change-modal');
             if (dialog) {
+              dialog.setAttribute('data-filepath', filepath);
               dialog.open();
             }
           }
         });
         return defer.promise;
+      },
+      uploadChange: function(){
+        var dialog = document.getElementById('change-modal'),
+            filepath = dialog.getAttribute('data-filepath');
+        this.uploadFile(filepath);
       }
+
     });
 	</script>
 </dom-module>

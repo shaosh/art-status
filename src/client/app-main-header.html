@@ -34,7 +34,7 @@
         <div class="subtitle">{{statusTitle}}</div>
       </div>
     </paper-toolbar>
-    <paper-tabs selected="0" no-bar noink>
+    <paper-tabs id="funcTab" selected="{{tab}}" no-bar noink>
       <paper-tab>
         <iron-icon icon="communication:message"></iron-icon>
       </paper-tab>
@@ -49,10 +49,6 @@
       </paper-tab>
     </paper-tabs>
     <content></content>
-   <!--  <content></content>
-    <div>
-      <iframe src="{{viewurl}}" style="width: 640px; height: 500px; border-radius: 5px; border: 1px solid #d9d9d9;"  allowfullscreen="allowfullscreen"></iframe>
-    </div> -->
   </template>
   
   <script>
@@ -100,6 +96,11 @@
         viewurl:{
           type: String,
           notify: true
+        },
+        tab: {
+          type: String,
+          notify: true,
+          value: 0
         }
       },
       ready: function(){

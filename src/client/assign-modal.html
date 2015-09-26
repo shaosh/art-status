@@ -1,0 +1,18 @@
+<dom-module id="assign-modal">
+	<paper-dialog id="assign-modal" modal>
+		<h2>ASSIGN</h2>
+		<paper-icon-button dialog-dismiss suffix icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+		<paper-dialog-scrollable>
+			<p>Assign this job</p>
+		 	<paper-input label="Filter team members" id="filter">
+	      <iron-icon icon="search" prefix></iron-icon>
+    	</paper-input>
+    	<template is="dom-repeat" items="{{members}}">
+    		<paper-card>
+	    		<div class="avatar">:)</div>
+	        <div class="title">{{item.name}}</div>
+    		</paper-card>
+    	</template>
+		</paper-dialog-scrollable>
+	</paper-dialog>
+</dom-module>

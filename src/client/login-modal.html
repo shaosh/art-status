@@ -1,0 +1,78 @@
+<dom-module id="login-modal">
+	<style>
+		paper-input{
+			min-width:800px;
+		}
+		paper-dialog{
+			width:80%;
+			height:80%;
+			max-height: 90%;
+			max-width: 90%;
+			position: absolute;
+			
+		}
+	</style>
+	<template>
+		<paper-dialog id="login-modal" modal>
+			<paper-input id="idInput" label="User ID" value="{{userid}}" error-message="{{idErrMsg}}" on-keypress="keySubmit">
+				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+			</paper-input>
+			<paper-input id="pwInput" label="Password" type="password" value="{{password}}" error-message="{{pwErrMsg}}" on-keypress="keySubmit">
+				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+			</paper-input>      
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus on-click="submit" id='submitButton'>Submit</paper-button>
+      </div>
+    </paper-dialog>
+	</template>
+	<script>
+		Polymer({
+			is:'login-modal',
+			properties: {
+				userid:{
+					type: String,
+					notify: true
+				},
+				password:{
+					type: String,
+					notify: true
+				},
+				idErrMsg:{
+					type: String,
+					notify: true
+				},
+				pwErrMsg:{
+					type: String,
+					notify: true
+				}
+			},			
+			clearInput: function(e){
+      	var button = Polymer.dom(e).localTarget;
+      	var input = button.parentElement;
+      	while(input.tagName.toLowerCase() !== 'paper-input'){
+      		input = input.parentElement;
+      	}
+      	input.value = '';
+      },
+      keySubmit: function(e){
+      	if(e.keyCode === 13){
+      		this.submit();
+      	}
+      },
+      submit: function(e){
+      	if(checkInput()){
+      		return;
+      	}
+      	if(!userid){
+      		idErrMsg = 'Please enter your user ID';
+      	}
+      	if(!password){
+      		pwErrMsg = 'Please enter your user password';
+      	}
+      },
+      checkInput: function(){
+      	return !!userid && !!password;
+      }
+		})
+	</script>
+</dom-module>
