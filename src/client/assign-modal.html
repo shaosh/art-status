@@ -1,18 +1,151 @@
 <dom-module id="assign-modal">
-	<paper-dialog id="assign-modal" modal>
-		<h2>ASSIGN</h2>
-		<paper-icon-button dialog-dismiss suffix icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
-		<paper-dialog-scrollable>
-			<p>Assign this job</p>
-		 	<paper-input label="Filter team members" id="filter">
-	      <iron-icon icon="search" prefix></iron-icon>
-    	</paper-input>
-    	<template is="dom-repeat" items="{{members}}">
-    		<paper-card>
-	    		<div class="avatar">:)</div>
-	        <div class="title">{{item.name}}</div>
-    		</paper-card>
-    	</template>
-		</paper-dialog-scrollable>
-	</paper-dialog>
+	<style>
+		#assign-modal{
+			min-width: 400px;
+      min-height: 300px;
+		}
+		#userList{			
+			overflow-y: auto;
+		}
+		.userItem:first-child{
+			border-top:1px solid black;
+		}
+		.userItem{
+			height: 30px;
+			padding: 5px 10px;
+			overflow: hidden;
+			box-sizing:border-box;
+			border-bottom:1px solid black;
+		}
+		.userName{
+			float: left;
+		}
+		.assignButton{
+			float:right;
+		}
+		.assignButton iron-icon{
+			height:20px;
+		}
+		.checkIcon{
+			color: #7EC1F4;
+			display:none;
+		}
+		.addIcon:hover{
+			cursor: pointer;
+		}
+	</style>
+	<template>
+		<paper-dialog id="assign-modal">
+			<h2>Assign Primary</h2>
+			<p>Choose a user to assign as the primary artist for this task.</p>
+			<div id="userList">
+				<template is="dom-repeat" items="{{users}}">
+          <div class="userItem">
+          	<span class="userName" data-userid$="{{item.userId}}">{{item.username}}</span>
+          	<span class="assignButton">
+          		<iron-icon class="addIcon" icon="add-circle-outline" on-click="assign"></iron-icon>
+          		<iron-icon class="checkIcon" icon="check-circle"></iron-icon>
+          	</span>
+          </div>
+        </template>
+			</div>
+		</paper-dialog> 
+	</template>
+	<script>
+		Polymer({
+      is: 'assign-modal',
+      properties: {
+        users: {
+          type: Array,
+          notify: true
+        },
+        jobs: {
+          type: Array,
+          notify: true
+        },
+        assigneeid: {
+        	type: String,
+        	notify: true,
+        	observer: 'renderAssignee',
+        }, 
+        job: {
+        	type: Object,
+          notify: true
+        }
+      },
+      assign: function(e){
+      	if(!!this.job){
+      		var button = Polymer.dom(e).localTarget;
+      		var span = button.parentElement.previousElementSibling;
+      		var id = span.getAttribute('data-userid');
+
+      		var name = span.innerHTML;
+      		var that = this;
+      		var options = {
+      			url: CARD_URL.replace('{jobId}', this.job.jobId),
+      			headers: HEADER,
+      			method: 'POST',
+      			json: true,
+      			body: {
+      				"job": {
+		             "status": dict[this.job.status.toLowerCase()],
+		             "assigneeId": id
+		          }
+      			}
+      		};
+      		request(options, function(error, response, body){
+      			if(!error && response.statusCode === 200){
+      				that.clearAll();
+              that.job.username = body.username;
+              that.job.assigneeId = body.assigneeId; 
+              that.job.email = body.email;
+              that.job = JSON.parse(JSON.stringify(that.job));
+              var temp = [];
+              that.jobs.forEach(function(job){
+                if(job.jobId === that.job.jobId){
+                  job = that.job;
+                }
+                temp.push(job);
+              });
+              that.jobs = temp;
+			        button.style.display = 'none';
+			        button.nextElementSibling.style.display = 'block';              
+			        document.querySelector('#toast').innerHTML = 'Assigned the job to ' + name;
+      				document.querySelector('#toast').show();
+      			}
+      			else{
+      				document.querySelector('#toast').innerHTML = 'Failed to assign the job';
+      				document.querySelector('#toast').show();
+      			}
+      		});
+      	}
+      	
+      },
+      renderAssignee: function(newValue, oldValue){
+    		this.clearAll();
+    		var checkIcons = Polymer.dom(this.root).querySelectorAll('.checkIcon');
+    		checkIcons.forEach(function(icon){
+    			if(icon.parentElement.previousElementSibling.getAttribute('data-userid') === newValue){
+    				icon.style.display = 'block';
+      			icon.previousElementSibling.style.display = 'none';
+      			return;
+    			}
+    		});
+      },
+      clearAll: function(){
+      	var checkIcons = Polymer.dom(this.root).querySelectorAll('.checkIcon');
+        if(checkIcons.length > 0){
+          checkIcons.map(function(checkIcon){
+            checkIcon.style.display = 'none';
+          });
+        }
+        var addIcons = Polymer.dom(this.root).querySelectorAll('.addIcon');
+        if(addIcons.length > 0){
+          addIcons.map(function(addIcon){
+            addIcon.style.display = 'block';
+          });
+        }
+      }
+    });
+	</script>
 </dom-module>

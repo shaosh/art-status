@@ -1,0 +1,688 @@
+<link rel="import" href="alert-modal.html">
+
+<dom-module id="app-main-body">
+	<style>
+		.container{
+			padding: 50px 20px 0 20px;
+		}
+		.uploadPanel{
+			width: 100%;
+			height: 40px;
+			margin-top:100px;
+			padding: 0 30px;
+			box-sizing: border-box;
+      position: relative;
+		}
+		.viewPanel{
+			text-align: left;
+		}
+		.horizontal-container{
+			position:relative;
+			margin-bottom:20px;
+		}
+		.horizontal-section {      
+      display:inline-block;
+      height: 360px;
+    }
+    .iframe-section{
+    	margin: 0 20px 0 50px;
+    }
+    .info-section{
+    	position:absolute;
+    	min-width: 100px;
+    }
+    .button-container{
+      overflow: hidden
+    }
+    .download-button{
+    	background-color:#4285f4;
+    	color:white;
+      float:left;
+    }
+    .loading{
+      height: 100px;
+      width: 100px;
+      top: 50%;
+      left: 50%;
+      margin-left:-50px;
+      margin-top: -50px;
+      display: none;
+      position:absolute;
+    }
+    .loading-sm{
+      float: left;
+      display: none;
+      margin-left:20px;
+    }
+    iframe{
+    	width: 640px; 
+    	height: 360px; 
+    	border-radius: 5px; 
+    	border: 1px solid #d9d9d9;
+    }
+    #toast{
+      position:absolute;
+      width: 200px;
+      left: 50%;
+      margin-left: -100px;
+      text-align: center;
+      background: #4285f4;
+    }
+	</style>
+	<template>
+		<div class="container">
+			<div class="uploadPanel" style="display:none">
+        <custom-validator id="imageurlValidator" validator-name="imageurlValidator"></custom-validator>
+				<paper-input id="imageurlInput" label="Add the url of the first image..." value="{{imageurl}}" on-keypress="upload" auto-validate error-message="{{imageurlErrMsg}}" validator='imageurlValidator'>
+					<paper-icon-button id="clearIcon" suffix onclick="clearInput()" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+				</paper-input>
+        <img class="loading" src="img/loading.gif" />
+			</div>
+			<div class="viewPanel" style="display:none">
+				<template is="dom-repeat" items="{{versions}}">
+					<div class="horizontal-container">
+						<div class="horizontal-section iframe-section">
+							<iframe src="{{item.viewurl}}" allowfullscreen="allowfullscreen">						
+							</iframe>
+						</div>
+						<div class="horizontal-section info-section">
+              <div class="button-container">
+  							<paper-button class="download-button" raised on-click="startDownload">Download</paper-button>
+                <img class="loading-sm" src="img/loading-sm.gif" />
+              </div>
+							<p>Author: </p>
+							<p>Date:&nbsp;<span>{{item.date}}</span></p>
+							<p>Version:&nbsp;<span>{{item.version}}</span></p>
+						</div>
+					</div>          
+        </template>        
+			</div>
+      <paper-toast id="toast" text="{{toastText}}"></paper-toast>
+		</div>
+    <alert-modal></alert-modal>
+    <paper-dialog id="change-modal" modal data-filepath="">
+      <h2>Changes Detected</h2>
+      <p>
+        Changes has been detected in file <span>{{changedFile}}</span>. Do you want to upload this change to the repo?
+      </p>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus on-click="uploadChange">Yes, upload.</paper-button>
+        <paper-button dialog-dismiss autofocus>No, don't upload.</paper-button>
+      </div>
+    </paper-dialog>		
+	</template>
+	<script>
+		function clearInput() {
+      document.getElementById('imageurlInput').value = '';
+    }
+
+    var validurl = require('../../node_modules/valid-url'),
+    	  boxViewLib = require('../../node_modules/node-box-view'),
+    	  moment = require('../../node_modules/moment'),
+    	  Q = require('../../node_modules/q'),
+    	  request = require('../../node_modules/request'),	
+    	  fs = require('fs'),
+        isValid = require('../../node_modules/is-valid-path'),
+        fileExists = require('../../node_modules/file-exists'),
+        pathExists = require('../../node_modules/path-exists'),
+        mkdirp = require('../../node_modules/mkdirp'),
+        cmd = require('child_process'),
+    	  zamzar = require('./zamzar.js');    
+
+    var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7',
+        boxView = new boxViewLib(myKey), 
+        docUrl = 'https://view-api.box.com/1/documents/',
+        PDF = 'pdf',
+        CDR = 'pdf',
+        DEFAULTPATH = '/artapp/temp/',
+        CDRAPPNAME = 'CorelDRW.exe';
+
+		Polymer({
+      is: 'app-main-body',
+      properties: {
+        job: {
+          type: Object,
+          value: null,
+          notify: true,
+          observer: 'setJobData'
+        },
+        jobid: {
+          type: String,
+          notify: true
+        },
+        jobname: {
+          type: String,
+          notify: true
+        },
+        time: {
+          type: String,
+          notify: true
+        },
+        status: {
+          type: String,
+          notify: true
+        },
+        assignee: {
+          type: String,
+          notify: true
+        },
+        updater: {
+          type: String,
+          notify: true
+        },
+        jobTitle: {
+          type: String,
+          notify: true
+        },
+        statusTitle: {
+          type: String,
+          notify: true
+        },
+        imagenum: {
+        	type: Number,
+        	notify: true
+        },
+        imageurl: {
+        	type: String,
+        	notify: true
+        },
+        versions: {
+        	type: Array,
+        	notify: true,
+          value:[]
+        },
+        viewurl: {
+          type: String,
+          notify: true
+        },
+        toastText: {
+          type: String,
+          notify: true
+        },
+        imageurlErrMsg: {
+          type: String,
+          notify: true
+        },
+        validImageurl: {
+          type: Boolean,
+          notify: true,
+          value: false
+        }, 
+        changedFile: {
+          type: String,
+          notify: true
+        },
+        tab: {
+          type: String,
+          notify: true
+        }
+      },
+      ready: function(){
+        this.$.imageurlValidator.validate = this._validateImageurl.bind(this);
+        
+        // upload
+        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/text.txt', {}, function(err, res){
+        //   console.log('err', err);
+        //   console.log('res', res);
+        //   boxView.getList(null, function(err, res){console.log('list', res)});
+        // });
+        
+        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/lake.pdf', {}, function(err, res){
+        //   boxView.getList(null, function(err, res){console.log('list', res)});
+        // });
+        // boxView.getList(null, function(err, res){console.log('list', res)});
+
+        // boxView.getDocument('d38857ad016f4a988cddb87bff862052', [], function(err, res){
+          // boxView.getDocumentThumbnail('85f1375815f3480cb55499fcae7df336', 800, 500, '/documents/designashirt/artexpress/src/client/thumb.bmp', function(err,res){
+          //   console.log(err, res);
+          // });
+        // });
+				
+				//Empty list
+				// boxView.getList(null, function(err, res){
+				// 	console.log('list', res, res.document_collection.entries);
+				// 	res.document_collection.entries.forEach(function(obj){
+				// 		boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
+				// 	});
+				// });
+
+        // var that = this;
+        // // boxView.getDocumentSession(documentId, callback)
+        // boxView.getDocumentSession('16d69bd3b4bd460eac35e4f899b7c9ec', function(err, res){
+        //   console.log(err, res);
+        //   that.viewurl = res.urls.view + '?theme=dark';
+        //   console.log(res.urls.view);
+        // });
+
+        //getDocumentThumbnail(documentId, width, height, file, callback)
+        // boxView.getDocumentThumbnail('d38857ad016f4a988cddb87bff862052', 512, 384,  '/documents/designashirt/artexpress/src/client/res.jpg', function(err,res){
+        //   console.log(err, res);
+        // });
+
+        // client.documents.uploadFile(
+        //   '/documents/designashirt/artexpress/src/client/text.txt', null, function(err, res){
+        //     console.log(1111, err, res);
+        //     client.documents.list(function (err, list, res) {console.log('list', list);});
+        //     console.log(2222)
+        //   }
+        // );
+
+        // client.documents.list(function (err, list, res) {console.log('list', list.document_collection);});
+        // client.documents.getContent("e559be00dcbf49dd90be35c90ab7cf6e", function(err, res){console.log(res)})
+      },
+      setJobData: function(newValue, oldValue){
+        if(!!newValue){
+          this.jobid = newValue.id;
+          this.jobname = newValue.name;
+          this.time = newValue.time;
+          this.assignee = newValue.assignee;
+          this.updater = newValue.updater;
+          this.status = newValue.status;
+          this.imagenum = newValue.imagenum;
+          
+          this.jobTitle = this.jobid + ' - ' + this.jobname;
+          this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 
+          this.checkVerList();
+        }
+      },
+      upload: function(e){
+      	if(e.keyCode === 13){
+      		var url = this.imageurl;
+      		if(url !== '' && this.validImageurl){
+      			this.uploadFile(url);
+            // clearInput();
+      		}
+      		else{
+      			console.log('Invalid URL');
+      		}      		
+      	}
+      },
+      uploadFile: function(url){   
+      	var now = moment().format('MMDDYYYYHHmmss'),
+      			filename = this.jobid + '-' + now,
+      			that = this;
+      	//convert cdr file to pdf with zamzar, download pdf, upload pdf to box and delete the temp pdf file
+      	// zamzar.convert(url, filename + PDF)
+      	// 	.then(
+      	// 		function(localFilename){return that._uploadLocalFile(localFilename, {fileName: filename + '.pdf'});},
+      	// 		function(e){that._outputError(e);})
+      	// 	.then(
+      	// 		function(path){fs.unlinkSync(path);},
+      	// 		function(e){that._outputError(e);});
+    		if(validurl.isUri(url)){
+          this._uploading();
+    			this._uploadFromUrl(url, {fileName: filename + '.' + CDR})
+            .then(              
+              function(res){return that._checkStatus(res);},
+              function(e){that._outputError(e);}                
+            )
+            .then(
+              function(res){that._addNewSession(res);},
+              function(e){that._outputError(e);}
+            );
+    		}
+    		else{
+          this._uploading();
+    			this._uploadLocalFile(url, {fileName: filename + '.' + CDR})
+            .then(
+              function(res){return that._checkStatus(res);},
+              function(e){that._outputError(e);}                
+            )
+            .then(
+              function(res){that._addNewSession(res);},
+              function(e){that._outputError(e);}
+            );
+    		}
+      },
+      checkVerList: function(){
+      	var that = this;
+      	boxView.getList(null, function(err, res){
+					var list = res.document_collection.entries,
+							promiseList =[],
+							verList = [],
+							dict = [];
+
+          // empty files
+          // list.forEach(function(obj){
+          //   boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
+          // });
+
+					list.forEach(function(obj){
+						var name = obj.name,								
+								basename = name.split('.')[0],
+								type = name.split('.')[1];
+						if(type === CDR){
+							dict[basename] = obj.id;
+						}
+					});
+
+					list.forEach(function(obj, index){
+						var name = obj.name,								
+								basename = name.split('.')[0],
+								type = name.split('.')[1],
+                id = basename.split('-')[0],
+                date = basename.split('-')[1];
+						if(id === that.jobid && type === PDF){
+							var o = {};
+							o.viewurl = '';
+							o.filename = basename + '.' + CDR;
+							o.downloadurl = docUrl + dict[basename] + '/content.pdf';
+							o.date = that._parseDate(date);
+							o.version = '';
+							promiseList.push(that._getSession(obj.id, o));
+						}
+					});
+					Q.allSettled(promiseList).then(function(responses){
+						responses.forEach(function(res, index){
+							if(res.state === 'fulfilled' && res.value !== null){
+								verList[index] = res.value;
+							}
+							else{
+								console.log('No version retrieved.');
+							}
+						});
+						if(verList.length === 0){
+							that.$$('.uploadPanel').style.display = 'block';
+							that.$$('.viewPanel').style.display = 'none';
+						}
+						else{
+              verList.forEach(function(ver, index){
+                ver.version = verList.length - 1 - index;
+              });
+							that.versions = verList;
+							that.$$('.viewPanel').style.display = 'block';
+							that.$$('.uploadPanel').style.display = 'none';
+						}
+					});					
+				});
+      },
+      _getSession: function(id, obj){
+      	var defer = Q.defer();
+      	boxView.getDocumentSession(id, function(err, res){
+      		if(!!err){
+      			var error = 'Unable to get session: ' + err;
+            deferred.reject(error);
+      		}
+      		else{
+      			obj.viewurl = res.urls.view + '?theme=dark';
+      			defer.resolve(obj);
+      		}
+        });	
+        return defer.promise;				
+      },
+      _addNewSession: function(res){
+        var objid = res.id,
+            name = res.name,                
+            basename = name.split('.')[0],
+            type = name.split('.')[1],
+            id = basename.split('-')[0],
+            date = basename.split('-')[1],
+            o = {},
+            defer = Q.defer(),
+            that = this;
+        o.viewurl = '';
+        o.filename = basename + '.' + CDR;
+        o.downloadurl = docUrl + objid + '/content.pdf';
+        o.date = that._parseDate(date);
+        o.version = '';
+
+        this._getSession(objid, o).then(
+          function(res){
+            if(!!res){              
+              res.version = that.versions.length;
+              that.versions.unshift(res);
+              console.log('versions',that.versions);
+              if(that.$$('.uploadPanel').style.display === 'block'){
+                that.$$('.uploadPanel').style.display = 'none';
+                that.$$('.viewPanel').style.display = 'block';
+              }
+              defer.resolve();
+            }              
+            else{
+              var err = 'Retrieved empty session';
+              that._outputError(err);
+              defer.reject(err);
+            }
+          },
+          function(e){
+            that._outputError(e);
+            defer.reject(e);
+          }
+        );
+        return defer.promise;
+      },
+      _getDocument: function(id){
+        var defer = Q.defer();
+        boxView.getDocument(id, [], function(err, res){
+          if(!!err){
+            var error = 'Unable to get document: ' + err;
+            deferred.reject(error);
+          }
+          else{
+            defer.resolve(JSON.parse(res));
+          }
+        });
+        return defer.promise;
+      },
+      _checkStatus: function(obj){
+        var defer = Q.defer(),
+            interval = 2000,
+            id = obj.id,
+            that = this,
+            check;
+        var getStatus = function(){          
+          that._getDocument(id).then(
+            function(res){
+              if(res.status === 'done'){
+                clearInterval(check);
+                console.log('SUCCESS! File is processed!');
+                that.toastText = "Upload Complete";
+                document.querySelector('#toast').show();
+                that._removeUploading();
+                defer.resolve(res);                
+              }
+            },
+            function(e){
+              that._outputError(e);
+              that.toastText = "Fail to Complete Upload'";
+              document.querySelector('#toast').show();
+              that._removeUploading();
+              defer.reject(e);
+            }
+          );
+        };
+        check = setInterval(getStatus, interval);
+        return defer.promise;
+      },
+      _parseDate: function(date){
+      	var m = date.substring(0, 2),
+      			d = date.substring(2, 4),
+      			y = date.substring(4, 8),
+      			h = date.substring(8, 10),
+      			min = date.substring(10, 12),
+      			s = date.substring(12, 14);
+      	return m + '-' + d + '-' + y + ' ' + h + ':' + min + ':' + s;
+      },
+      _uploadLocalFile: function(path, option){
+      	var deferred = Q.defer(),
+            that = this;
+      	boxView.uploadFile(path, option, function(err, res){
+      		if(!!err){
+            that.toastText = "Fail to Complete Upload'";
+            document.querySelector('#toast').show();
+            that._removeUploading();
+    				var error = 'Unable to upload from local path: ' + err;
+      			deferred.reject(error);
+    			}
+    			else{
+    				console.log('File upload from local path complete');
+            deferred.resolve(res);
+    			}
+      	});
+      	return deferred.promise;
+      },
+      _uploadFromUrl: function(url, option){
+      	var deferred = Q.defer();		
+      	boxView.uploadFromUrl(url, option/*{fileName: filename + '.cdr'}*/, function(err, res){
+    			if(!!err){
+            that.toastText = "Fail to Complete Upload'";
+            document.querySelector('#toast').show();
+            that._removeUploading();
+    				var error = 'Unable to upload from url: ' + err;
+      			deferred.reject(error);
+    			}
+    			else{
+    				console.log('File upload from url complete');
+            deferred.resolve(res);
+    			}
+    		});
+    		return deferred.promise;
+      },
+      _validateImageurl: function(){
+        var INVALIDIMAGEURL = 'Invalid URL/path or path not exist',
+            result;
+        console.log(validurl.isUri(this.imageurl));
+        if(this.imageurl === ''){
+          result = true;
+        }
+        else if(validurl.isUri(this.imageurl)){
+          result = true;
+        }
+        else if(!!isValid(this.imageurl)){
+          if(fileExists(this.imageurl)){
+            result = true;
+          }
+          else{
+            this.imageurlErrMsg = 'Unable to find the file with this path';
+            result = false;
+          }
+        }
+        else{
+          this.imageurlErrMsg = INVALIDIMAGEURL;
+          result = false;
+        }
+
+        this.validImageurl = result;
+        return result;
+      },
+      _uploading: function(){
+        this.$$('.loading').style.display = 'block';
+        this.$.imageurlInput.setAttribute('disabled', true);
+      },
+      _removeUploading: function(){
+        this.$$('.loading').style.display = 'none';
+        this.$.imageurlInput.removeAttribute('disabled');
+        this.imageurl = '';
+      },
+      _outputError: function(err){
+				console.log(err);
+			},
+      startDownload: function(e){
+      	var url = e.model.item.downloadurl,            
+            that = this,
+            filepath;
+
+        if(!localStorage.coreldrawPath){
+          var dialog = document.getElementById('alert-modal');
+          if (dialog) {
+            dialog.open();
+          }
+          return;
+        }
+        if(!localStorage.downloadPath){
+          localStorage.downloadPath = DEFAULTPATH;
+        }
+        filepath = localStorage.downloadPath;
+        mkdirp.sync(filepath);
+
+        var button = Polymer.dom(e).localTarget;
+        button.setAttribute('disabled', true);
+        button.nextElementSibling.style.display = 'block';
+      	this.download(url, button, filepath, e.model.item.filename)
+          .then(
+            function(res){return that.edit(res)}, 
+            function(e){that._outputError(e);}
+          )
+          .then(
+            function(res){that.watch(res)}, 
+            function(e){that._outputError(e);}
+          );
+        
+			},
+      download: function(url, button, filepath, filename){
+        var defer = Q.defer(),
+            that = this;
+        request.get({
+            url: url,
+            headers: {
+            'Authorization': 'Token ' + myKey
+            },
+          })
+          .on('error', function(err) {
+            var error = 'Unable to download: ' + err;
+            that._outputError(error);
+            that.toastText = 'Fail to Complete Download';
+            document.querySelector('#toast').show();
+            document.querySelector('#toast').style.background = 'red';
+            button.removeAttribute('disabled');
+            button.nextElementSibling.style.display = 'none';
+            defer.reject(error);
+          })
+          // .on('response', function(response) {
+          //   console.log(response) // 200 
+          //   console.log(response.headers['content-type']) // 'image/png' 
+          // })
+          .pipe(fs.createWriteStream(filepath + '/' + filename))
+          .on('finish', function(){
+            console.log(filename, 'is downloaded');
+            that.toastText = "Download Complete";
+            document.querySelector('#toast').show();
+            button.removeAttribute('disabled');
+            button.nextElementSibling.style.display = 'none';
+            defer.resolve(filepath + '/' + filename);
+          }
+        );
+        return defer.promise;
+      },
+      edit: function(filepath){
+        var cdrapp = '"' + localStorage.coreldrawPath + '\\' + CDRAPPNAME + '"',
+            that = this,
+            defer = Q.defer();
+        cmd.exec(cdrapp + ' ' + '"' + filepath + '"', function(error, stdout, stderr){
+          if (!!error) {
+            error = 'Unable to open the file in CorelDraw: ' + error;
+            that._outputError(error);
+            defer.reject(error);
+          }       
+        });
+        return Q.fcall(function(){return filepath});
+      },
+      watch: function(filepath){
+        var defer = Q.defer(),
+            that = this;
+        fs.watch(filepath, function(event, filename){
+          if(!!filename){
+            that.changedFile = filename;
+          }
+          else{
+            that.changedFile = filepath;
+          }
+          if(event === 'change' && that.tab === '3'){
+            var dialog = document.getElementById('change-modal');
+            if (dialog) {
+              dialog.setAttribute('data-filepath', filepath);
+              dialog.open();
+            }
+          }
+        });
+        return defer.promise;
+      },
+      uploadChange: function(){
+        var dialog = document.getElementById('change-modal'),
+            filepath = dialog.getAttribute('data-filepath');
+        this.uploadFile(filepath);
+      }
+
+    });
+	</script>
+</dom-module>

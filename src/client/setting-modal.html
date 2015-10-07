@@ -8,11 +8,15 @@
 	<template>
 		<paper-dialog id="setting-modal" modal>
 			<custom-validator id="cdrValidator" validator-name="cdrValidator"></custom-validator>
-      <custom-validator id="downloadValidator" validator-name="downloadValidator"></custom-validator>
+      <custom-validator id="targetFolderValidator" validator-name="targetFolderValidator"></custom-validator>
+      <custom-validator id="sourceFolderValidator" validator-name="sourceFolderValidator"></custom-validator>
 			<paper-input id="cdrInput" label="Set the path to the folder which contains the CorelDRW.exe" value="{{coreldrawPath}}" auto-validate error-message="{{cdrErrMsg}}" validator='cdrValidator'>
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 			</paper-input>
-			<paper-input id="downloadInput" label="Set the path to the folder where you'd like to store the downloaded arts" value="{{downloadPath}}" auto-validate error-message="{{downloadErrMsg}}" validator='downloadValidator'>
+      <paper-input id="sourceFolderInput" label="Set the folder to download CDR files from" value="{{sourceFolderPath}}" auto-validate error-message="{{sourceFolderErrMsg}}" validator='sourceFolderValidator'>
+        <paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
+      </paper-input> 
+			<paper-input id="targetFolderInput" label="Set the folder to store downloaded file" value="{{targetFolderPath}}" auto-validate error-message="{{targetFolderErrMsg}}" validator='targetFolderValidator'>
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 			</paper-input>      
       <div class="buttons">
@@ -36,7 +40,13 @@
           notify: true,
           observer: 'checkEmptyInput'
         },
-        downloadPath: {
+        targetFolderPath: {
+          type: String,
+          value: '',
+          notify: true,
+          observer: 'checkEmptyInput'
+        },
+        sourceFolderPath: {
           type: String,
           value: '',
           notify: true,
@@ -46,27 +56,39 @@
         	type: String,
         	notify: true
         },
-        downloadErrMsg: {
+        targetFolderErrMsg: {
         	type: String,
         	notify: true
+        },
+        sourceFolderErrMsg: {
+          type: String,
+          notify: true
         },
         validCdrPath: {
         	type: Boolean,
         	notify: true
         },
-        validDownloadPath: {
+        validTargetFolderPath: {
         	type: Boolean,
         	notify: true
+        },
+        validSourceFolderPath: {
+          type: Boolean,
+          notify: true
         }
       },
       ready: function(){
       	this.$.cdrValidator.validate = this.validateCdr.bind(this);
-        this.$.downloadValidator.validate = this.validateDownload.bind(this);
+        this.$.targetFolderValidator.validate = this.validateTargetFolder.bind(this);
+        this.$.sourceFolderValidator.validate = this.validateSourceFolder.bind(this);
         if(!!localStorage.coreldrawPath){
         	this.coreldrawPath = localStorage.coreldrawPath;
         }
-        if(!!localStorage.downloadPath){
-        	this.downloadPath = localStorage.downloadPath;
+        if(!!localStorage.targetFolderPath){
+        	this.targetFolderPath = localStorage.targetFolderPath;
+        }
+        if(!!localStorage.sourceFolderPath){
+          this.sourceFolderPath = localStorage.sourceFolderPath;
         }
       },
       clearInput: function(e){
@@ -81,9 +103,12 @@
       	if(!!this.coreldrawPath){
       		localStorage.coreldrawPath = this.coreldrawPath;
       	}
-      	if(!!this.downloadPath){
-      		localStorage.downloadPath = this.downloadPath;
+      	if(!!this.targetFolderPath){
+      		localStorage.targetFolderPath = this.targetFolderPath;
       	}
+        if(!!this.sourceFolderPath){
+          localStorage.sourceFolderPath = this.sourceFolderPath;
+        }
       },
       validateCdr: function(){
       	var result;
@@ -108,24 +133,40 @@
 				this.setSaveButton();
 				return result;
       },
-      validateDownload: function(){
+      validateTargetFolder: function(){
       	var result;
-      	if(this.downloadPath === ''){
+      	if(this.targetFolderPath === ''){
 					result = true;
 				}
-				else if(!!isValid(this.downloadPath) && !!pathExists.sync(this.downloadPath)){
+				else if(!!isValid(this.targetFolderPath) && !!pathExists.sync(this.targetFolderPath)){
 					result = true;					
 				}
 				else{
-					this.downloadErrMsg = INVALIDPATH;
+					this.targetFolderErrMsg = INVALIDPATH;
 					result = false;
 				}
-				this.validDownloadPath = result;
+				this.validTargetFolderPath = result;
 				this.setSaveButton();
 				return result;
       },
+      validateSourceFolder: function(){
+        var result;
+        if(this.sourceFolderPath === ''){
+          result = true;
+        }
+        else if(!!isValid(this.sourceFolderPath) && !!pathExists.sync(this.sourceFolderPath)){
+          result = true;          
+        }
+        else{
+          this.sourceFolderErrMsg = INVALIDPATH;
+          result = false;
+        }
+        this.validSourceFolderPath = result;
+        this.setSaveButton();
+        return result;
+      },
       setSaveButton: function(){
-      	if(!!this.validCdrPath && !!this.validDownloadPath){
+      	if(!!this.validCdrPath && !!this.validTargetFolderPath && !!this.validSourceFolderPath){
 					this.$.saveButton.removeAttribute('disabled');
 				}
 				else{
@@ -133,9 +174,10 @@
 				}
       },
       checkEmptyInput: function(){
-      	if(this.coreldrawPath === '' && this.downloadPath === ''){
+      	if(this.coreldrawPath === '' && this.targetFolderPath === '' && this.sourceFolderPath === ''){
       		this.validCdrPath = true;
-      		this.validDownloadPath = true;
+      		this.validTargetFolderPath = true;
+          this.validSourceFolderPath = true;
       		this.$.saveButton.removeAttribute('disabled');
       	}
       }

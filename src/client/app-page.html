@@ -5,22 +5,34 @@
 	<template>
  		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}">
 	    <div class="content">
-	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
+	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" users="{{users}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
 	    </div>
 	  </app-header>
 	</template>
 
-	<script>    
+	<script>
     Polymer({
       is: 'app-page',
       
       ready: function(){
-        this.initCompanies();
-        this.initJobs();
-        if(this.companies.length > 0){
-          this.setCompanyAndJob();
-        }
-        this.setOnHashChange();  
+        var that = this;
+        localStorage.username = 'kevin';
+        localStorage.userId = '10d2b6a1c9894306b9da7251fece8932';
+        this.getCompanies().then(
+          function(){return that.getUsers();},
+          function(e){outputError(e);}
+        ).then(
+          function(){return that.getJobs();},
+          function(e){outputError(e);}
+        )
+
+
+        // this.initCompanies();
+        // this.initJobs();
+        // if(this.companies.length > 0){
+        //   this.setCompanyAndJob();
+        // }
+        // this.setOnHashChange();  
       },            
 
       setOnHashChange: function(){
@@ -52,7 +64,7 @@
             return false;
           }
           for (var i = 0; i < companies.length; i++){
-            if(params.length > 1 && params[1].toLowerCase() === companies[i].name.toLowerCase()){
+            if(params.length > 1 && params[1].toLowerCase() === companies[i].company.toLowerCase()){
               this.selectedCompany = companies[i];
               return true;
             }
@@ -68,7 +80,7 @@
       	if(jobs.length > 0){
       		var joblist = [];
       		for(var i = 0; i < jobs.length; i++){
-      			if(jobs[i].companyid === selectedCompany.id){
+      			if(jobs[i].company === selectedCompany.company){
       				joblist.push(jobs[i]);
       			}
       		}
@@ -79,8 +91,8 @@
       		var jobInUrl = this.setJobWithHash(joblist);
       		if(window.location.hash === '' || !jobInUrl){
       			this.selectedJob = joblist[0];
-            this.expectedHash = '#/' + selectedCompany.name + '/' + this.selectedJob.id;
-            window.location.hash = '#/' + selectedCompany.name + '/' + this.selectedJob.id;
+            this.expectedHash = '#/' + selectedCompany.company + '/' + this.selectedJob.jobId;
+            window.location.hash = '#/' + selectedCompany.company + '/' + this.selectedJob.jobId;
       		}
           this.currJobs = joblist;
       	}
@@ -94,7 +106,7 @@
             return false;
           }
           for (var i = 0; i < jobs.length; i++){
-            if(params.length > 2 && params[2] === jobs[i].id){
+            if(params.length > 2 && params[2] === jobs[i].jobId){
               this.selectedJob = jobs[i];
               return true;
             }
@@ -106,86 +118,188 @@
         return false;
       },
 
-      //TODO: hardcode to ajax calls
-      initCompanies: function(){
-        this.push('companies', {name: 'DesignAShirt', id: '0'});
-        this.push('companies', {name: 'AntonSports', id: '1'});
+      getCompanies: function(){
+        var that = this,
+            defer = Q.defer(),
+            options = {
+              url: GETCOMPANIES_URL,
+              headers:HEADER
+            };
+
+        request(options, function(error, response, body){
+          if (!error && !!response && response.statusCode === 200) {
+            that.companies = JSON.parse(body);
+            defer.resolve(that.companies);
+            localStorage.companies = that.companies;
+            console.log('companies:', that.companies);
+          }
+          else if(!!response && response.statusCode !== 200){
+            var e = 'GetCompanies ERROR:' + response.statusCode;
+            defer.reject(e);
+          }
+          else{
+            var e = 'GetCompanies ERROR:' + error;
+            defer.reject(e);
+          }
+        });
+        return defer.promise;
       },
 
-      initJobs: function(){
-      	this.jobs = [
-          {
-            id: '111111',
-            name: 'For the dogs',
-            time: '2015-08-15 00:00:22',
-            status: 'Working',
-            assignee: 'Jessie',
-            updater: 'Aaron',
-            companyid: '0',
-            imagenum: 0
-          },
-          {
-            id: '222222',
-            name: 'For the dogs',
-            time: '2015-08-20 23:11:22',
-            status: 'Waiting',
-            assignee: 'Mike',
-            updater: 'Aaron',
-            companyid: '0',
-            imagenum: 0
-          },
-          {
-            id: '333333',
-            name: 'For the dogs',
-            time: '2015-08-19 00:12:45',
-            status: 'Locked',
-            assignee: 'Bob',
-            updater: 'Aaron',
-            companyid: '1',
-            imagenum: 0
-          },
-          {
-            id: '444444',
-            name: 'For the dogs',
-            time: '2015-08-16 15:33:11',
-            status: 'Done',
-            assignee: 'Zack',
-            updater: 'Aaron',
-            companyid: '0',
-            imagenum: 0
-          },
-          {
-            id: '555555',
-            name: 'For the dogs',
-            time: '2015-08-17 07:13:56',
-            status: 'Done',
-            assignee: 'Sam',
-            updater: 'Aaron',
-            companyid: '1',
-            imagenum: 0
-          },
-          {
-            id: '666666',
-            name: 'For the dogs',
-            time: '2015-08-18 18:18:38',
-            status: 'Working',
-            assignee: 'Amy',
-            updater: 'Aaron',
-            companyid: '1',
-            imagenum: 0
-          },
-          {
-            id: '777777',
-            name: 'For the dogs',
-            time: '2015-08-15 00:00:22',
-            status: 'Waiting',
-            assignee: 'Hill',
-            updater: 'Aaron',
-            companyid: '0',
-            imagenum: 0
+      getUsers: function(){
+        var that = this,
+            defer = Q.defer(),
+            options = {
+              url: GETUSERS_URL,
+              headers:HEADER
+            };
+
+        request(options, function(error, response, body){
+          if (!error && !!response && response.statusCode === 200) {
+            that.users = JSON.parse(body);
+            defer.resolve(that.users);
+            console.log('users:', that.users);
           }
-        ]
+          else if(!!response && response.statusCode !== 200){
+            var e = 'GetUsers ERROR:' + response.statusCode;
+            defer.reject(e);
+          }
+          else{
+            var e = 'GetUsers ERROR:' + error;
+            defer.reject(e);
+          }
+        });
+        return defer.promise;
       },
+
+      getJobs: function(){
+        var that = this,
+            defer = Q.defer(),
+            options = {
+              url: GETJOBS_URL,
+              headers:HEADER
+            };
+
+        request(options, function(error, response, body){
+          if (!error && !!response && response.statusCode === 200) {
+            var joblist = JSON.parse(body);  
+            joblist.forEach(function(job){
+              var user = that.getUserById(job.assigneeId);
+              if(!!user){
+                job.avatarurl = user.imageUrl;
+              }
+              else{
+                job.avatarurl = '';
+              }
+            });
+            that.jobs = joblist;
+            if(that.companies.length > 0){
+              that.setCompanyAndJob();
+            }
+            that.setOnHashChange();  
+            that.selectedJob = JSON.parse(JSON.stringify(that.selectedJob));
+            defer.resolve(that.jobs);
+            console.log('jobs:', that.jobs);
+          }
+          else if(!!response && response.statusCode !== 200){
+            var e = 'GetJobs ERROR:' + response.statusCode;
+            defer.reject(e);
+          }
+          else{
+            var e = 'GetJobs ERROR:' + error;
+            defer.reject(e);
+          }
+        });
+        return defer.promise;
+      },
+
+      getUserById: function(id){
+        this.users.forEach(function(user){
+          if(user.userId === id){
+            return user;
+          }
+        });
+        return null;
+      },
+
+      // initCompanies: function(){
+      //   this.push('companies', {name: 'DesignAShirt', id: '0'});
+      //   this.push('companies', {name: 'AntonSports', id: '1'});
+      // },
+
+      // initJobs: function(){
+      // 	this.jobs = [
+      //     {
+      //       id: '111111',
+      //       name: 'For the dogs',
+      //       time: '2015-08-15 00:00:22',
+      //       status: 'Working',
+      //       assignee: 'Jessie',
+      //       updater: 'Aaron',
+      //       companyid: '0',
+      //       imagenum: 0
+      //     },
+      //     {
+      //       id: '222222',
+      //       name: 'For the dogs',
+      //       time: '2015-08-20 23:11:22',
+      //       status: 'Waiting',
+      //       assignee: 'Mike',
+      //       updater: 'Aaron',
+      //       companyid: '0',
+      //       imagenum: 0
+      //     },
+      //     {
+      //       id: '333333',
+      //       name: 'For the dogs',
+      //       time: '2015-08-19 00:12:45',
+      //       status: 'Locked',
+      //       assignee: 'Bob',
+      //       updater: 'Aaron',
+      //       companyid: '1',
+      //       imagenum: 0
+      //     },
+      //     {
+      //       id: '444444',
+      //       name: 'For the dogs',
+      //       time: '2015-08-16 15:33:11',
+      //       status: 'Done',
+      //       assignee: 'Zack',
+      //       updater: 'Aaron',
+      //       companyid: '0',
+      //       imagenum: 0
+      //     },
+      //     {
+      //       id: '555555',
+      //       name: 'For the dogs',
+      //       time: '2015-08-17 07:13:56',
+      //       status: 'Done',
+      //       assignee: 'Sam',
+      //       updater: 'Aaron',
+      //       companyid: '1',
+      //       imagenum: 0
+      //     },
+      //     {
+      //       id: '666666',
+      //       name: 'For the dogs',
+      //       time: '2015-08-18 18:18:38',
+      //       status: 'Working',
+      //       assignee: 'Amy',
+      //       updater: 'Aaron',
+      //       companyid: '1',
+      //       imagenum: 0
+      //     },
+      //     {
+      //       id: '777777',
+      //       name: 'For the dogs',
+      //       time: '2015-08-15 00:00:22',
+      //       status: 'Waiting',
+      //       assignee: 'Hill',
+      //       updater: 'Aaron',
+      //       companyid: '0',
+      //       imagenum: 0
+      //     }
+      //   ]
+      // },
 
       properties: {
         selectedCompany: {
@@ -209,6 +323,11 @@
         	type: Array,
         	value: [],
         	notify: true
+        },
+        users: {
+          type: Array,
+          value: [],
+          notify: true
         },
         currJobs:{
           type: Array,

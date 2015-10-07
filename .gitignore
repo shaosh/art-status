@@ -33,3 +33,7 @@ Thumbs.db
 # NWJS files
 nwjs-v0.12.3-win-x64
 
+src/client/sessionids.txt
+src/client/app-main-body-副本.html
+
+

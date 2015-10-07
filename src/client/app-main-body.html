@@ -1,43 +1,94 @@
 <link rel="import" href="alert-modal.html">
+<link rel="import" href="assign-modal.html">
 
 <dom-module id="app-main-body">
 	<style>
 		.container{
-			padding: 50px 20px 0 20px;
+			padding: 20px 20px 0 20px;
 		}
+    paper-card{
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    paper-card .header{
+      background-color: #83A6D9;
+      padding: 16px;
+      font-weight: bold;
+    }
+    #taskOverview p, .cardItem p{
+      margin: 10px 0;
+    }
 		.uploadPanel{
 			width: 100%;
 			height: 40px;
-			margin-top:100px;
-			padding: 0 30px;
 			box-sizing: border-box;
       position: relative;
 		}
 		.viewPanel{
 			text-align: left;
 		}
-		.horizontal-container{
-			position:relative;
-			margin-bottom:20px;
-		}
-		.horizontal-section {      
-      display:inline-block;
-      height: 360px;
+    .iframe-wrapper{
+      text-align: center
+    }    
+    #commentForm{
+      overflow: hidden;
     }
-    .iframe-section{
-    	margin: 0 20px 0 50px;
+    #sumbitCommentButton{
+      float:right;
     }
-    .info-section{
-    	position:absolute;
-    	min-width: 100px;
+    #closeButton{
+      color: #fff;
+      float:right;
+      background-color: var(--paper-red-500);
     }
-    .button-container{
-      overflow: hidden
+    #showCommentButton{
+      display:none;
+      max-width: 200px
     }
-    .download-button{
-    	background-color:#4285f4;
-    	color:white;
-      float:left;
+    #reopenWrapper{
+      display:none;
+    }
+    #reopenButton{  
+      color: #fff;    
+      background-color: var(--paper-blue-500);
+    }
+    paper-button.blue {
+      color: var(--paper-light-blue-500);
+      --paper-button-flat-focus-color: var(--paper-light-blue-50);
+    }
+    paper-button.blue:hover {
+      background: var(--paper-light-blue-50);
+    }
+    paper-button[toggles][active].blue {
+      background-color: rgba(66, 133, 244, 0.25);
+    }
+    paper-button.red {
+      color: var(--paper-red-500);
+      --paper-button-flat-focus-color: var(--paper-red-50);
+    }
+    paper-button.red:hover {
+      background: var(--paper-red-50);
+    }
+    paper-button.green {
+      color: var(--paper-green-500);
+      --paper-button-flat-focus-color: var(--paper-green-50);
+    }
+    paper-button.green:hover {
+      background: var(--paper-green-50);
+    }
+    #proofCheckbox{
+      margin-bottom:20px;
+      display:block;
+    }
+    paper-checkbox.blue {
+      --paper-checkbox-checked-color: var(--paper-light-blue-500);
+      --paper-checkbox-checked-ink-color: var(--paper-light-blue-500);
+      --paper-checkbox-unchecked-color: var(--paper-light-blue-900);
+      --paper-checkbox-unchecked-ink-color: var(--paper-light-blue-900);
+    }
+    #change-modal, #upload-modal{
+      min-height: 300px;
+      min-width: 400px;
     }
     .loading{
       height: 100px;
@@ -55,10 +106,11 @@
       margin-left:20px;
     }
     iframe{
-    	width: 640px; 
-    	height: 360px; 
+    	width: 480px; 
+    	height: 270px; 
     	border-radius: 5px; 
     	border: 1px solid #d9d9d9;
+      margin: 10px auto;
     }
     #toast{
       position:absolute;
@@ -71,6 +123,30 @@
 	</style>
 	<template>
 		<div class="container">
+      <paper-card>
+        <div class="card-content" style="text-align:left">
+          <paper-button tabindex="0" id="showCommentButton" noink on-click="showCommentBox">Add a comment</paper-button>
+          <div id="commentForm" style="display:none">
+            <paper-textarea id="commentInput" label="Enter your comment" value="{{commentText}}"></paper-textarea>
+            <paper-button tabindex="0" id="sumbitCommentButton" class="blue" disabled noink on-click="submitComment">Submit Comment</paper-button>
+            <paper-button tabindex="0" id="closeButton" raised on-click="closeJob">Close</paper-button>
+          </div>
+          <div id="reopenWrapper">
+            <p>This job has already been closed. Click the button to reopen it</p>
+            <paper-button tabindex="0" id="reopenButton" noink on-click="reopenJob">Reopen</paper-button>
+          </div>  
+        </div>            
+      </paper-card>
+      <paper-card id="taskOverview" >
+        <div class="header">
+          Task Overview
+        </div>
+        <div class="card-content">
+          <p>Design Name: <span>{{jobname}}</span></p>
+          <p>Primary Assigne: <span>{{username}}</span></p>
+          <p>Task Status: <span>{{status}}</span></p>                  
+        </div>
+      </paper-card>
 			<div class="uploadPanel" style="display:none">
         <custom-validator id="imageurlValidator" validator-name="imageurlValidator"></custom-validator>
 				<paper-input id="imageurlInput" label="Add the url of the first image..." value="{{imageurl}}" on-keypress="upload" auto-validate error-message="{{imageurlErrMsg}}" validator='imageurlValidator'>
@@ -78,62 +154,73 @@
 				</paper-input>
         <img class="loading" src="img/loading.gif" />
 			</div>
-			<div class="viewPanel" style="display:none">
-				<template is="dom-repeat" items="{{versions}}">
-					<div class="horizontal-container">
-						<div class="horizontal-section iframe-section">
-							<iframe src="{{item.viewurl}}" allowfullscreen="allowfullscreen">						
-							</iframe>
-						</div>
-						<div class="horizontal-section info-section">
-              <div class="button-container">
-  							<paper-button class="download-button" raised on-click="startDownload">Download</paper-button>
-                <img class="loading-sm" src="img/loading-sm.gif" />
-              </div>
-							<p>Author: </p>
-							<p>Date:&nbsp;<span>{{item.date}}</span></p>
-							<p>Version:&nbsp;<span>{{item.version}}</span></p>
-						</div>
-					</div>          
-        </template>        
+			<div class="viewPanel" style="display:none">   
+        <template is="dom-repeat" items="{{cards}}" sort="sortCard">
+          <paper-card class="cardItem" >
+            <div class="header">
+              <span>{{item.title}}</span>
+            </div>
+            <div class="card-content">
+              <p>{{item.time}}</p>
+              <p>{{item.text}}</p>
+              <template is="dom-if" if="{{isPdf(item.documentId)}}">
+                <div>Version: #<span class="verSpan">{{item.version}}</span></div>
+                <div class="iframe-wrapper">
+                  <iframe src="{{item.viewurl}}" allowfullscreen="allowfullscreen"></iframe>
+                </div>
+              </template>
+            </div>
+            <div class="card-actions" style$="{{item.display}}">
+              <paper-textarea class="cardComment" label="Enter your comment"></paper-textarea>
+              <paper-button class="blue" tabindex="0" toggles>Start Review</paper-button>
+              <paper-button class="green" on-click="approveArt" data-version="{{item.version}}">Approve</paper-button>
+              <paper-button class="red" on-click="rejectArt" data-version="{{item.version}}">Reject</paper-button>
+                <!-- <template is="dom-if" if="{{isLocked(status)}}"> 
+                  <span>The buttons are locked since another user is review it.</span>
+                </template> -->
+            </div>
+          </paper-card>
+        </template>				 
 			</div>
       <paper-toast id="toast" text="{{toastText}}"></paper-toast>
 		</div>
     <alert-modal></alert-modal>
-    <paper-dialog id="change-modal" modal data-filepath="">
+    <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}"></assign-modal>
+    <paper-dialog id="change-modal" modal>
       <h2>Changes Detected</h2>
       <p>
-        Changes has been detected in file <span>{{changedFile}}</span>. Do you want to upload this change to the repo?
-      </p>
+        Changes has been detected in file <span>{{changedFile}}</span>. Do you want to commit this change to the repo?
+      </p>  
+      <p>If you'd like to upload the PDF file for this change, click the button below to select the PDF file.</p> 
+      <input type="file" id="changeModalInput">   
       <div class="buttons">
-        <paper-button dialog-confirm autofocus on-click="uploadChange">Yes, upload.</paper-button>
+        <paper-button dialog-confirm autofocus on-click="uploadChange">Yes, commit.</paper-button>
+        <paper-button dialog-dismiss autofocus>No, don't commit.</paper-button>
+      </div>
+    </paper-dialog>	
+    <paper-dialog id="upload-modal" modal>
+      <h2>Upload file</h2>
+      <p>
+        Select a PDF file to upload
+      </p>   
+      <input type="file" id="uploadModalInput"><br>
+      <paper-checkbox class="blue" id="proofCheckbox">Upload this file as Proof</paper-checkbox>   
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus  id="proofUploadButton" disabled>Yes, upload.</paper-button>
         <paper-button dialog-dismiss autofocus>No, don't upload.</paper-button>
       </div>
-    </paper-dialog>		
+    </paper-dialog> 	
 	</template>
 	<script>
 		function clearInput() {
       document.getElementById('imageurlInput').value = '';
-    }
-
-    var validurl = require('../../node_modules/valid-url'),
-    	  boxViewLib = require('../../node_modules/node-box-view'),
-    	  moment = require('../../node_modules/moment'),
-    	  Q = require('../../node_modules/q'),
-    	  request = require('../../node_modules/request'),	
-    	  fs = require('fs'),
-        isValid = require('../../node_modules/is-valid-path'),
-        fileExists = require('../../node_modules/file-exists'),
-        pathExists = require('../../node_modules/path-exists'),
-        mkdirp = require('../../node_modules/mkdirp'),
-        cmd = require('child_process'),
-    	  zamzar = require('./zamzar.js');    
+    }    
+    var boxViewLib = require('../../node_modules/node-box-view');
 
     var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7',
         boxView = new boxViewLib(myKey), 
         docUrl = 'https://view-api.box.com/1/documents/',
         PDF = 'pdf',
-        CDR = 'pdf',
         DEFAULTPATH = '/artapp/temp/',
         CDRAPPNAME = 'CorelDRW.exe';
 
@@ -145,6 +232,10 @@
           value: null,
           notify: true,
           observer: 'setJobData'
+        },
+        jobs: {
+          type: Array,
+          notify: true
         },
         jobid: {
           type: String,
@@ -162,7 +253,11 @@
           type: String,
           notify: true
         },
-        assignee: {
+        username: {
+          type: String,
+          notify: true
+        },
+        assigneeid: {
           type: String,
           notify: true
         },
@@ -191,6 +286,16 @@
         	notify: true,
           value:[]
         },
+        cards: {
+          type: Array,
+          notify: true,
+          value: []
+        },
+        users: {
+          type: Array, 
+          notify: true,
+          value: []
+        },
         viewurl: {
           type: String,
           notify: true
@@ -214,12 +319,18 @@
         },
         tab: {
           type: String,
-          notify: true
+          notify: true,
+          observer: 'tabObserver'
+        },
+        commentText: {
+          type: String,
+          notify: true,
+          observer: 'commentTextObserver'
         }
-      },
+      },      
       ready: function(){
-        this.$.imageurlValidator.validate = this._validateImageurl.bind(this);
-        
+        this.$.imageurlValidator.validate = this._validateImageurl.bind(this);       
+
         // upload
         // boxView.uploadFile('/documents/designashirt/artexpress/src/client/text.txt', {}, function(err, res){
         //   console.log('err', err);
@@ -270,26 +381,431 @@
         // client.documents.list(function (err, list, res) {console.log('list', list.document_collection);});
         // client.documents.getContent("e559be00dcbf49dd90be35c90ab7cf6e", function(err, res){console.log(res)})
       },
-      setJobData: function(newValue, oldValue){
-        if(!!newValue){
-          this.jobid = newValue.id;
-          this.jobname = newValue.name;
-          this.time = newValue.time;
-          this.assignee = newValue.assignee;
-          this.updater = newValue.updater;
-          this.status = newValue.status;
-          this.imagenum = newValue.imagenum;
-          
-          this.jobTitle = this.jobid + ' - ' + this.jobname;
-          this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 
-          this.checkVerList();
+      openChangeModal: function(filepath){
+        var dialog = document.getElementById('change-modal');
+        if (dialog) {
+          dialog.open();
         }
+      },
+      setJobData: function(newValue, oldValue){
+        var that = this;
+        if(!!newValue){
+          this.jobid = newValue.jobId;
+          this.jobname = newValue.name;
+          this.time = newValue.updatedAt;
+          this.assigneeid = newValue.assigneeId;
+          this.username = newValue.username;
+          this.status = newValue.status;
+          
+          if(dict[this.status.toLowerCase()] === STATUSES.DONE){
+            this.$.showCommentButton.style.display = 'none';
+            this.$.reopenWrapper.style.display = 'block';
+          }
+          else{
+            this.$.showCommentButton.style.display = 'block';
+            this.$.reopenWrapper.style.display = 'none';
+          }
+          // this.jobTitle = this.jobid + ' - ' + this.jobname;
+          // this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 
+          // this.checkVerList();
+
+          var options = {
+            url: CARD_URL.replace('{jobId}', this.jobid),
+            headers: HEADER
+          };
+
+          request(options, function(error, response, body){
+            var obj = JSON.parse(body);
+            console.log('cards', obj);
+            if(!error && response.statusCode === 200){
+              if(!!obj && !!obj.cards && obj.cards.length > 0){
+                that.processCards(obj.cards);
+              }
+              else if(!!obj && !!obj.cards && obj.cards.length === 0){
+                that.cards = [];
+                that.$$('.uploadPanel').style.display = 'block';
+                that.$$('.viewPanel').style.display = 'none';
+              }
+            }
+            else{
+              outputError(!!error ? 'GetCards Error' + error : response.statusCode);
+            }
+          });
+          // this.processCards();
+        }
+      },
+      showCommentBox: function(){
+        this.$.showCommentButton.style.display = 'none';
+        this.$.commentForm.style.display = 'block';
+      },
+      commentTextObserver: function(newValue, oldValue){
+        if((!oldValue || !oldValue.trim()) && (!!newValue && !!newValue.trim())){
+          this.$.sumbitCommentButton.removeAttribute('disabled');
+        }
+        else if(!newValue || !newValue.trim()){
+          this.$.sumbitCommentButton.setAttribute('disabled', true);
+        }
+      },
+      submitComment: function(e){
+        this.addCard(STEPS.COMMENT, this.commentText, '', REVIEW.APPROVE, dict[this.status.toLowerCase()], '');  
+        this.commentText = '';
+      },
+      closeJob: function(e){
+        this.addCard(STEPS.DONE, this.commentText, '', REVIEW.APPROVE, STATUSES.DONE, '');  
+        this.commentText = ''; 
+      },
+      reopenJob: function(e){
+        this.addCard(STEPS.REOPENED, this.commentText, '', REVIEW.APPROVE, STATUSES.WORKING, '');  
+        this.commentText = ''; 
+      },
+      approveArt: function(e){
+        var stepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
+        this.addCard(stepid, this.commentText, '', REVIEW.APPROVE, STATUSES.WORKING, e.model.item.version);  
+        this.commentText = '';
+      },
+      rejectArt: function(e){
+        var stepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
+        this.addCard(stepid, this.commentText, '', REVIEW.REJECT, STATUSES.WORKING, e.model.item.version);  
+        this.commentText = '';
+      },
+      addCard: function(step, comment, documentId, approve, status, version){
+        var that = this,
+            ver = '';
+
+        if(!!version){
+          ver = '$$$' + version;
+        }
+        var options = {
+          url: CARD_URL.replace('{jobId}', this.job.jobId),
+          headers: HEADER,
+          method: 'POST',
+          json: true,
+          body: {            
+            "card":{
+              "updaterId": localStorage.userId,
+              "step": step,
+              "comment": comment + ver,
+              "documentId": documentId,
+              "approve": approve,
+              'viewurl': ''
+            },
+            "job": {
+               "status": status, 
+               "assigneeId": this.assigneeid
+            }
+          }
+        };   
+
+        request(options, function(error, response, body){
+          console.log('body', body);
+          if(!error && response.statusCode === 200){
+            if(!!body && !!body.cards && body.cards.length > 0){
+              if(dict[body.status.toLowerCase()] === STATUSES.DONE){
+                that.$.commentForm.style.display = 'none';
+                that.$.reopenWrapper.style.display = 'block';
+                that.status = STATUSES.DONE;
+              }
+              else{
+                if(that.$.reopenWrapper.style.display !== 'none'){
+                  that.status = STATUSES.WORKING;
+                }
+                that.$.showCommentButton.style.display = 'block';
+                that.$.commentForm.style.display = 'none';
+                that.$.reopenWrapper.style.display = 'none';
+              }
+              that.processCards(body.cards);              
+            }
+          }
+          else{
+            outputError(!!error ? 'AddCard Error' + error : response.statusCode);
+          }
+        }); 
+      },
+      isPdf: function(documentId){
+        return !!documentId;
+      },
+      isDone: function(){
+        return dict[this.status.toLowerCase()] === STATUSES.DONE;
+      },
+      isOpen: function(){
+        return dict[this.status.toLowerCase()] !== STATUSES.DONE;
+      },
+      isNonComment: function(step){
+        return step !== STEPS.COMMENT;
+      },
+      // isOpenPdf: function(documentId){
+      //   return !!documentId && this.isOpen();
+      // },
+      // isLocked: function(){
+      //   return dict[this.status.toLowerCase()] === STATUSES.LOCKED;
+      // },
+      // lockJob: function(){
+      //   var inputs = Polymer.dom(this.root).querySelectorAll('paper-textarea');
+      //   console.log(inputs)
+      //   if(inputs.length > 0){
+      //     inputs.map(function(input){
+      //       input.setAttribute('disabled', true);
+      //     });
+      //   }
+      //   var buttons = Polymer.dom(this.root).querySelectorAll('.card-actions paper-button');
+      //   console.log(buttons)
+      //   if(buttons.length > 0){
+      //     buttons.map(function(button){
+      //       button.setAttribute('disabled', true);
+      //     });
+      //   }
+      // },
+      // unlockJob: function(){
+      //   var inputs = Polymer.dom(this.root).querySelectorAll('paper-textarea');
+      //   if(inputs.length > 0){
+      //     inputs.map(function(input){
+      //       input.removeAttribute('disabled');
+      //     });
+      //   }
+      //   var buttons = Polymer.dom(this.root).querySelectorAll('.card-actions paper-button');
+      //   if(buttons.length > 0){
+      //     buttons.map(function(button){
+      //       button.removeAttribute('disabled');
+      //     });
+      //   }
+      // },
+      processCards: function(list){
+        var that = this,
+          promiseList =[],
+          resList = [];
+        var count = 0;
+        list.forEach(function(item, index){
+          var title = item.step.toLowerCase();  
+          if(item.stepId === STEPS.COMMENT){
+            item.text = item.username + ' said ' + '"' + item.comment + '."';
+          }
+          else if(item.stepId === STEPS.ARTREVISION){
+            item.text = item.username + ' made a revision to the art.';
+          }
+          else if(item.stepId === STEPS.REVIEW || item.stepId === STEPS.PROOFREVIEW ){
+            item.text = item.username + ' marked the pending ';
+            var ver = '';
+            if(!!item.comment && item.comment.split('$$$').length > 1){
+              var splitComment = item.comment.split('$$$');
+              ver = splitComment[splitComment.length - 1];
+              item.comment = item.comment.substring(0, splitComment.length - ver.length - 3);
+            }
+
+            if(item.stepId === STEPS.REVIEW){
+              item.text = item.text + 'revision #' + ver + ' as ';
+            }
+            else{
+              item.text = item.text + 'proof #' + ver + ' as ';
+            }
+            if(!!item.approve){
+              item.text = item.text + 'approved.';
+            }
+            else {
+              item.text = item.text + 'rejected.';
+            }
+            if(!!item.comment){
+              item.text = item.text + ' Comment: ' + item.comment;
+            }          
+          }
+          else if(item.stepId === STEPS.PROOF){
+            item.text = item.username + ' uploaded a proof.';
+          }
+          else if(item.stepId === STEPS.DONE){
+            item.text = item.username + ' closed this issue.' 
+            if(!!item.comment){
+              item.text = item.text + ' Comment: ' + item.comment;
+            }
+          }
+          else if(item.stepId === STEPS.REQUEST){
+            item.text = item.username + ' sent a request to ' + item.comment + '.';
+          }
+          else if(item.stepId === STEPS.REOPENED){
+            item.text = item.username + ' reopened this issue.';
+          }
+          item.time = moment(item.updatedAt).format("MMM DD, YYYY, h:mm:ss a");
+          item.title = item.step;
+          item.index = index;
+          item.display = 'display:none';
+          if(!!item.documentId){
+            count++;
+            item.version = count;
+            item.display = 'display:block';
+            promiseList.push(that._getSession(item.documentId, item));
+          }          
+        });        
+        Q.allSettled(promiseList).then(function(responses){
+          responses.forEach(function(res){
+            if(res.state === 'fulfilled' && res.value !== null){
+              list[res.value.index] = res.value;
+            }
+            else{
+              console.log('No version retrieved.');
+            }
+          });          
+        }).done(function(){
+          if(list.length === 0){
+            that.$$('.uploadPanel').style.display = 'block';
+            that.$$('.viewPanel').style.display = 'none';
+          }
+          else{              
+            that.cards = list;
+            that.$$('.viewPanel').style.display = 'block';
+            that.$$('.uploadPanel').style.display = 'none';
+
+            // console.log('dict[that.status.toLowerCase()', dict[that.status.toLowerCase()]);
+            // if(dict[that.status.toLowerCase()] === STATUSES.DONE){              
+            //   that.lockJob();                
+            // }
+            // else{              
+            //   that.unlockJob();
+            // }
+          } 
+        });       
+      },
+      tabObserver: function(newValue, oldValue){
+        var that = this;
+        if(newValue === TABS.WATCH){
+          if(!!localStorage.coreldrawPath && !!localStorage.targetFolderPath && !!localStorage.sourceFolderPath){
+            var jobid = this.job.name.substring(0, 6),
+                sourceFile = localStorage.sourceFolderPath + '\\' + jobid + '.cdr',
+                targetFile = localStorage.targetFolderPath + '\\' + jobid + '.cdr';
+
+            if(!fileExists(sourceFile)){
+              alert(jobid + '.cdr does not exist in ' + localStorage.sourceFolderPath);
+              return;
+            }
+            console.log('start copying');
+            this.copy(sourceFile, targetFile).then(
+              function(res){return that.openInCDR(res)},
+              function(e){outputError(e)}
+            ).then(
+              function(res){that.watch(res)},
+              function(e){outputError(e)}
+            );
+
+            // fsextra.copy(sourceFile, targetFile, function(err){
+            //   if(!!err){
+            //     outputError('Fail to copy file: ' + err);
+            //     return;
+            //   }
+            //   console.log('start opening');
+            //   cmd.exec(cdrapp + ' ' + '"' + targetFile + '"', function(error, stdout, stderr){
+            //     if (!!error) {
+            //       error = 'Unable to open the file in CorelDraw: ' + error;
+            //       that._outputError(error);
+            //     }       
+            //   });
+            // });
+
+
+            // var watcher = chokidar.watch(localStorage.targetFolderPath, {
+            //   persistent: true
+            // });
+            // this.toastText = 'Start watching ' + localStorage.targetFolderPath;
+            // document.querySelector('#toast').show();
+            // watcher.on('change', function(path){
+            //   that.changedFile = path;
+            //   that.openChangeModal();
+            // });
+          }
+          else{
+            document.getElementById('setting-modal').open();
+          }
+        }
+        else if(newValue === TABS.ASSIGN){
+          document.getElementById('assign-modal').open();
+        }
+        else if(newValue === TABS.UPLOAD){
+          document.getElementById('upload-modal').open();
+          var input = document.getElementById('uploadModalInput');
+          input.onchange = function(){
+            that.enableUploadButton(input, 'proofUploadButton');
+          };
+        }
+      },
+      enableUploadButton: function(input, buttonId){
+        var that = this;
+        if(!!input.value && input.value.substr(-4) === '.pdf'){
+          var button = document.getElementById(buttonId);
+          button.removeAttribute('disabled');   
+          button.onclick = function(){
+            var step = STEPS.ARTREVISION;
+            if(that.tab === TABS.UPLOAD){
+              if(that.$.proofCheckbox.checked){
+                step = STEPS.PROOF;
+              }
+            }
+            that.uploadFile(input.value, step);
+            button.setAttribute('disabled', true);
+            input.value = '';
+          }       
+        }        
+        else{
+          document.getElementById(buttonId).setAttribute('disabled', true);
+        }
+      },
+      copy: function(src, dst){
+        var that = this,
+            defer = Q.defer();
+        fsextra.copy(src, dst, function(err){
+          if(!!err){
+            defer.reject('Fail to copy file: ' + err);
+            return;
+          }
+          console.log('finish copying');
+          defer.resolve(dst);
+        });
+        return defer.promise;
+      },
+      openInCDR: function(dst){
+        var cdrapp = '"' + localStorage.coreldrawPath + '\\' + CDRAPPNAME + '"',
+            defer = Q.defer(),
+            that = this;
+        console.log('opening...');
+        cmd.exec(cdrapp + ' ' + '"' + dst + '"', function(error, stdout, stderr){
+          if (!!error) {
+            error = 'Unable to open the file in CorelDraw: ' + error;
+            defer.reject(error);
+          }       
+        });
+        return Q.fcall(function(){return dst});
+      },
+      watch: function(dst){
+        var defer = Q.defer(),
+            that = this;
+
+        var watcher = chokidar.watch(dst, {
+          persistent: true
+        });
+        this.showToast('Start watching ' + dst);
+        watcher.on('change', function(path){
+          that.changedFile = path;
+          that.openChangeModal();
+        });
+
+        // fs.watch(dst, function(event, filename){
+        //   if(!!filename){
+        //     that.changedFile = filename;
+        //   }
+        //   else{
+        //     that.changedFile = dst;
+        //   }
+        //   if(event === 'change'){
+        //     console.log('change detectedd');
+        //     var dialog = document.getElementById('change-modal');
+        //     if (dialog) {
+        //       // dialog.setAttribute('data-filepath', dst);
+        //       dialog.open();
+        //     }
+        //   }
+        // });
+        // return defer.promise;
       },
       upload: function(e){
       	if(e.keyCode === 13){
       		var url = this.imageurl;
       		if(url !== '' && this.validImageurl){
-      			this.uploadFile(url);
+      			this.uploadFile(url, STEPS.ARTREVISION);
             // clearInput();
       		}
       		else{
@@ -297,105 +813,143 @@
       		}      		
       	}
       },
-      uploadFile: function(url){   
+      uploadFile: function(url, step){   
       	var now = moment().format('MMDDYYYYHHmmss'),
       			filename = this.jobid + '-' + now,
       			that = this;
-      	//convert cdr file to pdf with zamzar, download pdf, upload pdf to box and delete the temp pdf file
-      	// zamzar.convert(url, filename + PDF)
-      	// 	.then(
-      	// 		function(localFilename){return that._uploadLocalFile(localFilename, {fileName: filename + '.pdf'});},
-      	// 		function(e){that._outputError(e);})
-      	// 	.then(
-      	// 		function(path){fs.unlinkSync(path);},
-      	// 		function(e){that._outputError(e);});
+      	
     		if(validurl.isUri(url)){
           this._uploading();
-    			this._uploadFromUrl(url, {fileName: filename + '.' + CDR})
+    			this._uploadFromUrl(url, {fileName: filename + '.' + PDF})
             .then(              
               function(res){return that._checkStatus(res);},
-              function(e){that._outputError(e);}                
+              function(e){outputError(e);}                
             )
             .then(
-              function(res){that._addNewSession(res);},
-              function(e){that._outputError(e);}
+              function(res){that._renderPdfCard(res, step);},
+              function(e){outputError(e);}
             );
+            // .then(
+            //   function(res){that._addNewSession(res);},
+            //   function(e){outputError(e);}
+            // );
     		}
     		else{
           this._uploading();
-    			this._uploadLocalFile(url, {fileName: filename + '.' + CDR})
+    			this._uploadLocalFile(url, {fileName: filename + '.' + PDF})
             .then(
               function(res){return that._checkStatus(res);},
-              function(e){that._outputError(e);}                
+              function(e){outputError(e);}                
             )
             .then(
-              function(res){that._addNewSession(res);},
-              function(e){that._outputError(e);}
+              function(res){that._renderPdfCard(res, step);},
+              function(e){outputError(e);}
             );
+            // .then(
+            //   function(res){that._addNewSession(res);},
+            //   function(e){outputError(e);}
+            // );
     		}
       },
-      checkVerList: function(){
-      	var that = this;
-      	boxView.getList(null, function(err, res){
-					var list = res.document_collection.entries,
-							promiseList =[],
-							verList = [],
-							dict = [];
+    //   checkVerList: function(){
+    //   	var that = this;
+    //   	boxView.getList(null, function(err, res){
+				// 	var list = res.document_collection.entries,
+				// 			promiseList =[],
+				// 			verList = [],
+				// 			dict = [];
 
-          // empty files
-          // list.forEach(function(obj){
-          //   boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
-          // });
+    //       // empty files
+    //       // list.forEach(function(obj){
+    //       //   boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
+    //       // });
 
-					list.forEach(function(obj){
-						var name = obj.name,								
-								basename = name.split('.')[0],
-								type = name.split('.')[1];
-						if(type === CDR){
-							dict[basename] = obj.id;
-						}
-					});
+				// 	list.forEach(function(obj){
+				// 		var name = obj.name,								
+				// 				basename = name.split('.')[0],
+				// 				type = name.split('.')[1];
+				// 		if(type === PDF){
+				// 			dict[basename] = obj.id;
+				// 		}
+				// 	});
 
-					list.forEach(function(obj, index){
-						var name = obj.name,								
-								basename = name.split('.')[0],
-								type = name.split('.')[1],
-                id = basename.split('-')[0],
-                date = basename.split('-')[1];
-						if(id === that.jobid && type === PDF){
-							var o = {};
-							o.viewurl = '';
-							o.filename = basename + '.' + CDR;
-							o.downloadurl = docUrl + dict[basename] + '/content.pdf';
-							o.date = that._parseDate(date);
-							o.version = '';
-							promiseList.push(that._getSession(obj.id, o));
-						}
-					});
-					Q.allSettled(promiseList).then(function(responses){
-						responses.forEach(function(res, index){
-							if(res.state === 'fulfilled' && res.value !== null){
-								verList[index] = res.value;
-							}
-							else{
-								console.log('No version retrieved.');
-							}
-						});
-						if(verList.length === 0){
-							that.$$('.uploadPanel').style.display = 'block';
-							that.$$('.viewPanel').style.display = 'none';
-						}
-						else{
-              verList.forEach(function(ver, index){
-                ver.version = verList.length - 1 - index;
-              });
-							that.versions = verList;
-							that.$$('.viewPanel').style.display = 'block';
-							that.$$('.uploadPanel').style.display = 'none';
-						}
-					});					
-				});
+				// 	list.forEach(function(obj, index){
+				// 		var name = obj.name,								
+				// 				basename = name.split('.')[0],
+				// 				type = name.split('.')[1],
+    //             id = basename.split('-')[0],
+    //             date = basename.split('-')[1];
+				// 		if(id === that.jobid && type === PDF){
+				// 			var o = {};
+				// 			o.viewurl = '';
+				// 			o.filename = basename + '.' + PDF;
+				// 			o.downloadurl = docUrl + dict[basename] + '/content.pdf';
+				// 			o.date = that._parseDate(date);
+				// 			o.version = '';
+				// 			promiseList.push(that._getSession(obj.id, o));
+				// 		}
+				// 	});
+				// 	Q.allSettled(promiseList).then(function(responses){
+				// 		responses.forEach(function(res, index){
+				// 			if(res.state === 'fulfilled' && res.value !== null){
+				// 				verList[index] = res.value;
+				// 			}
+				// 			else{
+				// 				console.log('No version retrieved.');
+				// 			}
+				// 		});
+				// 		if(verList.length === 0){
+				// 			that.$$('.uploadPanel').style.display = 'block';
+				// 			that.$$('.viewPanel').style.display = 'none';
+				// 		}
+				// 		else{
+    //           verList.forEach(function(ver, index){
+    //             ver.version = verList.length - 1 - index;
+    //           });
+				// 			that.versions = verList;     
+				// 			that.$$('.viewPanel').style.display = 'block';
+				// 			that.$$('.uploadPanel').style.display = 'none';
+				// 		}
+				// 	});					
+				// });
+    //   },
+      _renderPdfCard: function(docid, step){
+        var that = this;
+        this.addCard(step, '', docid, REVIEW.APPROVE, dict[this.status.toLowerCase()], '');
+        // this._getSession(docid).then(
+        //   function(res){
+        //     if(!!res){              
+        //       that.addCard(STEPS.ARTREVISION, '', docid);
+        //       defer.resolve();
+        //     }              
+        //     else{
+        //       var err = 'Retrieved empty session';
+        //       outputError(err);
+        //       defer.reject(err);
+        //     }
+        //   },
+        //   function(e){
+        //     outputError(e);
+        //     defer.reject(e);
+        //   }
+        // );
       },
+      // _getSession: function(id){
+      //   var defer = Q.defer();
+      //   boxView.getDocumentSession(id, function(err, res){
+      //     if(!!err){
+      //       var error = 'Unable to get session: ' + err;
+      //       deferred.reject(error);
+      //     }
+      //     else{
+      //       var viewurl = res.urls.view + '?theme=dark';
+      //       defer.resolve(viewurl);
+      //     }
+      //   }); 
+      //   return defer.promise;       
+      // },
+
+
       _getSession: function(id, obj){
       	var defer = Q.defer();
       	boxView.getDocumentSession(id, function(err, res){
@@ -421,7 +975,7 @@
             defer = Q.defer(),
             that = this;
         o.viewurl = '';
-        o.filename = basename + '.' + CDR;
+        o.filename = basename + '.' + PDF;
         o.downloadurl = docUrl + objid + '/content.pdf';
         o.date = that._parseDate(date);
         o.version = '';
@@ -431,7 +985,6 @@
             if(!!res){              
               res.version = that.versions.length;
               that.versions.unshift(res);
-              console.log('versions',that.versions);
               if(that.$$('.uploadPanel').style.display === 'block'){
                 that.$$('.uploadPanel').style.display = 'none';
                 that.$$('.viewPanel').style.display = 'block';
@@ -440,12 +993,12 @@
             }              
             else{
               var err = 'Retrieved empty session';
-              that._outputError(err);
+              outputError(err);
               defer.reject(err);
             }
           },
           function(e){
-            that._outputError(e);
+            outputError(e);
             defer.reject(e);
           }
         );
@@ -470,22 +1023,20 @@
             id = obj.id,
             that = this,
             check;
-        var getStatus = function(){          
+        var getStatus = function(){                    
           that._getDocument(id).then(
             function(res){
               if(res.status === 'done'){
                 clearInterval(check);
                 console.log('SUCCESS! File is processed!');
-                that.toastText = "Upload Complete";
-                document.querySelector('#toast').show();
+                that.showToast("Upload Complete");
                 that._removeUploading();
-                defer.resolve(res);                
+                defer.resolve(res.id);                
               }
             },
             function(e){
-              that._outputError(e);
-              that.toastText = "Fail to Complete Upload'";
-              document.querySelector('#toast').show();
+              outputError(e);
+              that.showToast('Fail to Complete Upload');
               that._removeUploading();
               defer.reject(e);
             }
@@ -508,8 +1059,7 @@
             that = this;
       	boxView.uploadFile(path, option, function(err, res){
       		if(!!err){
-            that.toastText = "Fail to Complete Upload'";
-            document.querySelector('#toast').show();
+            that.showToast('Fail to Complete Upload');
             that._removeUploading();
     				var error = 'Unable to upload from local path: ' + err;
       			deferred.reject(error);
@@ -523,10 +1073,10 @@
       },
       _uploadFromUrl: function(url, option){
       	var deferred = Q.defer();		
+        var that = this;
       	boxView.uploadFromUrl(url, option/*{fileName: filename + '.cdr'}*/, function(err, res){
     			if(!!err){
-            that.toastText = "Fail to Complete Upload'";
-            document.querySelector('#toast').show();
+            that.showToast('Fail to Complete Upload');
             that._removeUploading();
     				var error = 'Unable to upload from url: ' + err;
       			deferred.reject(error);
@@ -541,7 +1091,6 @@
       _validateImageurl: function(){
         var INVALIDIMAGEURL = 'Invalid URL/path or path not exist',
             result;
-        console.log(validurl.isUri(this.imageurl));
         if(this.imageurl === ''){
           result = true;
         }
@@ -573,116 +1122,35 @@
         this.$$('.loading').style.display = 'none';
         this.$.imageurlInput.removeAttribute('disabled');
         this.imageurl = '';
-      },
-      _outputError: function(err){
-				console.log(err);
-			},
-      startDownload: function(e){
-      	var url = e.model.item.downloadurl,            
-            that = this,
-            filepath;
-
-        if(!localStorage.coreldrawPath){
-          var dialog = document.getElementById('alert-modal');
-          if (dialog) {
-            dialog.open();
-          }
-          return;
-        }
-        if(!localStorage.downloadPath){
-          localStorage.downloadPath = DEFAULTPATH;
-        }
-        filepath = localStorage.downloadPath;
-        mkdirp.sync(filepath);
-
-        var button = Polymer.dom(e).localTarget;
-        button.setAttribute('disabled', true);
-        button.nextElementSibling.style.display = 'block';
-      	this.download(url, button, filepath, e.model.item.filename)
-          .then(
-            function(res){return that.edit(res)}, 
-            function(e){that._outputError(e);}
-          )
-          .then(
-            function(res){that.watch(res)}, 
-            function(e){that._outputError(e);}
-          );
-        
-			},
-      download: function(url, button, filepath, filename){
-        var defer = Q.defer(),
-            that = this;
-        request.get({
-            url: url,
-            headers: {
-            'Authorization': 'Token ' + myKey
-            },
-          })
-          .on('error', function(err) {
-            var error = 'Unable to download: ' + err;
-            that._outputError(error);
-            that.toastText = 'Fail to Complete Download';
-            document.querySelector('#toast').show();
-            document.querySelector('#toast').style.background = 'red';
-            button.removeAttribute('disabled');
-            button.nextElementSibling.style.display = 'none';
-            defer.reject(error);
-          })
-          // .on('response', function(response) {
-          //   console.log(response) // 200 
-          //   console.log(response.headers['content-type']) // 'image/png' 
-          // })
-          .pipe(fs.createWriteStream(filepath + '/' + filename))
-          .on('finish', function(){
-            console.log(filename, 'is downloaded');
-            that.toastText = "Download Complete";
-            document.querySelector('#toast').show();
-            button.removeAttribute('disabled');
-            button.nextElementSibling.style.display = 'none';
-            defer.resolve(filepath + '/' + filename);
-          }
-        );
-        return defer.promise;
-      },
-      edit: function(filepath){
-        var cdrapp = '"' + localStorage.coreldrawPath + '\\' + CDRAPPNAME + '"',
-            that = this,
-            defer = Q.defer();
-        cmd.exec(cdrapp + ' ' + '"' + filepath + '"', function(error, stdout, stderr){
-          if (!!error) {
-            error = 'Unable to open the file in CorelDraw: ' + error;
-            that._outputError(error);
-            defer.reject(error);
-          }       
-        });
-        return Q.fcall(function(){return filepath});
-      },
-      watch: function(filepath){
-        var defer = Q.defer(),
-            that = this;
-        fs.watch(filepath, function(event, filename){
-          if(!!filename){
-            that.changedFile = filename;
-          }
-          else{
-            that.changedFile = filepath;
-          }
-          if(event === 'change' && that.tab === '3'){
-            var dialog = document.getElementById('change-modal');
-            if (dialog) {
-              dialog.setAttribute('data-filepath', filepath);
-              dialog.open();
-            }
-          }
-        });
-        return defer.promise;
-      },
+      },    
+      showToast: function(text){
+        this.toastText = text;
+        document.querySelector('#toast').show();
+      },  
       uploadChange: function(){
-        var dialog = document.getElementById('change-modal'),
-            filepath = dialog.getAttribute('data-filepath');
-        this.uploadFile(filepath);
-      }
+        var jobid = this.job.name.substring(0, 6),
+            src = localStorage.targetFolderPath + '\\' + jobid + '.cdr',
+            dst = localStorage.sourceFolderPath + '\\' + jobid + '.cdr',
+            that = this,
+            input = document.getElementById('changeModalInput');
 
+        fsextra.copy(src, dst, function(err){
+          if(!!err){
+            console.log('Fail to copy file from' + src + ' to ' + dst + ': ' + err);
+            return;
+          }
+          that.showToast('Commit complete');
+        });
+
+        if(!!input.value && input.value.substr(-4) === '.pdf'){
+          this.uploadFile(input.value, STEPS.ARTREVISION);
+          button.setAttribute('disabled', true);
+          input.value = '';
+        }
+      },
+      sortCard: function(a, b){
+        return moment(b.updatedAt).diff(moment(a.updatedAt));
+      }
     });
 	</script>
 </dom-module>

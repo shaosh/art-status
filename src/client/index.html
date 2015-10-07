@@ -19,11 +19,83 @@
 <body class="fullbleed">
   <script>
     const STATUSES = {
-      WORKING: 'Working',
-      WAITING: 'Waiting',
-      LOCKED: 'Locked',
-      DONE: 'Done'
+      WORKING: 1,
+      WAITING: 2,
+      LOCKED: 3,
+      DONE: 4
     };
+
+    const TABS = {
+      HISTORY: 0,
+      ASSIGN: 1,
+      MESSAGE: 2,
+      WATCH: 3,
+      UPLOAD: 4
+    };
+
+    const LEFTTABS = {
+      ALL: 0,
+      MINE: 1
+    };
+
+    const STEPS = {
+        TASKOVERVIEW: 1,
+        REORDER: 2,
+        COMMENT: 3,
+        REVIEW: 4,
+        PROOF: 5,
+        PROOFREVIEW: 6,
+        ARTREVISION: 7,
+        DONE: 8,
+        REOPENED: 9,
+        RELATIONSHIP: 10,
+        REQUEST: 11
+    };
+    
+    const REVIEW = {
+      APPROVE: 1,
+      REJECT: 0
+    };
+
+    const XAPIKEY = 'qqX3C5Ph1M8Eo2yLkcAZh2k4Luh3gCMj24EtEjsr';
+    const APIURL_BASE = 'https://rd0a4dgksa.execute-api.us-east-1.amazonaws.com/v1';
+    const LOGIN_URL = APIURL_BASE + '/art/login';
+    const GETJOBS_URL = APIURL_BASE + '/job';
+    const JOBREFRESH_URL = APIURL_BASE + '/job/refresh';
+    const GETUSERS_URL = APIURL_BASE + '/job/users';
+    const FOLLOW_URL = APIURL_BASE + '/job/{userId}/follow';
+    const CARD_URL = APIURL_BASE + '/job/card/{jobId}';
+    const GETMYJOBS_URL = APIURL_BASE + '/job/{userId}';
+    const GETCOMPANIES_URL = APIURL_BASE + '/art/companies';
+    const LOCK_URL = APIURL_BASE + '/job/lock/{jobId}';
+
+    const HEADER = {
+      'x-api-key': XAPIKEY,
+      'User-Agent': 'request'
+    };
+
+    var validurl = require('../../node_modules/valid-url'),
+        boxViewLib = require('../../node_modules/node-box-view'),
+        moment = require('../../node_modules/moment'),
+        Q = require('../../node_modules/q'),
+        request = require('../../node_modules/request'),  
+        fs = require('fs'),
+        fsextra = require('../../node_modules/fs-extra'), 
+        isValid = require('../../node_modules/is-valid-path'),
+        fileExists = require('../../node_modules/file-exists'),
+        pathExists = require('../../node_modules/path-exists'),
+        cmd = require('child_process'),
+        chokidar = require('../../node_modules/chokidar');
+
+    var dict = [];
+    dict['working'] = 1;
+    dict['waiting'] = 2;
+    dict['locked'] = 3;
+    dict['completed'] = 4;
+    
+    var outputError = function(err){
+      console.log(err);
+    };  
   </script>
   <app-page></app-page>
 </body>

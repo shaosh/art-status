@@ -11,12 +11,12 @@
   <template>
     <paper-menu-button>
       <paper-button class="dropdown-trigger">
-        <span>{{selectedCompany.name}}</span>
+        <span>{{selectedCompany.company}}</span>
         <iron-icon icon="expand-more"></iron-icon>
       </paper-button>
       <paper-menu class="dropdown-content" selected="{{selectedIndex}}">
         <template is="dom-repeat" items="{{companies}}">
-          <paper-item>{{item.name}}</paper-item>
+          <paper-item>{{item.company}}</paper-item>
         </template>
       </paper-menu>
     </paper-menu-button>
@@ -50,7 +50,7 @@
       updateCompany: function(newValue, oldValue){
         if(typeof oldValue !== 'undefined'){       
           this.selectedCompany = this.companies[newValue];
-          window.location.hash = '#/' + this.selectedCompany.name;
+          window.location.hash = '#/' + this.selectedCompany.company;
         }
       }
     });

@@ -30,7 +30,7 @@
     <paper-toolbar class="medium-tall">
       <div class="header-wrapper">
         <div class="otherviewer">XXX is also viewing</div>
-        <div class="title">{{jobTitle}}</div>
+        <div class="title">{{jobname}}</div>
         <div class="subtitle">{{statusTitle}}</div>
       </div>
     </paper-toolbar>
@@ -46,6 +46,9 @@
       </paper-tab>
       <paper-tab>
         <iron-icon icon="image:brush"></iron-icon>
+      </paper-tab>
+      <paper-tab>
+        <iron-icon icon="file-upload"></iron-icon>
       </paper-tab>
     </paper-tabs>
     <content></content>
@@ -82,10 +85,6 @@
           notify: true
         },
         updater: {
-          type: String,
-          notify: true
-        },
-        jobTitle: {
           type: String,
           notify: true
         },
@@ -155,13 +154,11 @@
         if(!!newValue){
           this.jobid = newValue.id;
           this.jobname = newValue.name;
-          this.time = newValue.time;
-          this.assignee = newValue.assignee;
-          this.updater = newValue.updater;
+          this.time = moment(newValue.updatedAt).format("MMM DD, YYYY, h:mm:ss a");
+          this.assignee = newValue.username;
+          // this.updater = newValue.updater;
           this.status = newValue.status;
-          
-          this.jobTitle = this.jobid + ' - ' + this.jobname;
-          this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 
+          this.statusTitle = this.status + '. Updated at ' + this.time; 
         }
       } 
     });

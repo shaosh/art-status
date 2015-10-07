@@ -49,11 +49,11 @@
   <template>
     <paper-card>
       <div class="card-content">
-        <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');"></div>
-        <paper-tooltip for="avatar">{{assignee}}</paper-tooltip>
+        <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');">{{firstchar}}</div>
+        <paper-tooltip for="avatar">{{username}}</paper-tooltip>
         <div class="title">
-          <div class="medium"><span class="jobid">{{jobid}}</span> - <span>{{jobname}}</span></div>
-          <div class="small">{{time}}</div>
+          <div class="medium"><span class="jobid" data-jobid$="{{jobid}}"><span>{{jobname}}</span></div>
+          <div class="small">{{fromnow}}</div>
         </div>
         <div class="status">
           <iron-icon icon="{{statusIcon}}"></iron-icon>
@@ -85,7 +85,7 @@
           type: String,
           value: ''
         },
-        time: {
+        fromnow: {
           type: String,
           notify: true
         },
@@ -97,18 +97,23 @@
           type: String,
           notify: true
         },
-        assignee: {
+        username: {
           type: String,
           notify: true
+        },
+        firstchar: {
+          type: String,
+          notify: true,
+          value: ''
         }
       },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
-          this.jobid = newValue.id;
+          this.jobid = newValue.jobId;
           this.jobname = newValue.name;
-          this.time = newValue.time;
-          this.assignee = newValue.assignee;
-          this.status = newValue.status;          
+          this.fromnow = moment(newValue.updatedAt).fromNow();
+          this.username = newValue.username;
+          this.status = dict[newValue.status.toLowerCase()];          
           
           if(this.status === STATUSES.WORKING){
             this.statusIcon = 'tab';
@@ -124,15 +129,18 @@
           }
           //TODO: use api to get the url to the profile img
           var avatar = this.$$('.avatar');
-          var name = this.assignee.toLowerCase();
-          var url = ''
-          if(['hill', 'jessie', 'mike', 'zack'].indexOf(name) > -1){
-            url = 'img/' + name + '.jpg';
+          if(!!newValue.avatarurl){
+            avatar.style.backgroundImage = 'url(' + newValue.avatarurl + ')';
+          }
+          else if(!!this.username){
+            avatar.style.background = '#' + Math.random().toString(16).slice(-6);
+            this.firstchar = this.username.charAt(0).toUpperCase();
           }
           else{
-            url = 'img/default.png';
+            avatar.style.background = '';
+            avatar.style.backgroundImage = 'url(img/default.png)';
+            this.firstchar = '';
           }
-          avatar.style.backgroundImage = 'url(' + url + ')';
         }
       } 
     })

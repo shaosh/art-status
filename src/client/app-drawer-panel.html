@@ -13,10 +13,11 @@
       --paper-tabs-selection-bar-color: #7EC1F4;
     }
     
-    .newjob{
+    #newjob{
       padding: 10px 20px;
       text-align: center;
       background-color: #F2FD8E;
+      display: none;
     }
     
     .drawer{
@@ -39,7 +40,7 @@
     <paper-drawer-panel drawer-width="400px">
       <paper-header-panel drawer mode="standard" class="drawer">
         <div class="paper-header">
-          <paper-tabs selected="0" noink>
+          <paper-tabs selected="0" noink selected="{{leftTab}}">
             <paper-tab>
               <paper-menu-button>
                 <paper-button class="dropdown-trigger">
@@ -51,14 +52,14 @@
                 <!--    <paper-item>[[item.name]]</paper-item>-->
                 <!--  </template>-->
                 <!--</paper-menu>-->
-                </paper-menu-button>
-            </paper-tab>
-            <paper-tab>UNASSIGNED</paper-tab>
+              </paper-menu-button>
+            </paper-tab>            
             <paper-tab>MINE</paper-tab>
+            <!-- <paper-tab>UNASSIGNED</paper-tab> -->
           </paper-tabs>
-          <div class="newjob"><a href="#">You have {n} new jobs.</a></div>
+          <div id="newjob"><a href="#">You have <span>{{updateNum}}</span> new jobs.</a></div>
         </div>
-        <template is="dom-repeat" items="{{jobs}}">
+        <template is="dom-repeat" items="{{jobs}}" sort="sortJob">
           <job-card job="{{item}}" on-click="selectJob"></job-card>
         </template>
       </paper-header-panel>
@@ -67,7 +68,7 @@
           <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}"></app-main-header>
         </div>
         <div class="content">
-          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}"></app-main-body>
+          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{jobs}}"></app-main-body>
         </div>
       </paper-header-panel>
     </paper-drawer-panel>
@@ -76,6 +77,43 @@
   <script>
     Polymer({
       is: 'app-drawer-panel',
+
+      ready: function(){
+        var interval = 30000,
+            that = this;
+        setInterval(function(){that.getUpdateNum(localStorage.userId)}, interval);
+      },
+
+      getUpdateNum: function(userid){        
+        var that = this;
+        var options = {
+          url: JOBREFRESH_URL,
+          headers: HEADER,
+          method: 'POST',
+          json: true,
+          body: {
+           
+          }
+        };
+        console.log('options', options)
+        request(options, function(error, response, body){
+          console.log(response, body)
+          if(!error && response.statusCode === 200){
+            if(!!body && !!body.count){
+              that.updateNum = body.count;
+              if(body.count > 0){
+                that.$.newjob.style.display = 'block';
+              }
+              else{
+                that.$.newjob.style.display = 'none';
+              }
+            }
+          }
+          else{
+            outputError(!!error ? 'GetUpdateNum Error' + error : response.statusCode);
+          }
+        });        
+      },
 
       attached: function(){
         this.addSelectedClass(this.selectedJob, null);
@@ -90,22 +128,40 @@
         this.unselectPrevJob();
         card.toggleClass('selected');
         this.selectedJob = e.model.item;
-        window.location.hash = '#/' + this.selectedCompany.name + '/' + this.selectedJob.id;       
+        this.selectedTab = 0;
+        window.location.hash = '#/' + this.selectedCompany.company + '/' + this.selectedJob.jobId;     
       },      
 
+      sortJob: function(a, b){
+        return moment(b.updatedAt).diff(moment(a.updatedAt));
+      },
+
       addSelectedClass: function(newValue, oldValue){
+        // if(!!newValue && !!oldValue)
+        //   console.log(newValue.jobId, oldValue.jobId, newValue.assigneeId, oldValue.assigneeId);
+        // if(!!newValue && !!oldValue && newValue.jobId === oldValue.jobId){
+        //   console.log(111);
+        //   for(var i = 0; i < this.jobs.length; i++){
+        //     console.log(i, this.jobs[i], newValue)
+        //     if(this.jobs[i].jobId === newValue.jobId){
+        //       this.jobs[i] = newValue;
+        //       break;
+        //     }
+        //   }
+        // }
         var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
         if(typeof jobcards === 'undefined' || jobcards.length === 0){
           return;
         }
+        
         for(var i = 0; i < jobcards.length; i++){
           var idSpan = Polymer.dom(jobcards[i].childNodes[1]).querySelector('.jobid');
-          if(newValue.id === idSpan.innerText){
+          if(newValue.jobId === idSpan.getAttribute('data-jobid')){
             if(jobcards[i].childNodes[1].classList.contains('selected')){
             }
             else{
               this.unselectPrevJob();
-              jobcards[i].childNodes[1].toggleClass('selected');
+              jobcards[i].childNodes[1].toggleClass('selected');              
             }
             return;
           }
@@ -121,6 +177,17 @@
             jobcard.childNodes[1].toggleClass('selected', false);
           });
         }
+      },      
+
+      leftTabObserver: function(newValue, oldValue){
+        if(!!newValue && !!oldValue ){
+          if(newValue === LEFTTAB.ALL){
+
+          }
+          else{
+
+          }
+        }
       },
 
       properties: {
@@ -135,6 +202,25 @@
         },
         selectedTab: {
           type: String,
+          notify: true
+        },
+        leftTab: {
+          type: String,
+          notify: true,
+          observer: 'leftTabObserver',
+          value: '0'
+        },
+        updateNum: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+        users: {
+          type: Array,
+          notify: true
+        },
+        companies: {
+          type: Array,
           notify: true
         }
       }
