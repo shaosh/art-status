@@ -137,18 +137,6 @@
       },
 
       addSelectedClass: function(newValue, oldValue){
-        // if(!!newValue && !!oldValue)
-        //   console.log(newValue.jobId, oldValue.jobId, newValue.assigneeId, oldValue.assigneeId);
-        // if(!!newValue && !!oldValue && newValue.jobId === oldValue.jobId){
-        //   console.log(111);
-        //   for(var i = 0; i < this.jobs.length; i++){
-        //     console.log(i, this.jobs[i], newValue)
-        //     if(this.jobs[i].jobId === newValue.jobId){
-        //       this.jobs[i] = newValue;
-        //       break;
-        //     }
-        //   }
-        // }
         var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
         if(typeof jobcards === 'undefined' || jobcards.length === 0){
           return;

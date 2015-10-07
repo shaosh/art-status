@@ -106,49 +106,6 @@
         var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7';
         var boxViewLib = require('../../node_modules/node-box-view');
         var boxView = new boxViewLib(myKey);
-        // var client = boxView.createClient(myKey);
-        
-        // upload
-        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/text.txt', {}, function(err, res){
-        //   console.log('err', err);
-        //   console.log('res', res);
-        //   boxView.getList(null, function(err, res){console.log('list', res)});
-        // });
-        
-        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/lake.pdf', {}, function(err, res){
-        //   boxView.getList(null, function(err, res){console.log('list', res)});
-        // });
-        // boxView.getList(null, function(err, res){console.log('list', res)});
-
-        // boxView.getDocument('d38857ad016f4a988cddb87bff862052', [], function(err, res){
-          // boxView.getDocumentThumbnail('85f1375815f3480cb55499fcae7df336', 800, 500, '/documents/designashirt/artexpress/src/client/thumb.bmp', function(err,res){
-          //   console.log(err, res);
-          // });
-        // });
-
-        // var that = this;
-        // // boxView.getDocumentSession(documentId, callback)
-        // boxView.getDocumentSession('85f1375815f3480cb55499fcae7df336', function(err, res){
-        //   console.log(err, res);
-        //   that.viewurl = res.urls.view + '?theme=dark';
-        //   console.log(res.urls.view);
-        // });
-
-        //getDocumentThumbnail(documentId, width, height, file, callback)
-        // boxView.getDocumentThumbnail('d38857ad016f4a988cddb87bff862052', 512, 384,  '/documents/designashirt/artexpress/src/client/res.jpg', function(err,res){
-        //   console.log(err, res);
-        // });
-
-        // client.documents.uploadFile(
-        //   '/documents/designashirt/artexpress/src/client/text.txt', null, function(err, res){
-        //     console.log(1111, err, res);
-        //     client.documents.list(function (err, list, res) {console.log('list', list);});
-        //     console.log(2222)
-        //   }
-        // );
-
-        // client.documents.list(function (err, list, res) {console.log('list', list.document_collection);});
-        // client.documents.getContent("e559be00dcbf49dd90be35c90ab7cf6e", function(err, res){console.log(res)})
       },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
@@ -156,7 +113,6 @@
           this.jobname = newValue.name;
           this.time = moment(newValue.updatedAt).format("MMM DD, YYYY, h:mm:ss a");
           this.assignee = newValue.username;
-          // this.updater = newValue.updater;
           this.status = newValue.status;
           this.statusTitle = this.status + '. Updated at ' + this.time; 
         }

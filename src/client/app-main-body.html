@@ -175,9 +175,6 @@
               <paper-button class="blue" tabindex="0" toggles>Start Review</paper-button>
               <paper-button class="green" on-click="approveArt" data-version="{{item.version}}">Approve</paper-button>
               <paper-button class="red" on-click="rejectArt" data-version="{{item.version}}">Reject</paper-button>
-                <!-- <template is="dom-if" if="{{isLocked(status)}}"> 
-                  <span>The buttons are locked since another user is review it.</span>
-                </template> -->
             </div>
           </paper-card>
         </template>				 
@@ -329,57 +326,7 @@
         }
       },      
       ready: function(){
-        this.$.imageurlValidator.validate = this._validateImageurl.bind(this);       
-
-        // upload
-        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/text.txt', {}, function(err, res){
-        //   console.log('err', err);
-        //   console.log('res', res);
-        //   boxView.getList(null, function(err, res){console.log('list', res)});
-        // });
-        
-        // boxView.uploadFile('/documents/designashirt/artexpress/src/client/lake.pdf', {}, function(err, res){
-        //   boxView.getList(null, function(err, res){console.log('list', res)});
-        // });
-        // boxView.getList(null, function(err, res){console.log('list', res)});
-
-        // boxView.getDocument('d38857ad016f4a988cddb87bff862052', [], function(err, res){
-          // boxView.getDocumentThumbnail('85f1375815f3480cb55499fcae7df336', 800, 500, '/documents/designashirt/artexpress/src/client/thumb.bmp', function(err,res){
-          //   console.log(err, res);
-          // });
-        // });
-				
-				//Empty list
-				// boxView.getList(null, function(err, res){
-				// 	console.log('list', res, res.document_collection.entries);
-				// 	res.document_collection.entries.forEach(function(obj){
-				// 		boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
-				// 	});
-				// });
-
-        // var that = this;
-        // // boxView.getDocumentSession(documentId, callback)
-        // boxView.getDocumentSession('16d69bd3b4bd460eac35e4f899b7c9ec', function(err, res){
-        //   console.log(err, res);
-        //   that.viewurl = res.urls.view + '?theme=dark';
-        //   console.log(res.urls.view);
-        // });
-
-        //getDocumentThumbnail(documentId, width, height, file, callback)
-        // boxView.getDocumentThumbnail('d38857ad016f4a988cddb87bff862052', 512, 384,  '/documents/designashirt/artexpress/src/client/res.jpg', function(err,res){
-        //   console.log(err, res);
-        // });
-
-        // client.documents.uploadFile(
-        //   '/documents/designashirt/artexpress/src/client/text.txt', null, function(err, res){
-        //     console.log(1111, err, res);
-        //     client.documents.list(function (err, list, res) {console.log('list', list);});
-        //     console.log(2222)
-        //   }
-        // );
-
-        // client.documents.list(function (err, list, res) {console.log('list', list.document_collection);});
-        // client.documents.getContent("e559be00dcbf49dd90be35c90ab7cf6e", function(err, res){console.log(res)})
+        this.$.imageurlValidator.validate = this._validateImageurl.bind(this);    
       },
       openChangeModal: function(filepath){
         var dialog = document.getElementById('change-modal');
@@ -405,9 +352,6 @@
             this.$.showCommentButton.style.display = 'block';
             this.$.reopenWrapper.style.display = 'none';
           }
-          // this.jobTitle = this.jobid + ' - ' + this.jobname;
-          // this.statusTitle = this.status + '. Updated at ' + this.time + ' by ' + this.updater; 
-          // this.checkVerList();
 
           var options = {
             url: CARD_URL.replace('{jobId}', this.jobid),
@@ -431,7 +375,6 @@
               outputError(!!error ? 'GetCards Error' + error : response.statusCode);
             }
           });
-          // this.processCards();
         }
       },
       showCommentBox: function(){
@@ -533,42 +476,6 @@
       isNonComment: function(step){
         return step !== STEPS.COMMENT;
       },
-      // isOpenPdf: function(documentId){
-      //   return !!documentId && this.isOpen();
-      // },
-      // isLocked: function(){
-      //   return dict[this.status.toLowerCase()] === STATUSES.LOCKED;
-      // },
-      // lockJob: function(){
-      //   var inputs = Polymer.dom(this.root).querySelectorAll('paper-textarea');
-      //   console.log(inputs)
-      //   if(inputs.length > 0){
-      //     inputs.map(function(input){
-      //       input.setAttribute('disabled', true);
-      //     });
-      //   }
-      //   var buttons = Polymer.dom(this.root).querySelectorAll('.card-actions paper-button');
-      //   console.log(buttons)
-      //   if(buttons.length > 0){
-      //     buttons.map(function(button){
-      //       button.setAttribute('disabled', true);
-      //     });
-      //   }
-      // },
-      // unlockJob: function(){
-      //   var inputs = Polymer.dom(this.root).querySelectorAll('paper-textarea');
-      //   if(inputs.length > 0){
-      //     inputs.map(function(input){
-      //       input.removeAttribute('disabled');
-      //     });
-      //   }
-      //   var buttons = Polymer.dom(this.root).querySelectorAll('.card-actions paper-button');
-      //   if(buttons.length > 0){
-      //     buttons.map(function(button){
-      //       button.removeAttribute('disabled');
-      //     });
-      //   }
-      // },
       processCards: function(list){
         var that = this,
           promiseList =[],
@@ -651,14 +558,6 @@
             that.cards = list;
             that.$$('.viewPanel').style.display = 'block';
             that.$$('.uploadPanel').style.display = 'none';
-
-            // console.log('dict[that.status.toLowerCase()', dict[that.status.toLowerCase()]);
-            // if(dict[that.status.toLowerCase()] === STATUSES.DONE){              
-            //   that.lockJob();                
-            // }
-            // else{              
-            //   that.unlockJob();
-            // }
           } 
         });       
       },
@@ -682,31 +581,6 @@
               function(res){that.watch(res)},
               function(e){outputError(e)}
             );
-
-            // fsextra.copy(sourceFile, targetFile, function(err){
-            //   if(!!err){
-            //     outputError('Fail to copy file: ' + err);
-            //     return;
-            //   }
-            //   console.log('start opening');
-            //   cmd.exec(cdrapp + ' ' + '"' + targetFile + '"', function(error, stdout, stderr){
-            //     if (!!error) {
-            //       error = 'Unable to open the file in CorelDraw: ' + error;
-            //       that._outputError(error);
-            //     }       
-            //   });
-            // });
-
-
-            // var watcher = chokidar.watch(localStorage.targetFolderPath, {
-            //   persistent: true
-            // });
-            // this.toastText = 'Start watching ' + localStorage.targetFolderPath;
-            // document.querySelector('#toast').show();
-            // watcher.on('change', function(path){
-            //   that.changedFile = path;
-            //   that.openChangeModal();
-            // });
           }
           else{
             document.getElementById('setting-modal').open();
@@ -782,31 +656,12 @@
           that.changedFile = path;
           that.openChangeModal();
         });
-
-        // fs.watch(dst, function(event, filename){
-        //   if(!!filename){
-        //     that.changedFile = filename;
-        //   }
-        //   else{
-        //     that.changedFile = dst;
-        //   }
-        //   if(event === 'change'){
-        //     console.log('change detectedd');
-        //     var dialog = document.getElementById('change-modal');
-        //     if (dialog) {
-        //       // dialog.setAttribute('data-filepath', dst);
-        //       dialog.open();
-        //     }
-        //   }
-        // });
-        // return defer.promise;
       },
       upload: function(e){
       	if(e.keyCode === 13){
       		var url = this.imageurl;
       		if(url !== '' && this.validImageurl){
       			this.uploadFile(url, STEPS.ARTREVISION);
-            // clearInput();
       		}
       		else{
       			console.log('Invalid URL');
@@ -829,10 +684,6 @@
               function(res){that._renderPdfCard(res, step);},
               function(e){outputError(e);}
             );
-            // .then(
-            //   function(res){that._addNewSession(res);},
-            //   function(e){outputError(e);}
-            // );
     		}
     		else{
           this._uploading();
@@ -845,110 +696,12 @@
               function(res){that._renderPdfCard(res, step);},
               function(e){outputError(e);}
             );
-            // .then(
-            //   function(res){that._addNewSession(res);},
-            //   function(e){outputError(e);}
-            // );
     		}
       },
-    //   checkVerList: function(){
-    //   	var that = this;
-    //   	boxView.getList(null, function(err, res){
-				// 	var list = res.document_collection.entries,
-				// 			promiseList =[],
-				// 			verList = [],
-				// 			dict = [];
-
-    //       // empty files
-    //       // list.forEach(function(obj){
-    //       //   boxView.deleteDocument(obj.id, function(){obj.id, 'done!'})
-    //       // });
-
-				// 	list.forEach(function(obj){
-				// 		var name = obj.name,								
-				// 				basename = name.split('.')[0],
-				// 				type = name.split('.')[1];
-				// 		if(type === PDF){
-				// 			dict[basename] = obj.id;
-				// 		}
-				// 	});
-
-				// 	list.forEach(function(obj, index){
-				// 		var name = obj.name,								
-				// 				basename = name.split('.')[0],
-				// 				type = name.split('.')[1],
-    //             id = basename.split('-')[0],
-    //             date = basename.split('-')[1];
-				// 		if(id === that.jobid && type === PDF){
-				// 			var o = {};
-				// 			o.viewurl = '';
-				// 			o.filename = basename + '.' + PDF;
-				// 			o.downloadurl = docUrl + dict[basename] + '/content.pdf';
-				// 			o.date = that._parseDate(date);
-				// 			o.version = '';
-				// 			promiseList.push(that._getSession(obj.id, o));
-				// 		}
-				// 	});
-				// 	Q.allSettled(promiseList).then(function(responses){
-				// 		responses.forEach(function(res, index){
-				// 			if(res.state === 'fulfilled' && res.value !== null){
-				// 				verList[index] = res.value;
-				// 			}
-				// 			else{
-				// 				console.log('No version retrieved.');
-				// 			}
-				// 		});
-				// 		if(verList.length === 0){
-				// 			that.$$('.uploadPanel').style.display = 'block';
-				// 			that.$$('.viewPanel').style.display = 'none';
-				// 		}
-				// 		else{
-    //           verList.forEach(function(ver, index){
-    //             ver.version = verList.length - 1 - index;
-    //           });
-				// 			that.versions = verList;     
-				// 			that.$$('.viewPanel').style.display = 'block';
-				// 			that.$$('.uploadPanel').style.display = 'none';
-				// 		}
-				// 	});					
-				// });
-    //   },
       _renderPdfCard: function(docid, step){
         var that = this;
         this.addCard(step, '', docid, REVIEW.APPROVE, dict[this.status.toLowerCase()], '');
-        // this._getSession(docid).then(
-        //   function(res){
-        //     if(!!res){              
-        //       that.addCard(STEPS.ARTREVISION, '', docid);
-        //       defer.resolve();
-        //     }              
-        //     else{
-        //       var err = 'Retrieved empty session';
-        //       outputError(err);
-        //       defer.reject(err);
-        //     }
-        //   },
-        //   function(e){
-        //     outputError(e);
-        //     defer.reject(e);
-        //   }
-        // );
       },
-      // _getSession: function(id){
-      //   var defer = Q.defer();
-      //   boxView.getDocumentSession(id, function(err, res){
-      //     if(!!err){
-      //       var error = 'Unable to get session: ' + err;
-      //       deferred.reject(error);
-      //     }
-      //     else{
-      //       var viewurl = res.urls.view + '?theme=dark';
-      //       defer.resolve(viewurl);
-      //     }
-      //   }); 
-      //   return defer.promise;       
-      // },
-
 
       _getSession: function(id, obj){
       	var defer = Q.defer();
@@ -1074,7 +827,7 @@
       _uploadFromUrl: function(url, option){
       	var deferred = Q.defer();		
         var that = this;
-      	boxView.uploadFromUrl(url, option/*{fileName: filename + '.cdr'}*/, function(err, res){
+      	boxView.uploadFromUrl(url, option, function(err, res){
     			if(!!err){
             that.showToast('Fail to Complete Upload');
             that._removeUploading();
