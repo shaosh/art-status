@@ -19,6 +19,11 @@
       background-color: #F2FD8E;
       display: none;
     }
+
+    #newjobButton:hover{
+      color: #132584;
+      font-weight: bold;
+    }
     
     .drawer{
       box-sizing:content-box;
@@ -43,7 +48,7 @@
           <paper-tabs selected="0" noink selected="{{leftTab}}">
             <paper-tab>
               <paper-menu-button>
-                <paper-button class="dropdown-trigger">
+                <paper-button class="dropdown-trigger" noink>
                   <span>ALL (<span>{{jobs.length}}</span>)</span>
                   <iron-icon icon="expand-more"></iron-icon>
                 </paper-button>
@@ -57,7 +62,9 @@
             <paper-tab>MINE</paper-tab>
             <!-- <paper-tab>UNASSIGNED</paper-tab> -->
           </paper-tabs>
-          <div id="newjob"><a href="#">You have <span>{{updateNum}}</span> new jobs.</a></div>
+          <div id="newjob">
+            <paper-button id="newjobButton" on-click="getUpdatedJobs" noink>You have <span>{{updateNum}}</span> new jobs.</paper-button>
+          </div>
         </div>
         <template is="dom-repeat" items="{{jobs}}" sort="sortJob">
           <job-card job="{{item}}" on-click="selectJob"></job-card>
@@ -95,12 +102,11 @@
            
           }
         };
-        console.log('options', options)
         request(options, function(error, response, body){
           console.log(response, body)
           if(!error && response.statusCode === 200){
             if(!!body && !!body.count){
-              that.updateNum = body.count;
+              that.updateNum = that.updateNum + body.count;
               if(body.count > 0){
                 that.$.newjob.style.display = 'block';
               }
@@ -114,9 +120,10 @@
           }
         });        
       },
-
-      attached: function(){
-        this.addSelectedClass(this.selectedJob, null);
+      getUpdatedJobs: function(){
+        this.domHost.getJobs();
+        this.$.newjob.style.display = 'none';
+        this.updateNum = 0;
       },
 
       selectJob: function(e){

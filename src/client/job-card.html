@@ -141,6 +141,12 @@
             avatar.style.backgroundImage = 'url(img/default.png)';
             this.firstchar = '';
           }
+
+          var interval = 60000, 
+              that = this;
+          setInterval(function(){
+            that.fromnow = moment(newValue.updatedAt).fromNow();
+          }, interval);
         }
       } 
     })
