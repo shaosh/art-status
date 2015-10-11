@@ -52,12 +52,12 @@
         <div class="avatar" id="avatar" style="background-image: url('{{avatarurl}}');">{{firstchar}}</div>
         <paper-tooltip for="avatar">{{username}}</paper-tooltip>
         <div class="title">
-          <div class="medium"><span class="jobid" data-jobid$="{{jobid}}"><span>{{jobname}}</span></div>
+          <div class="medium"><span class="jobid" data-jobid$="{{jobid}}">{{jobname}}</span></div>
           <div class="small">{{fromnow}}</div>
         </div>
         <div class="status">
           <iron-icon icon="{{statusIcon}}"></iron-icon>
-          <paper-tooltip>{{status}}</paper-tooltip>
+          <paper-tooltip>{{statusText}}</paper-tooltip>
         </div>
       </div>
     </paper-card>
@@ -113,6 +113,7 @@
           this.jobname = newValue.name;
           this.fromnow = moment(newValue.updatedAt).fromNow();
           this.username = newValue.username;
+          this.statusText = newValue.status.toLowerCase();
           this.status = dict[newValue.status.toLowerCase()];          
           
           if(this.status === STATUSES.WORKING){
@@ -142,11 +143,19 @@
             this.firstchar = '';
           }
 
+          var jobText = this.$$('.jobid');
+          if(this.username === localStorage.username){            
+            jobText.style.fontWeight = 'bold';
+          }
+          else{
+            jobText.style.fontWeight = 'normal';
+          }
+
           var interval = 60000, 
               that = this;
-          setInterval(function(){
-            that.fromnow = moment(newValue.updatedAt).fromNow();
-          }, interval);
+          // setInterval(function(){
+          //   that.fromnow = moment(newValue.updatedAt).fromNow();
+          // }, interval);
         }
       } 
     })

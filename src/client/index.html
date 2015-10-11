@@ -35,7 +35,13 @@
 
     const LEFTTABS = {
       ALL: 0,
-      MINE: 1
+      MINE: 1,
+      OTHERS: 2
+    };
+
+    const LEFTTABSTEXT = {
+      ALL: 'All',
+      MINE: 'Mine'
     };
 
     const STEPS = {
@@ -58,7 +64,7 @@
     };
 
     const XAPIKEY = 'qqX3C5Ph1M8Eo2yLkcAZh2k4Luh3gCMj24EtEjsr';
-    const APIURL_BASE = 'https://rd0a4dgksa.execute-api.us-east-1.amazonaws.com/v1';
+    const APIURL_BASE = 'https://cz0cog7rt2.execute-api.us-east-1.amazonaws.com/v2';
     const LOGIN_URL = APIURL_BASE + '/art/login';
     const GETJOBS_URL = APIURL_BASE + '/job';
     const JOBREFRESH_URL = APIURL_BASE + '/job/refresh';
@@ -68,6 +74,7 @@
     const GETMYJOBS_URL = APIURL_BASE + '/job/{userId}';
     const GETCOMPANIES_URL = APIURL_BASE + '/art/companies';
     const LOCK_URL = APIURL_BASE + '/job/lock/{jobId}';
+    const RELATION_URL = APIURL_BASE + '/job/relation/{jobId}';
 
     const HEADER = {
       'x-api-key': XAPIKEY,

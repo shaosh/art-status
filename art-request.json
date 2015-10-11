@@ -79,6 +79,7 @@
   "/job/refresh": {
     "method": "post",
     "request-body": {
+      "companyId": 2,
       "userId": "367a99bd7a594904a49afa52d35a74d4" //default userId is null, this will refresh all job list that updated; if has userId, then just refresh job updated of mine.
     },
     "response": {
@@ -231,6 +232,7 @@
             "step": 1, // from 1 ~ 11
             "comment": "this need to be fixed",
             "documentId": "e50e0481a74e4e9082ed659965c6890d",
+            "viewUrl": "string",
             "approve": 1 //1 is approve, 0 is reject
           }
         },
@@ -378,7 +380,10 @@
     }
   },
   "/job/relation/{jobId}": {
-    "method": "get",
+    "method": "post",
+    "request-body": {
+      "companyId": 2
+    },
     "response": [{
       "jobId": {
         "type": "string"
@@ -409,4 +414,69 @@
       }
     }]
   }
+  /*"/art/{userId}/filter": { // UNUSED FOR NOW
+    "1": {
+      "method": "get",
+      "response": [
+        {
+          "id": {
+            "type": "int"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "filter": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "date"
+          },
+          "createdAt": {
+            "type": "date"
+          }
+        }
+      ]
+    },
+    "2": {
+      "method": "post",
+      "request-body": {
+        "op": "add | del | update | query",// required
+        "id": 9, // required if del, update， query,
+        "tag": "filter name or title", // required if add, update
+        "filter": "filter content"// required if add, update, query
+      },
+      "response": [{
+        "jobId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "assigneeId": {
+          "type": "string"
+        },
+        "username": {// assignee
+          "type": "string"
+        },
+        "email": {// assignee
+          "type": "string"
+        },
+        "company": {
+          "type": "string"
+        },
+        "online": {
+          "type": "boolean"// if job not assign to anyone, this will be null
+        },
+        "updatedAt": {
+          "type": "date"
+        }
+      }]
+    }
+  }*/
 }

@@ -8,6 +8,12 @@
       font-style: italic;
       color: #8A97DC;
     }
+    .title-wrapper{
+      overflow: hidden;
+    }
+    .title{
+      float:left;
+    }
     .subtitle{
       color: #B4BDEF;
     }
@@ -25,12 +31,23 @@
       color: #5A5A5A;
       background-color: #BDBDBD;
     }
+    #relation-icon{
+      margin-top: 4px;
+      margin-left:20px;
+      height:20px;
+      color:#B2E281;
+      cursor: pointer; 
+      float:left;
+    }
   </style>
   <template>
     <paper-toolbar class="medium-tall">
       <div class="header-wrapper">
         <div class="otherviewer">XXX is also viewing</div>
-        <div class="title">{{jobname}}</div>
+        <div class="title-wrapper">
+          <div class="title"><span>{{jobname}}</span></div>
+          <iron-icon icon="av:library-books" id="relation-icon" on-click="showRelation"></iron-icon>
+        </div>
         <div class="subtitle">{{statusTitle}}</div>
       </div>
     </paper-toolbar>
@@ -103,9 +120,10 @@
         }
       },
       ready: function(){
-        var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7';
-        var boxViewLib = require('../../node_modules/node-box-view');
-        var boxView = new boxViewLib(myKey);
+        
+        // var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7';
+        // var boxViewLib = require('../../node_modules/node-box-view');
+        // var boxView = new boxViewLib(myKey);
       },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
@@ -115,8 +133,40 @@
           this.assignee = newValue.username;
           this.status = newValue.status;
           this.statusTitle = this.status + '. Updated at ' + this.time; 
+          this.getRelation();
         }
-      } 
+      },
+      getRelation: function(){
+        var that = this,
+          defer = Q.defer(),
+          options = {
+            url: RELATION_URL,
+            headers:HEADER,
+            
+          };
+
+        request(options, function(error, response, body){
+            var obj = JSON.parse(body);
+            console.log('relation', obj);
+            // if(!error && response.statusCode === 200){
+            //   if(!!obj && !!obj.cards && obj.cards.length > 0){
+            //     that.processCards(obj.cards);
+            //   }
+            //   else if(!!obj && !!obj.cards && obj.cards.length === 0){
+            //     that.cards = [];
+            //     that.$$('.uploadPanel').style.display = 'block';
+            //     that.$$('.viewPanel').style.display = 'none';
+            //   }
+            // }
+            // else{
+            //   outputError(!!error ? 'GetCards Error' + error : response.statusCode);
+            // }
+          }
+        );
+      },
+      showRelation: function(e){
+        alert(1111);
+      }
     });
   </script>
 </dom-module>

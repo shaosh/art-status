@@ -182,7 +182,8 @@
                 job.avatarurl = '';
               }
             });
-            that.jobs = joblist;
+            that.jobs = joblist.sort(that.sortJob);
+
             if(that.companies.length > 0){
               that.setCompanyAndJob();
             }
@@ -210,6 +211,10 @@
           }
         });
         return null;
+      },
+
+      sortJob: function(a, b){
+        return moment(b.updatedAt).diff(moment(a.updatedAt));
       },
 
       properties: {

@@ -18,7 +18,21 @@
       </paper-input> 
 			<paper-input id="targetFolderInput" label="Set the folder to store downloaded file" value="{{targetFolderPath}}" auto-validate error-message="{{targetFolderErrMsg}}" validator='targetFolderValidator'>
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
-			</paper-input>      
+			</paper-input> 
+      <div style="padding-top:20px">
+        <div style="font-size:12px;color:#757575">Default Job List Tab</div> 
+        <paper-menu-button id="defaultTabMenu">
+          <paper-button class="dropdown-trigger" noink>
+            <span>{{defaultTabText}}</span>
+            <iron-icon icon="expand-more"></iron-icon>
+          </paper-button>
+          <paper-menu class="dropdown-content" selected="{{selectedIndex}}">
+            <template is="dom-repeat" items="{{tabs}}">
+              <paper-item>{{item.text}}</paper-item>
+            </template>
+          </paper-menu>
+        </paper-menu-button>
+      </div>
       <div class="buttons">
         <paper-button dialog-confirm autofocus on-click="save" id='saveButton'>Save</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -75,6 +89,40 @@
         validSourceFolderPath: {
           type: Boolean,
           notify: true
+        },
+        defaultTab:{
+          type: String,
+          notify: true,
+          value: ''
+        },
+        defaultTabText: {
+          type: String,
+          notify: true,
+          value: 'Set the default tab in the job list'
+        },
+        selectedIndex: {
+          type: Number,
+          notify: true,
+          observer: 'updateDefaultTab'
+        },
+        tabs: {
+          type: Array,
+          value: [
+            {
+              text: 'All',
+              id: 0
+            },
+            {
+              text: 'Mine',
+              id: 1
+            }
+          ]
+        }
+      },
+      updateDefaultTab: function(newValue, oldValue){
+        if(!!newValue || newValue === 0){
+          this.defaultTabText = this.tabs[newValue].text;
+          this.defaultTab = newValue;
         }
       },
       ready: function(){
@@ -89,6 +137,9 @@
         }
         if(!!localStorage.sourceFolderPath){
           this.sourceFolderPath = localStorage.sourceFolderPath;
+        }
+        if(!!localStorage.defaultTab){
+          this.defaultTabText = this.tabs[localStorage.defaultTab].text; 
         }
       },
       clearInput: function(e){
@@ -109,6 +160,9 @@
         if(!!this.sourceFolderPath){
           localStorage.sourceFolderPath = this.sourceFolderPath;
         }
+        if(!!this.defaultTab || this.defaultTab === 0){
+          localStorage.defaultTab = this.defaultTab;
+        }        
       },
       validateCdr: function(){
       	var result;

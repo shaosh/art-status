@@ -30,6 +30,32 @@
       border-right: #132584 1px solid;
     }
     
+    #showFilterButton{
+      width: 100%;
+    }
+
+    #filterWrapper{
+      display: none;
+      overflow: hidden;
+    }
+
+    #filterInput{
+      float: left;
+      width:75%;
+      margin-left:5%;
+      box-sizing: border-box;
+      height: 60px;
+    }
+
+    #hideFilterButton{
+      width: 15%;
+      float: right;
+      box-sizing: border-box;
+      text-align: center;
+      height: 60px;
+      padding-top: 18px;
+    }
+
     job-card{
       cursor: pointer;
     }
@@ -45,28 +71,40 @@
     <paper-drawer-panel drawer-width="400px">
       <paper-header-panel drawer mode="standard" class="drawer">
         <div class="paper-header">
-          <paper-tabs selected="0" noink selected="{{leftTab}}">
-            <paper-tab>
-              <paper-menu-button>
-                <paper-button class="dropdown-trigger" noink>
-                  <span>ALL (<span>{{jobs.length}}</span>)</span>
+          <paper-tabs noink selected="{{leftTab}}">
+            <paper-tab on-click="showAll">
+              <span id="allTab">ALL</span>&nbsp;(<span>{{jobs.length}}</span>)
+              <!-- <paper-menu-button>
+                <paper-button class="dropdown-trigger" noink>                  
                   <iron-icon icon="expand-more"></iron-icon>
                 </paper-button>
-                <!--<paper-menu class="dropdown-content" selected="{{selectedIndex}}">-->
-                <!--  <template is="dom-repeat" items="[[companies]]">-->
-                <!--    <paper-item>[[item.name]]</paper-item>-->
-                <!--  </template>-->
-                <!--</paper-menu>-->
-              </paper-menu-button>
+                <paper-menu class="dropdown-content">
+                  <template is="dom-repeat" items="{{filters}}">
+                    <paper-item>aa</paper-item>
+                  </template>
+                  <hr>
+                </paper-menu>                
+              </paper-menu-button> -->
             </paper-tab>            
-            <paper-tab>MINE</paper-tab>
+            <paper-tab on-click="showMine">MINE&nbsp;(<span>{{mineJobsNum}}</span>)</paper-tab>
+            <paper-tab on-click="showOthers">OTHERS</paper-tab>
             <!-- <paper-tab>UNASSIGNED</paper-tab> -->
           </paper-tabs>
+          <div id="jobFilter">
+            <paper-button tabindex="0" id="showFilterButton" noink on-click="showFilter">
+              <span>Open Filter</span>
+              <iron-icon icon="expand-more"></iron-icon>
+            </paper-button>
+            <div id="filterWrapper">
+              <paper-input id="filterInput" label="Filter by order ID and name"></paper-input>
+              <paper-icon-button id="hideFilterButton" suffix on-click="hideFilter" icon="expand-less" alt="collapse"></paper-icon-button>
+            </div>
+          </div>
           <div id="newjob">
             <paper-button id="newjobButton" on-click="getUpdatedJobs" noink>You have <span>{{updateNum}}</span> new jobs.</paper-button>
           </div>
         </div>
-        <template is="dom-repeat" items="{{jobs}}" sort="sortJob">
+        <template is="dom-repeat" items="{{displayJobs}}" sort="sortJob">
           <job-card job="{{item}}" on-click="selectJob"></job-card>
         </template>
       </paper-header-panel>
@@ -75,7 +113,7 @@
           <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}"></app-main-header>
         </div>
         <div class="content">
-          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{jobs}}"></app-main-body>
+          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}"></app-main-body>
         </div>
       </paper-header-panel>
     </paper-drawer-panel>
@@ -88,7 +126,7 @@
       ready: function(){
         var interval = 30000,
             that = this;
-        setInterval(function(){that.getUpdateNum(localStorage.userId)}, interval);
+        // setInterval(function(){that.getUpdateNum(localStorage.userId)}, interval);        
       },
 
       getUpdateNum: function(userid){        
@@ -98,9 +136,7 @@
           headers: HEADER,
           method: 'POST',
           json: true,
-          body: {
-           
-          }
+          body: {}
         };
         request(options, function(error, response, body){
           console.log(response, body)
@@ -108,6 +144,8 @@
             if(!!body && !!body.count){
               that.updateNum = that.updateNum + body.count;
               if(body.count > 0){
+                that.$.showFilterButton.style.display = 'none';
+                that.$.filterWrapper.style.display = 'none';
                 that.$.newjob.style.display = 'block';
               }
               else{
@@ -123,7 +161,43 @@
       getUpdatedJobs: function(){
         this.domHost.getJobs();
         this.$.newjob.style.display = 'none';
+        this.$.showFilterButton.style.display = 'block';
+        this.$.filterWrapper.style.display = 'none';
         this.updateNum = 0;
+        this.leftTab = LEFTTABS.ALL;
+      },
+
+      showAll: function(){
+        console.log('this.prevTab', this.prevTab, LEFTTABS.ALL)
+        if(this.prevTab === LEFTTABS.ALL){
+          return;
+        }
+        this.prevTab = LEFTTABS.ALL;
+        this.displayJobs = this.allJobs;
+        this.selectedJob = this.displayJobs[0];
+        // this.getUpdatedJobs();
+      },
+
+      showMine: function(){
+        if(this.prevTab === LEFTTABS.MINE){
+          return;
+        }
+        this.prevTab = LEFTTABS.MINE;
+        this.displayJobs = this.mineJobs;
+        if(this.mineJobs.length > 0){
+          this.selectedJob = this.displayJobs[0];
+        }        
+      },
+
+      showOthers: function(){
+        if(this.prevTab === LEFTTABS.OTHERS){
+          return;
+        }
+        this.prevTab = LEFTTABS.OTHERS;
+        if(this.otherJobs.length > 0){
+          this.displayJobs = this.otherJobs;
+          this.selectedJob = this.displayJobs[0];
+        }        
       },
 
       selectJob: function(e){
@@ -175,20 +249,78 @@
       },      
 
       leftTabObserver: function(newValue, oldValue){
-        if(!!newValue && !!oldValue ){
-          if(newValue === LEFTTAB.ALL){
+        // console.log(newValue, oldValue)
+        // if(!!newValue && !!oldValue ){
+        //   this.prevTab = oldValue;
+        // }
+      },
 
+      jobsObserver: function(newValue, oldValue){
+        var that = this;
+        console.log('newValue, oldValue', newValue, oldValue)
+        if(!!newValue && !!oldValue){
+          this.mineJobs = [];
+          newValue.forEach(function(job){
+            if(job.assigneeId === localStorage.userId){
+              that.mineJobs.push(job);
+            }
+          });
+          this.allJobs = newValue;
+          // this.displayJobs = this.allJobs;
+          this.mineJobsNum = this.mineJobs.length;
+          this.otherJobs = [];
+          this.leftTab = this.setDefaultTab();          
+          if(this.leftTab === LEFTTABS.ALL.toString()){
+            this.showAll();
+            console.log('displayJobs', this.displayJobs)
           }
           else{
-
+            this.showMine();
           }
         }
+      },
+
+      showFilter: function(e){
+        this.$.showFilterButton.style.display = 'none';
+        this.$.filterWrapper.style.display = 'block';
+      },
+
+      hideFilter: function(e){
+        this.$.showFilterButton.style.display = 'block';
+        this.$.filterWrapper.style.display = 'none';
+      },
+
+      setDefaultTab: function(){
+        if(!!localStorage.defaultTab || localStorage.defaultTab === 0){
+          return localStorage.defaultTab;
+        }
+        return 0;
       },
 
       properties: {
         jobs:{
           type: Array,
-          notify: true
+          notify: true,
+          observer: 'jobsObserver'
+        },
+        allJobs: {
+          type: Array,
+          value: []
+        },
+        mineJobs: {
+          type: Array,
+          notify: true,
+          value: []
+        },
+        otherJobs: {
+          type: Array,
+          notify: true,
+          value: []
+        },
+        displayJobs: {
+          type: Array,
+          notify: true,
+          value: []
         },
         selectedJob: {
           type: Object,
@@ -202,10 +334,19 @@
         leftTab: {
           type: String,
           notify: true,
-          observer: 'leftTabObserver',
-          value: '0'
+          observer: 'leftTabObserver'
+        },
+        prevTab: {
+          type: String, 
+          notify: true,
+          value: ''
         },
         updateNum: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+        mineJobsNum:{
           type: Number,
           notify: true,
           value: 0
@@ -217,7 +358,21 @@
         companies: {
           type: Array,
           notify: true
-        }
+        },
+        filters: {
+          type: Array,
+          notify: true,
+          value: [
+            {
+              text: 'filter1',
+              filterText: '100000'
+            },
+            {
+              text: 'filter2',
+              filterText: '100005'
+            }
+          ]
+        }        
       }
     });
   </script>
