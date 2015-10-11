@@ -74,21 +74,9 @@
           <paper-tabs noink selected="{{leftTab}}">
             <paper-tab on-click="showAll">
               <span id="allTab">ALL</span>&nbsp;(<span>{{jobs.length}}</span>)
-              <!-- <paper-menu-button>
-                <paper-button class="dropdown-trigger" noink>                  
-                  <iron-icon icon="expand-more"></iron-icon>
-                </paper-button>
-                <paper-menu class="dropdown-content">
-                  <template is="dom-repeat" items="{{filters}}">
-                    <paper-item>aa</paper-item>
-                  </template>
-                  <hr>
-                </paper-menu>                
-              </paper-menu-button> -->
             </paper-tab>            
             <paper-tab on-click="showMine">MINE&nbsp;(<span>{{mineJobsNum}}</span>)</paper-tab>
             <paper-tab on-click="showOthers">OTHERS</paper-tab>
-            <!-- <paper-tab>UNASSIGNED</paper-tab> -->
           </paper-tabs>
           <div id="jobFilter">
             <paper-button tabindex="0" id="showFilterButton" noink on-click="showFilter">
@@ -96,7 +84,7 @@
               <iron-icon icon="expand-more"></iron-icon>
             </paper-button>
             <div id="filterWrapper">
-              <paper-input id="filterInput" label="Filter by order ID and name"></paper-input>
+              <paper-input id="filterInput" label="Filter by order ID and name" value="{{filterText}}"></paper-input>
               <paper-icon-button id="hideFilterButton" suffix on-click="hideFilter" icon="expand-less" alt="collapse"></paper-icon-button>
             </div>
           </div>
@@ -104,7 +92,7 @@
             <paper-button id="newjobButton" on-click="getUpdatedJobs" noink>You have <span>{{updateNum}}</span> new jobs.</paper-button>
           </div>
         </div>
-        <template is="dom-repeat" items="{{displayJobs}}" sort="sortJob">
+        <template  id="jobRepeat" is="dom-repeat" items="{{displayJobs}}" sort="sortJob" filter="filterJob" observe="name">
           <job-card job="{{item}}" on-click="selectJob"></job-card>
         </template>
       </paper-header-panel>
@@ -168,7 +156,6 @@
       },
 
       showAll: function(){
-        console.log('this.prevTab', this.prevTab, LEFTTABS.ALL)
         if(this.prevTab === LEFTTABS.ALL){
           return;
         }
@@ -297,6 +284,24 @@
         return 0;
       },
 
+      filterJob: function(item){
+        return item.name.indexOf(this.filterText) > -1;
+      },
+
+      filterChanged: function(newValue, oldValue){
+        if(!!newValue || (!!oldValue && newValue === '')){
+          this.$.jobRepeat.render();
+          var jobid = document.querySelector('.job-card.selected').getAttribute('data-jobid');
+          if(jobid !== this.selectedJob.jobId){
+            for(var i = 0; i < this.displayJobs.length; i++){
+              if(jobid === this.displayJobs[i].jobId){
+                this.selectedJob = this.displayJobs[i];
+              }
+            }
+          }
+        }
+      },
+    
       properties: {
         jobs:{
           type: Array,
@@ -372,6 +377,11 @@
               filterText: '100005'
             }
           ]
+        },
+        filterText: {
+          type: String,
+          notify: true,
+          observer: 'filterChanged'
         }        
       }
     });
