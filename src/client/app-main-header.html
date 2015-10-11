@@ -119,12 +119,6 @@
           value: 0
         }
       },
-      ready: function(){
-        
-        // var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7';
-        // var boxViewLib = require('../../node_modules/node-box-view');
-        // var boxView = new boxViewLib(myKey);
-      },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
           this.jobid = newValue.id;
@@ -142,7 +136,10 @@
           options = {
             url: RELATION_URL,
             headers:HEADER,
-            
+            method: 'POST',
+            json: true,
+            body: { 
+            }
           };
 
         request(options, function(error, response, body){

@@ -114,17 +114,22 @@
       ready: function(){
         var interval = 30000,
             that = this;
-        // setInterval(function(){that.getUpdateNum(localStorage.userId)}, interval);        
+        setInterval(function(){that.getUpdateNum(localStorage.userId)}, interval);        
       },
 
       getUpdateNum: function(userid){        
-        var that = this;
+        var that = this,
+            uid = this.leftTab === LEFTTABS.MINE ? userid : null;
+
         var options = {
           url: JOBREFRESH_URL,
           headers: HEADER,
           method: 'POST',
           json: true,
-          body: {}
+          body: {
+            'userId': uid,
+            'companyId': this.selectedCompany.id
+          }
         };
         request(options, function(error, response, body){
           console.log(response, body)
@@ -152,7 +157,9 @@
         this.$.showFilterButton.style.display = 'block';
         this.$.filterWrapper.style.display = 'none';
         this.updateNum = 0;
-        this.leftTab = LEFTTABS.ALL;
+        console.log('this.prevTab', this.prevTab);
+        this.leftTab = this.prevTab;
+        // this.leftTab = LEFTTABS.ALL;
       },
 
       showAll: function(){
@@ -244,7 +251,6 @@
 
       jobsObserver: function(newValue, oldValue){
         var that = this;
-        console.log('newValue, oldValue', newValue, oldValue)
         if(!!newValue && !!oldValue){
           this.mineJobs = [];
           newValue.forEach(function(job){
@@ -259,7 +265,6 @@
           this.leftTab = this.setDefaultTab();          
           if(this.leftTab === LEFTTABS.ALL.toString()){
             this.showAll();
-            console.log('displayJobs', this.displayJobs)
           }
           else{
             this.showMine();
@@ -291,7 +296,11 @@
       filterChanged: function(newValue, oldValue){
         if(!!newValue || (!!oldValue && newValue === '')){
           this.$.jobRepeat.render();
-          var jobid = document.querySelector('.job-card.selected').getAttribute('data-jobid');
+          var selectedJobCard = document.querySelector('.job-card.selected');
+          if(!selectedJobCard){
+            return;
+          }
+          var jobid = selectedJobCard.getAttribute('data-jobid');
           if(jobid !== this.selectedJob.jobId){
             for(var i = 0; i < this.displayJobs.length; i++){
               if(jobid === this.displayJobs[i].jobId){
