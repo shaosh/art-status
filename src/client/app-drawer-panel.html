@@ -98,7 +98,7 @@
       </paper-header-panel>
       <paper-header-panel main mode="standard">
         <div class="paper-header">
-          <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}"></app-main-header>
+          <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}" company="{{selectedCompany}}"></app-main-header>
         </div>
         <div class="content">
           <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}"></app-main-body>
@@ -114,7 +114,8 @@
       ready: function(){
         var interval = 30000,
             that = this;
-        setInterval(function(){that.getUpdateNum(localStorage.userId)}, interval);        
+        setInterval(function(){
+          that.getUpdateNum(localStorage.userId)}, interval);        
       },
 
       getUpdateNum: function(userid){        
@@ -157,9 +158,7 @@
         this.$.showFilterButton.style.display = 'block';
         this.$.filterWrapper.style.display = 'none';
         this.updateNum = 0;
-        console.log('this.prevTab', this.prevTab);
         this.leftTab = this.prevTab;
-        // this.leftTab = LEFTTABS.ALL;
       },
 
       showAll: function(){
@@ -169,6 +168,7 @@
         this.prevTab = LEFTTABS.ALL;
         this.displayJobs = this.allJobs;
         this.selectedJob = this.displayJobs[0];
+        // this.addSelectedBackground(selectedJob)
         // this.getUpdatedJobs();
       },
 
@@ -194,6 +194,15 @@
         }        
       },
 
+      setOthers: function(list, job){
+        if(list.length > 0){
+          this.displayJobs = list;
+          this.selectedJob = job;          
+        }
+        this.leftTab = LEFTTABS.OTHERS;
+        this.prevTab = LEFTTABS.OTHERS;
+      },
+
       selectJob: function(e){
         var card = Polymer.dom(e).localTarget.childNodes[1];
         if(card.classList.contains('selected')){
@@ -212,6 +221,33 @@
       },
 
       addSelectedClass: function(newValue, oldValue){
+        if(!!newValue){
+          this.addSelectedBackground(newValue.jobId);
+        }
+        
+        // var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
+        // if(typeof jobcards === 'undefined' || jobcards.length === 0){
+        //   return;
+        // }
+        
+        // for(var i = 0; i < jobcards.length; i++){
+        //   var idSpan = Polymer.dom(jobcards[i].childNodes[1]).querySelector('.jobid');
+        //   if(newValue.jobId === idSpan.getAttribute('data-jobid')){
+        //     if(jobcards[i].childNodes[1].classList.contains('selected')){
+        //     }
+        //     else{
+        //       this.unselectPrevJob();
+        //       jobcards[i].childNodes[1].toggleClass('selected');              
+        //     }
+        //     return;
+        //   }
+        // }
+        // this.unselectPrevJob();
+        // jobcards[0].childNodes[1].toggleClass('selected');
+      },
+
+      addSelectedBackground: function(jobid){
+        this.$.jobRepeat.render();
         var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
         if(typeof jobcards === 'undefined' || jobcards.length === 0){
           return;
@@ -219,7 +255,7 @@
         
         for(var i = 0; i < jobcards.length; i++){
           var idSpan = Polymer.dom(jobcards[i].childNodes[1]).querySelector('.jobid');
-          if(newValue.jobId === idSpan.getAttribute('data-jobid')){
+          if(jobid === idSpan.getAttribute('data-jobid')){
             if(jobcards[i].childNodes[1].classList.contains('selected')){
             }
             else{
