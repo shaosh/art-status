@@ -1,13 +1,15 @@
 <link rel="import" href="app-drawer-panel.html">
 <link rel="import" href="app-header.html">
+<link rel="import" href="login-modal.html">
 
 <dom-module id="app-page">
 	<template>
  		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}">
 	    <div class="content">
 	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" users="{{users}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
-	    </div>
+	    </div>      
 	  </app-header>
+    <login-modal></login-modal>
 	</template>
 
 	<script>
@@ -18,13 +20,18 @@
         var that = this;
         localStorage.username = 'kevin';
         localStorage.userId = '10d2b6a1c9894306b9da7251fece8932';
-        this.getCompanies().then(
-          function(){return that.getUsers();},
-          function(e){outputError(e);}
-        ).then(
-          function(){return that.getJobs();},
-          function(e){outputError(e);}
-        )
+        // if(!!localStorage.username && !!localStorage.userId){
+          this.getCompanies().then(
+            function(){return that.getUsers();},
+            function(e){outputError(e);}
+          ).then(
+            function(){return that.getJobs();},
+            function(e){outputError(e);}
+          );
+        // }
+        // else{
+        //   document.getElementById('login-modal').open();
+        // }        
       },            
 
       setOnHashChange: function(){

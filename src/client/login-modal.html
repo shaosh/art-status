@@ -1,15 +1,11 @@
 <dom-module id="login-modal">
 	<style>
 		paper-input{
-			min-width:800px;
+			min-width:300px;
 		}
 		paper-dialog{
-			width:80%;
-			height:80%;
-			max-height: 90%;
-			max-width: 90%;
-			position: absolute;
-			
+			width:50%;
+			height:50%;
 		}
 	</style>
 	<template>
@@ -21,7 +17,7 @@
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 			</paper-input>      
       <div class="buttons">
-        <paper-button dialog-confirm autofocus on-click="submit" id='submitButton'>Submit</paper-button>
+        <paper-button dialog-confirm autofocus on-click="submit" id='submitButton' disabled>Submit</paper-button>
       </div>
     </paper-dialog>
 	</template>
@@ -31,11 +27,13 @@
 			properties: {
 				userid:{
 					type: String,
-					notify: true
+					notify: true,
+					observer: 'checkEmptyInput'
 				},
 				password:{
 					type: String,
-					notify: true
+					notify: true,
+					observer: 'checkEmptyInput'
 				},
 				idErrMsg:{
 					type: String,
@@ -72,6 +70,14 @@
       },
       checkInput: function(){
       	return !!userid && !!password;
+      },
+      checkEmptyInput: function(){
+      	if(!!this.userid && !!this.password){
+					this.$.submitButton.removeAttribute('disabled');
+				}
+				else{
+					this.$.submitButton.setAttribute('disabled', true);
+				}
       }
 		})
 	</script>

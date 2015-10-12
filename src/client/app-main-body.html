@@ -1,10 +1,12 @@
 <link rel="import" href="alert-modal.html">
 <link rel="import" href="assign-modal.html">
+<link rel="import" href="msg-card.html">
 
 <dom-module id="app-main-body">
 	<style>
-		.container{
+		#mainContainer, #msgContainer{
 			padding: 20px 20px 0 20px;
+      display: none;
 		}
     paper-card{
       width: 100%;
@@ -122,7 +124,7 @@
     }
 	</style>
 	<template>
-		<div class="container">
+		<div id="mainContainer">
       <paper-card>
         <div class="card-content" style="text-align:left">
           <paper-button tabindex="0" id="showCommentButton" noink on-click="showCommentBox">Add a comment</paper-button>
@@ -181,6 +183,11 @@
 			</div>
       <paper-toast id="toast" text="{{toastText}}"></paper-toast>
 		</div>
+    <div id="msgContainer">
+      <template  id="msgRepeat" is="dom-repeat" items="{{colleagues}}">
+        <msg-card colleague="{{item}}"></msg-card>
+      </template>
+    </div>
     <alert-modal></alert-modal>
     <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}"></assign-modal>
     <paper-dialog id="change-modal" modal>
@@ -323,6 +330,42 @@
           type: String,
           notify: true,
           observer: 'commentTextObserver'
+        }, 
+        colleagues: {
+          type: Array, 
+          notify: true,
+          value: [
+            {
+              name: 'Jessie',
+              title: 'Customer Service',
+              online: 'true',
+              id: '0'
+            },
+            {
+              name: 'Matt',
+              title: 'Production Manager',
+              online: 'false',
+              id: '1'
+            },
+            {
+              name: 'Sarah',
+              title: 'COO',
+              online: 'true',
+              id: '2'
+            },
+            {
+              name: 'John',
+              title: 'Boss',
+              online: 'false',
+              id: '3'
+            },
+            {
+              name: 'Karisa',
+              title: 'Designer',
+              online: 'true',
+              id: '4'
+            }
+          ]
         }
       },      
       ready: function(){
@@ -595,6 +638,13 @@
           input.onchange = function(){
             that.enableUploadButton(input, 'proofUploadButton');
           };
+        }
+
+        if(newValue === TABS.MESSAGE){
+          this.showMsgContainer();
+        }       
+        else{
+          this.showMainContainer();
         }
       },
       enableUploadButton: function(input, buttonId){
@@ -903,6 +953,14 @@
       },
       sortCard: function(a, b){
         return moment(b.updatedAt).diff(moment(a.updatedAt));
+      },
+      showMainContainer: function(){
+        this.$.msgContainer.style.display = 'none';
+        this.$.mainContainer.style.display = 'block';
+      },
+      showMsgContainer: function(){
+        this.$.mainContainer.style.display = 'none';
+        this.$.msgContainer.style.display = 'block';
       }
     });
 	</script>

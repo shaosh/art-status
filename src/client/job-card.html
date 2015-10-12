@@ -134,7 +134,7 @@
             avatar.style.backgroundImage = 'url(' + newValue.avatarurl + ')';
           }
           else if(!!this.username){
-            avatar.style.background = '#' + Math.random().toString(16).slice(-6);
+            avatar.style.background = '#' + simpleHash(this.username).toString(16).slice(-6);
             this.firstchar = this.username.charAt(0).toUpperCase();
           }
           else{
