@@ -7,17 +7,22 @@
 			width:50%;
 			height:50%;
 		}
+		#errMsg{
+			display: none;
+			color: red;
+		}
 	</style>
 	<template>
 		<paper-dialog id="login-modal" modal>
-			<paper-input id="idInput" label="User ID" value="{{userid}}" error-message="{{idErrMsg}}" on-keypress="keySubmit">
+			<paper-input id="idInput" label="User ID/Email" value="{{userid}}" error-message="{{idErrMsg}}" on-keypress="keySubmit">
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 			</paper-input>
 			<paper-input id="pwInput" label="Password" type="password" value="{{password}}" error-message="{{pwErrMsg}}" on-keypress="keySubmit">
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
-			</paper-input>      
+			</paper-input>
+			<div id="errMsg">Failed to authenticate</div>      
       <div class="buttons">
-        <paper-button dialog-confirm autofocus on-click="submit" id='submitButton' disabled>Submit</paper-button>
+        <paper-button autofocus on-click="submit" id='submitButton' disabled>Submit</paper-button>
       </div>
     </paper-dialog>
 	</template>
@@ -57,20 +62,59 @@
       		this.submit();
       	}
       },
-      submit: function(e){
-      	if(checkInput()){
-      		return;
-      	}
-      	if(!userid){
-      		idErrMsg = 'Please enter your user ID';
-      	}
-      	if(!password){
-      		pwErrMsg = 'Please enter your user password';
-      	}
+      submit: function(){
+      	var isEmail = validator.isEmail(this.userid),
+      			password = crypt.createHmac("sha1", this.password).digest("base64"),
+      			username = isEmail ? null : this.userid,
+      			email = isEmail ? this.userid : null,
+      			that = this,
+      			options = {
+	            url: LOGIN_URL,
+	            headers:HEADER,
+	            method: 'POST',
+	            json: true,
+	            body: { 
+	              "username": username,
+				        "password": password,
+				        "email": email
+	            }
+	      		};
+	      console.log('pw', password)
+	      request(options, function(error, response, body){
+            console.log('login', body);            
+            if(!error && response.statusCode === 200){
+              if(!!body && !!body.login){
+                localStorage.username = body.username;
+        				localStorage.userId = body.userId;
+        				localStorage.userEmail = body.email;
+        				that.domHost.getData();
+        				that.domHost.setUsername(body.username);
+        				 document.getElementById('login-modal').close();
+              }
+              else{
+                that.$.errMsg.style.display = 'block';
+              }
+            }
+            else{
+            	that.$.errMsg.style.display = 'block';
+              outputError(!!error ? 'Login Error' + error : response.statusCode);
+            }
+          }
+        );
+
+      	// if(checkInput()){
+      	// 	return;
+      	// }
+      	// if(!userid){
+      	// 	idErrMsg = 'Please enter your user ID';
+      	// }
+      	// if(!password){
+      	// 	pwErrMsg = 'Please enter your user password';
+      	// }
       },
-      checkInput: function(){
-      	return !!userid && !!password;
-      },
+      // checkInput: function(){
+      // 	return !!userid && !!password;
+      // },
       checkEmptyInput: function(){
       	if(!!this.userid && !!this.password){
 					this.$.submitButton.removeAttribute('disabled');

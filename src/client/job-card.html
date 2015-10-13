@@ -153,9 +153,12 @@
 
           var interval = 60000, 
               that = this;
-          // setInterval(function(){
-          //   that.fromnow = moment(newValue.updatedAt).fromNow();
-          // }, interval);
+
+          var updateTime = function(){
+            that.fromnow = moment(newValue.updatedAt).fromNow();
+            console.log(that.fromnow);
+          };
+          setIntervalByTimeout(updateTime, interval);
         }
       } 
     })

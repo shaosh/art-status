@@ -3,8 +3,25 @@
 <link rel="import" href="login-modal.html">
 
 <dom-module id="app-page">
+  <style>
+    #globalDrawerPanel{
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+    }
+  </style>
+
 	<template>
- 		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}">
+    <!-- <paper-drawer-panel id="globalDrawerPanel">
+      <div drawer style="display:none"></div>
+      <div main>
+        <div>
+          <paper-button on-click="flipDrawer" raised>flip drawer</paper-button>
+        </div>
+      </div>
+    </paper-drawer-panel> -->
+ 		<app-header companies="{{companies}}" selected-company="{{selectedCompany}}" username="{{username}}">
 	    <div class="content">
 	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" users="{{users}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
 	    </div>      
@@ -16,23 +33,56 @@
     Polymer({
       is: 'app-page',
       
+      
+      // flipDrawer: function() {
+      //   var DRAWER_ATTR = 'right-drawer';
+      //   this.$.globalDrawerPanel.closeDrawer();
+      //   // var pdp = document.getElementById('globalDrawerPanel');
+      //   // if(pdp.style.display === 'none'){
+      //   //   pdp.style.display = 'block'
+      //   // }
+      //   // else{
+      //   //   pdp.style.display === 'none'
+      //   // }
+      // },
+
       ready: function(){
         var that = this;
-        localStorage.username = 'kevin';
-        localStorage.userId = '10d2b6a1c9894306b9da7251fece8932';
+        if(!!localStorage.username && !!localStorage.userId){
+          if(!this.username){
+            this.username = localStorage.username;
+          }
+          this.getData();
+        }
+        else{
+          document.getElementById('login-modal').open();
+        }
+        // localStorage.username = 'kevin';
+        // localStorage.userId = '10d2b6a1c9894306b9da7251fece8932';
         // if(!!localStorage.username && !!localStorage.userId){
-          this.getCompanies().then(
-            function(){return that.getUsers();},
-            function(e){outputError(e);}
-          ).then(
-            function(){return that.getJobs();},
-            function(e){outputError(e);}
-          );
+          // this.getCompanies().then(
+          //   function(){return that.getUsers();},
+          //   function(e){outputError(e);}
+          // ).then(
+          //   function(){return that.getJobs();},
+          //   function(e){outputError(e);}
+          // );
         // }
         // else{
         //   document.getElementById('login-modal').open();
         // }        
-      },            
+      },        
+
+      getData: function(){
+        var that = this;
+        this.getCompanies().then(
+          function(){return that.getUsers();},
+          function(e){outputError(e);}
+        ).then(
+          function(){return that.getJobs();},
+          function(e){outputError(e);}
+        );
+      },    
 
       setOnHashChange: function(){
       	var fn = function(obj){
@@ -224,6 +274,10 @@
         return moment(b.updatedAt).diff(moment(a.updatedAt));
       },
 
+      setUsername: function(name){
+        this.username = name;
+      },
+
       properties: {
         selectedCompany: {
           type: Object,          
@@ -260,6 +314,10 @@
         expectedHash:{
           type: String,
           value: ''
+        },
+        username: {
+          type: String,
+          notify: true
         }
       }
     });

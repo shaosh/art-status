@@ -92,7 +92,9 @@
         fileExists = require('../../node_modules/file-exists'),
         pathExists = require('../../node_modules/path-exists'),
         cmd = require('child_process'),
-        chokidar = require('../../node_modules/chokidar');
+        chokidar = require('../../node_modules/chokidar'),
+        validator = require('../../node_modules/validator'),
+        crypt = require('crypto'); //Chrome has a variable called crypto, so must use another name
 
     var dict = [];
     dict['working'] = 1;
@@ -113,6 +115,15 @@
         hash = hash & hash;
       }
       return hash;
+    };
+
+    var setIntervalByTimeout = function(fn, interval){
+      setTimeout(
+        function(){
+          fn();
+          setTimeout(arguments.callee, interval);
+        }, interval
+      );
     };
   </script>
   <app-page></app-page>

@@ -396,29 +396,39 @@
             this.$.reopenWrapper.style.display = 'none';
           }
 
-          var options = {
-            url: CARD_URL.replace('{jobId}', this.jobid),
-            headers: HEADER
-          };
+          this.getCards();
 
-          request(options, function(error, response, body){
-            var obj = JSON.parse(body);
-            console.log('cards', obj);
-            if(!error && response.statusCode === 200){
-              if(!!obj && !!obj.cards && obj.cards.length > 0){
-                that.processCards(obj.cards);
-              }
-              else if(!!obj && !!obj.cards && obj.cards.length === 0){
-                that.cards = [];
-                that.$$('.uploadPanel').style.display = 'block';
-                that.$$('.viewPanel').style.display = 'none';
-              }
-            }
-            else{
-              outputError(!!error ? 'GetCards Error' + error : response.statusCode);
-            }
-          });
+          var interval = 60000;
+
+          setIntervalByTimeout(this.getCards, interval);
+          // setInterval(function(){
+          //   that.getCards()}, interval);
         }
+      },
+      getCards: function(){
+        var options = {
+          url: CARD_URL.replace('{jobId}', this.jobid),
+          headers: HEADER
+        },
+          that = this;
+
+        request(options, function(error, response, body){
+          var obj = JSON.parse(body);
+          console.log('cards', obj);
+          if(!error && response.statusCode === 200){
+            if(!!obj && !!obj.cards && obj.cards.length > 0){
+              that.processCards(obj.cards);
+            }
+            else if(!!obj && !!obj.cards && obj.cards.length === 0){
+              that.cards = [];
+              that.$$('.uploadPanel').style.display = 'block';
+              that.$$('.viewPanel').style.display = 'none';
+            }
+          }
+          else{
+            outputError(!!error ? 'GetCards Error' + error : response.statusCode);
+          }
+        });
       },
       showCommentBox: function(){
         this.$.showCommentButton.style.display = 'none';

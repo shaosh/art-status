@@ -7,10 +7,10 @@
         "email": "admin-art@designashirt.com" // username or email can only choose one
       },
       "response": {
-        "userId": {
-          "type": "string"
+        "login": {
+          "type": "boolean"
         },
-        "token": {
+        "userId": {
           "type": "string"
         },
         "username": {
@@ -21,9 +21,6 @@
         },
         "imageUrl": {
           "type": "string"
-        },
-        "online": {
-          "type": "boolean"
         },
         "createdAt": {
           "type": "date"

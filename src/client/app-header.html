@@ -24,9 +24,13 @@
           <company-selector companies="{{companies}}" selected-company="{{selectedCompany}}"></company-selector>
         </div>
         <div>
+          <span>{{username}}</span>
           <paper-icon-button icon="settings" id="settingsIcon" onclick="clickHandler(event)" data-dialog="setting-modal"></paper-icon-button>
           <paper-tooltip for="settingsIcon">Settings</paper-tooltip>
-          <paper-icon-button icon="social:notifications-none"></paper-icon-button>
+          <paper-icon-button icon="social:notifications-none" id="notifIcon"></paper-icon-button>
+          <paper-tooltip for="notifIcon">Notifications</paper-tooltip>
+          <paper-icon-button icon="exit-to-app" id="logoutIcon"></paper-icon-button>
+          <paper-tooltip for="logoutIcon">Log Out</paper-tooltip>
         </div>
       </paper-toolbar>
       <content></content>
