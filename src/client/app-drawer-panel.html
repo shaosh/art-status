@@ -111,10 +111,6 @@
     Polymer({
       is: 'app-drawer-panel',
 
-      ready: function(){
-               
-      },
-
       getUpdateNum: function(userid){        
         var that = this,
             uid = this.leftTab === LEFTTABS.MINE ? userid : null;
@@ -125,12 +121,13 @@
           method: 'POST',
           json: true,
           body: {
-            'userId': uid,
-            'companyId': this.selectedCompany.id
+            'companyId': this.selectedCompany.id,
+            'userId': uid            
           }
         };
+        console.log('companyId', this.selectedCompany.id);
         request(options, function(error, response, body){
-          console.log(response, body)
+          console.log('refresh', body)
           if(!error && response.statusCode === 200){
             if(!!body && !!body.count){
               that.updateNum = that.updateNum + body.count;
@@ -158,25 +155,33 @@
         this.leftTab = this.prevTab;
       },
 
-      showAll: function(){
-        if(this.prevTab === LEFTTABS.ALL){
+      showAll: function(companyChanged){
+        if(this.prevTab === LEFTTABS.ALL && companyChanged !== true){
+          this.displayJobs = this.allJobs;
+          this.selectedJob = this.selectedJob || this.displayJobs[0];
+          this.addSelectedBackground(this.selectedJob.jobId);
+          // this.$.jobRepeat.render();
+          console.log('showall return', this.allJobs)
           return;
         }
         this.prevTab = LEFTTABS.ALL;
+        console.log('showall this.alljobs.length', this.allJobs)
         this.displayJobs = this.allJobs;
-        this.selectedJob = this.displayJobs[0];
-        // this.addSelectedBackground(selectedJob)
+        this.selectedJob = this.selectedJob || this.displayJobs[0];
+        this.addSelectedBackground(this.selectedJob.jobId);
         // this.getUpdatedJobs();
       },
 
-      showMine: function(){
-        if(this.prevTab === LEFTTABS.MINE){
+      showMine: function(companyChanged){
+        if(this.prevTab === LEFTTABS.MINE && companyChanged !== true){
+          this.displayJobs = this.mineJobs;
+          this.selectedJob = this.selectedJob || this.displayJobs[0];
           return;
         }
         this.prevTab = LEFTTABS.MINE;
         this.displayJobs = this.mineJobs;
         if(this.mineJobs.length > 0){
-          this.selectedJob = this.displayJobs[0];
+          this.selectedJob = this.selectedJob || this.displayJobs[0];
         }        
       },
 
@@ -187,14 +192,15 @@
         this.prevTab = LEFTTABS.OTHERS;
         if(this.otherJobs.length > 0){
           this.displayJobs = this.otherJobs;
-          this.selectedJob = this.displayJobs[0];
+          this.selectedJob = this.selectedJob || this.displayJobs[0];
         }        
       },
 
       setOthers: function(list, job){
         if(list.length > 0){
           this.displayJobs = list;
-          this.selectedJob = job;          
+          this.selectedJob = job;  
+          this.addSelectedBackground(job.jobId);        
         }
         this.leftTab = LEFTTABS.OTHERS;
         this.prevTab = LEFTTABS.OTHERS;
@@ -209,7 +215,7 @@
         this.unselectPrevJob();
         card.toggleClass('selected');
         this.selectedJob = e.model.item;
-        this.selectedTab = 0;
+        // this.selectedTab = 0;
         window.location.hash = '#/' + this.selectedCompany.company + '/' + this.selectedJob.jobId;     
       },      
 
@@ -273,18 +279,18 @@
             jobcard.childNodes[1].toggleClass('selected', false);
           });
         }
-      },      
-
-      leftTabObserver: function(newValue, oldValue){
-        // console.log(newValue, oldValue)
-        // if(!!newValue && !!oldValue ){
-        //   this.prevTab = oldValue;
-        // }
-      },
+      },     
+      changeCompany: function(newValue, oldValue){
+        console.log('newValue, oldValue', newValue, oldValue)
+        if((!!newValue && !oldValue) || (!!newValue && !!oldValue && newValue.id !== oldValue.id)){
+          this.loadDefaultTab = true;
+        }
+        console.log('this.loadDefaultTab', this.loadDefaultTab)
+      }, 
 
       jobsObserver: function(newValue, oldValue){
         var that = this,
-            interval = 60000;
+            interval = 20000;        
         if(!!newValue && !!oldValue){
           this.mineJobs = [];
           newValue.forEach(function(job){
@@ -295,20 +301,50 @@
           this.allJobs = newValue;
           // this.displayJobs = this.allJobs;
           this.mineJobsNum = this.mineJobs.length;
-          this.otherJobs = [];
-          this.leftTab = this.setDefaultTab();          
-          if(this.leftTab === LEFTTABS.ALL.toString()){
+          if(!!this.loadDefaultTab){
+            this.leftTab = this.setDefaultTab(); 
+            this.otherJobs = [];         
+            if(this.leftTab === LEFTTABS.ALL.toString()){
+              this.showAll(true);
+            }
+            else{
+              this.showMine(true);
+            }
+            this.loadDefaultTab = false;
+          }
+          else if(this.leftTab === LEFTTABS.ALL){
+            console.log(11112222)
             this.showAll();
           }
-          else{
+          else if(this.leftTab === LEFTTABS.MINE){
+            console.log(11113333)
             this.showMine();
           }
+          else if(this.leftTab === LEFTTABS.OTHERS){
+            console.log(11114444)
+            this.showOthers();
+          }
+
+          // this.otherJobs = [];
+          // this.leftTab = this.setDefaultTab();          
+          // if(this.leftTab === LEFTTABS.ALL.toString()){
+          //   this.showAll();
+          // }
+          // else{
+          //   this.showMine();
+          // }
+
+          if(!this.refreshRunning){
+            setIntervalByTimeout(
+              function(){that.getUpdateNum(localStorage.userId)}, interval
+            );
+            this.refreshRunning = true;
+          }
           
-          setIntervalByTimeout(function(){
-            that.getUpdateNum(localStorage.userId)}, interval);
+          
           // setInterval(function(){
           //   that.getUpdateNum(localStorage.userId)}, interval); 
-          // }
+        }
       },
 
       showFilter: function(e){
@@ -386,8 +422,7 @@
         },
         leftTab: {
           type: String,
-          notify: true,
-          observer: 'leftTabObserver'
+          notify: true
         },
         prevTab: {
           type: String, 
@@ -412,6 +447,16 @@
           type: Array,
           notify: true
         },
+        selectedCompany: {
+          type: Object,
+          notify: true,
+          observer: 'changeCompany'
+        },
+        loadDefaultTab: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
         filters: {
           type: Array,
           notify: true,
@@ -430,7 +475,12 @@
           type: String,
           notify: true,
           observer: 'filterChanged'
-        }        
+        },
+        refreshRunning: {
+          type: Boolean,
+          notify: true,
+          value: false
+        }      
       }
     });
   </script>

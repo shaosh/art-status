@@ -23,6 +23,7 @@
 			<div id="errMsg">Failed to authenticate</div>      
       <div class="buttons">
         <paper-button autofocus on-click="submit" id='submitButton' disabled>Submit</paper-button>
+        <paper-button autofocus dialog-dismiss id="loginCloseButton">Close</paper-button>
       </div>
     </paper-dialog>
 	</template>
@@ -79,17 +80,19 @@
 				        "email": email
 	            }
 	      		};
-	      console.log('pw', password)
 	      request(options, function(error, response, body){
-            console.log('login', body);            
             if(!error && response.statusCode === 200){
               if(!!body && !!body.login){
                 localStorage.username = body.username;
         				localStorage.userId = body.userId;
         				localStorage.userEmail = body.email;
+        				localStorage.loginTime = moment();
         				that.domHost.getData();
         				that.domHost.setUsername(body.username);
-        				 document.getElementById('login-modal').close();
+        				document.getElementById('loginCloseButton').removeAttribute('disabled');
+        				that.$.errMsg.style.display = 'none';
+        				that.password = '';
+        				document.getElementById('login-modal').close();
               }
               else{
                 that.$.errMsg.style.display = 'block';

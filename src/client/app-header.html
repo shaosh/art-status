@@ -11,25 +11,40 @@
       box-sizing:content-box;
       border-bottom: #132584 1px solid;
     }
+
+   /* paper-item{
+      overflow:hidden;
+      display:block;
+      padding-top:8px;
+    }
+    paper-item iron-icon{
+      float:right;
+      display:inline-block;
+    }*/
 	</style>
 	
   <template>
     <paper-header-panel mode="seamed">
       <paper-toolbar>
-        <paper-menu-button>
+        <div>{{username}}</div>
+        <!-- <paper-menu-button>
           <paper-icon-button icon="menu" class="dropdown-trigger"></paper-icon-button>
-          <paper-menu class="dropdown-content"></paper-menu>
-        </paper-menu-button>
+          <paper-menu class="dropdown-content">
+            <paper-item>Change User<iron-icon icon="swap-horiz"></iron-icon></paper-item>
+            <paper-item>Logout<iron-icon icon="exit-to-app"></iron-icon></paper-item>
+          </paper-menu>
+        </paper-menu-button> -->
     	  <div class="horizontal-center">
           <company-selector companies="{{companies}}" selected-company="{{selectedCompany}}"></company-selector>
         </div>
-        <div>
-          <span>{{username}}</span>
+        <div>          
           <paper-icon-button icon="settings" id="settingsIcon" onclick="clickHandler(event)" data-dialog="setting-modal"></paper-icon-button>
           <paper-tooltip for="settingsIcon">Settings</paper-tooltip>
-          <paper-icon-button icon="social:notifications-none" id="notifIcon"></paper-icon-button>
-          <paper-tooltip for="notifIcon">Notifications</paper-tooltip>
-          <paper-icon-button icon="exit-to-app" id="logoutIcon"></paper-icon-button>
+          <!-- <paper-icon-button icon="social:notifications-none" id="notifIcon"></paper-icon-button>
+          <paper-tooltip for="notifIcon">Notifications</paper-tooltip> -->
+          <paper-icon-button icon="swap-horiz" id="changeuserIcon" on-click="openLogin"></paper-icon-button>
+          <paper-tooltip for="changeuserIcon">Change User</paper-tooltip>
+          <paper-icon-button icon="exit-to-app" id="logoutIcon"  on-click="logout"></paper-icon-button>
           <paper-tooltip for="logoutIcon">Log Out</paper-tooltip>
         </div>
       </paper-toolbar>
@@ -55,7 +70,20 @@
     }
    
     Polymer({
-      is: 'app-header'
+      is: 'app-header',
+      openLogin: function(){
+        document.getElementById('login-modal').open();        
+      },
+      logout: function(){
+        localStorage.loginTime = '';
+        localStorage.userId = '';
+        localStorage.username = '';
+        document.getElementById('login-modal').open();
+        document.getElementById('loginCloseButton').setAttribute('disabled', true);
+        for(var i = 0; i < timeouts.length; i++){
+          clearTimeout(timeouts[i]);
+        }
+      }
     });    
   </script>
 </dom-module>

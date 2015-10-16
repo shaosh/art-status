@@ -46,7 +46,7 @@
     }
     .onlineIcon, .offlineIcon{
     	margin-left:50px;
-    	/*display: none;*/
+    	display: none;
     }
     .onlineIcon{
     	color: #66DA48;
@@ -106,7 +106,6 @@
         }
       },
       setCardData: function(newValue, oldValue){
-      	console.log('newValue', newValue)
       	if(!!newValue){
       		this.name = newValue.name;
       		this.firstchar = this.name.charAt(0).toUpperCase();
@@ -124,7 +123,6 @@
       			this.$$('.offlineIcon').style.display = 'inline-block';
       			this.$$('.chatIcon').style.color = '#FF6464'; 
       		}
-      		// this.$$('.msgCard').render();
       	}
       }
     })

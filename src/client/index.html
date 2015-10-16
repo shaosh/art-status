@@ -64,7 +64,7 @@
     };
 
     const XAPIKEY = 'qqX3C5Ph1M8Eo2yLkcAZh2k4Luh3gCMj24EtEjsr';
-    const APIURL_BASE = 'https://cz0cog7rt2.execute-api.us-east-1.amazonaws.com/v2';
+    const APIURL_BASE = 'https://ww9m9v1irg.execute-api.us-east-1.amazonaws.com/v1';
     const LOGIN_URL = APIURL_BASE + '/art/login';
     const GETJOBS_URL = APIURL_BASE + '/job';
     const JOBREFRESH_URL = APIURL_BASE + '/job/refresh';
@@ -117,13 +117,15 @@
       return hash;
     };
 
+    var timeouts = [];
     var setIntervalByTimeout = function(fn, interval){
-      setTimeout(
+      var timeout = setTimeout(
         function(){
           fn();
           setTimeout(arguments.callee, interval);
         }, interval
       );
+      timeouts.push(timeout);
     };
   </script>
   <app-page></app-page>

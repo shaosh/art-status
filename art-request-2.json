@@ -54,6 +54,30 @@
       }
     }
   },
+  "/art/lostpwd": {
+    "method": "post",
+    "request-body": {
+      "email": "admin-art@designashirt.com"
+    },
+    "response": {
+      "create": {
+        "type": "boolean"
+      }
+    }
+  },
+  "/art/resetpwd": {
+    "method": "post",
+    "request-body": {
+      "email": "admin-art@designashirt.com",
+      "oldpwd": "gjaI2vynOT0kyHGi2pioTYcy6Sc=",
+      "newpwd": "sdfI2vynOT0kyHGi2pioTYcy78bd"
+    },
+    "response": {
+      "reset": {
+        "type": "boolean"
+      }
+    }
+  },
   "/art/companies": {// get companies' list
     "method": "get",
     "response": [{
@@ -129,8 +153,8 @@
   "/job/{userId}/follow": { // follow/unfollow a job
       "method": "post",
       "request-body": {
-        "jobId": "367a99bd7a594904a49afa52d35a74d4",   //required
-        "follow": true // unfollow is false            //required
+        "jobId": "367a99bd7a594904a49afa52d35a74d4",
+        "follow": true // unfollow is false
       },
       "response": {
         "jobId": {
@@ -149,10 +173,7 @@
   },
   "/job/card/{jobId}": { // add new card or get card details
       "1": {
-        "method": "put",
-        "request-body": {
-          "userId": "57jil99bd7a594904a49afa52d35a74d4"
-        },
+        "method": "get",
         "response": {
           "name": { // cart title
             "type": "string"
@@ -200,20 +221,6 @@
                 "type": "string"
               },
               "imageUrl": {// follower
-                "type": "string"
-              }
-            }
-          },
-          "viewers": {
-            "type": "array",
-            "items": {
-              "userId": {
-                "type": "string"
-              },
-              "username": {// viewer
-                "type": "string"
-              },
-              "email": {// viewer
                 "type": "string"
               }
             }
