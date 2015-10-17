@@ -149,14 +149,14 @@
           <p>Task Status: <span>{{status}}</span></p>                  
         </div>
       </paper-card>
-			<div class="uploadPanel" style="display:none">
+			<!-- <div class="uploadPanel" style="display:none">
         <custom-validator id="imageurlValidator" validator-name="imageurlValidator"></custom-validator>
 				<paper-input id="imageurlInput" label="Add the url of the first image..." value="{{imageurl}}" on-keypress="upload" auto-validate error-message="{{imageurlErrMsg}}" validator='imageurlValidator'>
 					<paper-icon-button id="clearIcon" suffix onclick="clearInput()" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 				</paper-input>
         <img class="loading" src="img/loading.gif" />
-			</div>
-			<div class="viewPanel" style="display:none">   
+			</div> -->
+			<div class="viewPanel">   
         <template is="dom-repeat" items="{{cards}}" sort="sortCard">
           <paper-card class="cardItem" >
             <div class="header">
@@ -188,7 +188,7 @@
         <msg-card colleague="{{item}}"></msg-card>
       </template>
     </div>
-    <alert-modal></alert-modal>
+    <alert-modal text="{{alertText}}"></alert-modal>
     <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}"></assign-modal>
     <paper-dialog id="change-modal" modal>
       <h2>Changes Detected</h2>
@@ -217,7 +217,7 @@
 	</template>
 	<script>
 		function clearInput() {
-      document.getElementById('imageurlInput').value = '';
+      // document.getElementById('imageurlInput').value = '';
     }    
     var boxViewLib = require('../../node_modules/node-box-view');
 
@@ -336,6 +336,11 @@
           notify: true,
           value: false
         },
+        alertText: {
+          type: String,
+          notify: true,
+          value: ''
+        },
         colleagues: {
           type: Array, 
           notify: true,
@@ -373,9 +378,9 @@
           ]
         }
       },      
-      ready: function(){
-        this.$.imageurlValidator.validate = this._validateImageurl.bind(this);    
-      },
+      // ready: function(){
+      //   this.$.imageurlValidator.validate = this._validateImageurl.bind(this);    
+      // },
       openChangeModal: function(filepath){
         var dialog = document.getElementById('change-modal');
         if (dialog) {
@@ -400,8 +405,9 @@
             this.$.showCommentButton.style.display = 'block';
             this.$.reopenWrapper.style.display = 'none';
           }
-
-          this.getCards();
+          if(!oldValue || newValue.jobId !== oldValue.jobId){
+            this.getCards();
+          }          
 
           var interval = 60000;
 
@@ -436,14 +442,56 @@
             }
             else if(!!obj && !!obj.cards && obj.cards.length === 0){
               that.cards = [];
-              that.$$('.uploadPanel').style.display = 'block';
-              that.$$('.viewPanel').style.display = 'none';
+              // that.$$('.uploadPanel').style.display = 'block';
+              // that.$$('.viewPanel').style.display = 'none';
             }
           }
           else{
             outputError('GetCards Error: ' + !!error ?  error : response.statusCode);
           }
         });
+      },
+      getCurrJob: function(){
+        var that = this,
+            defer = Q.defer();
+        var options = {
+          url: CARD_URL.replace('{jobId}', this.jobid),
+          headers: HEADER,
+          method: 'PUT',
+          json: true,
+          body: {  
+            'userId': localStorage.userId
+          }
+        };
+        request(options, function(error, response, body){
+          if(!error && response.statusCode === 200){
+            defer.resolve(body);
+          }
+          else{
+            outputError('GetCurrJob Error: ' + !!error ?  error : response.statusCode);
+            defer.reject('GetCurrJob Error: ' + !!error ?  error : response.statusCode)
+          }
+        });
+        return defer.promise;
+      },
+      getLock: function(){
+        var that = this,
+            defer = Q.defer();
+        var options = {
+          url: LOCK_URL.replace('{jobId}', this.jobid),
+          headers: HEADER,
+          json: true 
+        };
+        request(options, function(error, response, body){
+          if(!error && response.statusCode === 200){
+            defer.resolve(body);
+          }
+          else{
+            outputError('GetLock Error: ' + !!error ?  error : response.statusCode);
+            defer.reject('GetLock Error: ' + !!error ?  error : response.statusCode)
+          }
+        });
+        return defer.promise;
       },
       showCommentBox: function(){
         this.$.showCommentButton.style.display = 'none';
@@ -458,15 +506,15 @@
         }
       },
       submitComment: function(e){
-        this.addCard(STEPS.COMMENT, this.commentText, '', REVIEW.APPROVE, dict[this.status.toLowerCase()], '');  
+        this.addCard(STEPS.COMMENT, this.commentText, '', null, dict[this.status.toLowerCase()], '');  
         this.commentText = '';
       },
       closeJob: function(e){
-        this.addCard(STEPS.DONE, this.commentText, '', REVIEW.APPROVE, STATUSES.DONE, '');  
+        this.addCard(STEPS.DONE, this.commentText, '', null, STATUSES.DONE, '');  
         this.commentText = ''; 
       },
       reopenJob: function(e){
-        this.addCard(STEPS.REOPENED, this.commentText, '', REVIEW.APPROVE, STATUSES.WORKING, '');  
+        this.addCard(STEPS.REOPENED, this.commentText, '', null, STATUSES.WORKING, '');  
         this.commentText = ''; 
       },
       approveArt: function(e){
@@ -605,7 +653,7 @@
           if(!!item.documentId){
             count++;
             item.version = count;
-            item.display = 'display:block';
+            // item.display = 'display:block';
             promiseList.push(that._getSession(item.documentId, item));
           }          
         });        
@@ -619,19 +667,20 @@
             }
           });          
         }).done(function(){
-          if(list.length === 0){
-            that.$$('.uploadPanel').style.display = 'block';
-            that.$$('.viewPanel').style.display = 'none';
-          }
-          else{              
+          // if(list.length === 0){
+          //   that.$$('.uploadPanel').style.display = 'block';
+          //   that.$$('.viewPanel').style.display = 'none';
+          // }
+          if(list.length > 0){
+            that.turnOnCardAction(list);              
             that.cards = list;
             that.$$('.viewPanel').style.display = 'block';
-            that.$$('.uploadPanel').style.display = 'none';                
+            // that.$$('.uploadPanel').style.display = 'none';                
           } 
           if(that.status.toLowerCase() === STATUSESTEXT.DONE || that.status.toLowerCase() === STATUSESTEXT.LOCKED){
             that.toggleLockJob(LOCK.LOCK)
           }
-          else if(that.status.toLowerCase() === STATUSESTEXT.WORKING && that.$.imageurlInput.disabled === true){
+          else if(that.status.toLowerCase() === STATUSESTEXT.WORKING /*&& that.$.imageurlInput.disabled === true*/){
             that.toggleLockJob(LOCK.UNLOCK)
           }
         });       
@@ -647,7 +696,7 @@
             rejBtns[i].setAttribute('disabled', true);
             cardCmts[i].setAttribute('disabled', true);
           }
-          document.getElementById('imageurlInput').setAttribute('disabled', true);
+          // document.getElementById('imageurlInput').setAttribute('disabled', true);
         }
         else{
           for(var i = 0; i < appBtns.length; i++){
@@ -655,8 +704,27 @@
             rejBtns[i].removeAttribute('disabled');
             cardCmts[i].removeAttribute('disabled');
           }
-          document.getElementById('imageurlInput').removeAttribute('disabled');
+          // document.getElementById('imageurlInput').removeAttribute('disabled');
         }        
+      },
+      turnOnCardAction: function(list){
+        var proofReviewIndex = this.getLastCardOfStep(STEPS.PROOFREVIEW, list);
+        if(proofReviewIndex >= 0){
+          return;
+        }
+        var proofIndex = this.getLastCardOfStep(STEPS.PROOF, list);
+        if(proofIndex >= 0){
+          list[proofIndex].display = 'display:block';
+          return;
+        }
+        var reviewIndex = this.getLastCardOfStep(STEPS.REVIEW, list);
+        if(reviewIndex >= 0){
+          return;
+        }
+        var artrevisionIndex = this.getLastCardOfStep(STEPS.ARTREVISION, list);
+        if(artrevisionIndex >= 0){
+          list[artrevisionIndex].display = 'display:block';
+        }
       },
       tabObserver: function(newValue, oldValue){
         var that = this;
@@ -805,7 +873,7 @@
       },
       _renderPdfCard: function(docid, step){
         var that = this;
-        this.addCard(step, '', docid, REVIEW.APPROVE, dict[this.status.toLowerCase()], '');
+        this.addCard(step, '', docid, null, dict[this.status.toLowerCase()], '');
       },
 
       _getSession: function(id, obj){
@@ -843,10 +911,10 @@
             if(!!res){              
               res.version = that.versions.length;
               that.versions.unshift(res);
-              if(that.$$('.uploadPanel').style.display === 'block'){
-                that.$$('.uploadPanel').style.display = 'none';
-                that.$$('.viewPanel').style.display = 'block';
-              }
+              // if(that.$$('.uploadPanel').style.display === 'block'){
+              //   that.$$('.uploadPanel').style.display = 'none';
+              //   that.$$('.viewPanel').style.display = 'block';
+              // }
               defer.resolve();
             }              
             else{
@@ -974,11 +1042,11 @@
       },
       _uploading: function(){
         this.$$('.loading').style.display = 'block';
-        this.$.imageurlInput.setAttribute('disabled', true);
+        // this.$.imageurlInput.setAttribute('disabled', true);
       },
       _removeUploading: function(){
         this.$$('.loading').style.display = 'none';
-        this.$.imageurlInput.removeAttribute('disabled');
+        // this.$.imageurlInput.removeAttribute('disabled');
         this.imageurl = '';
       },    
       showToast: function(text){
@@ -1031,15 +1099,14 @@
           that = this;
         request(options, function(error, response, body){
           if(!error && response.statusCode === 200){
-            console.log('lock', body, body.lock, body.lock === true)
             if(!!body && body.lock === true && lock === LOCK.LOCK){
               var text = localStorage.username + ' is revising the art. This job is locked.';
-              that.addCard(STEPS.COMMENT, text, '', REVIEW.APPROVE, STATUSES.LOCKED, ''); 
+              that.addCard(STEPS.COMMENT, text, '', null, STATUSES.LOCKED, ''); 
               that.toggleLockJob(LOCK.LOCK);
             }
             else if(!!body && body.lock === false && lock === LOCK.UNLOCK){
               var text = localStorage.username + ' unlocked this job.';
-              that.addCard(STEPS.COMMENT, text, '', REVIEW.APPROVE, STATUSES.UNLOCKED, ''); 
+              that.addCard(STEPS.COMMENT, text, '', null, STATUSES.UNLOCKED, ''); 
               that.toggleLockJob(LOCK.UNLOCK);
             }
             else{
@@ -1050,6 +1117,34 @@
             outputError('SetLock Error: ' + !!error ?  error : response.statusCode);
           }
         });
+      },
+      getLastNonComment: function(){
+        if(!this.cards || this.cards.length === 0){
+          return -1;
+        }
+        var nonComments = [STEPS.REVIEW, STEPS.PROOF, STEPS.PROOFREVIEW, STEPS.ARTREVISION];
+        for(var i = this.cards.length - 1; i >= 0; i--){
+          if(nonComments.indexOf(this.cards[i].stepId)){
+            return this.cards[i].stepId;
+          }
+        }
+        return -1;
+      },
+      getLastCardOfStep: function(cardStep, list){
+        if(!list || list.length === 0){
+          return -1;
+        }
+        for(var i = list.length - 1; i >= 0; i--){
+          if(list[i].stepId === cardStep){
+            return i;
+          }
+        }
+        return -1;
+      },
+      showAlert: function(text){
+        this.alertText = text;
+        console.log('alert',document.getElementById('alert-modal'))
+        document.getElementById('alert-modal').open();
       }
     });
 	</script>

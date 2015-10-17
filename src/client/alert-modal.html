@@ -1,8 +1,9 @@
 <dom-module id="alert-modal">
 	<template>
-		<paper-dialog id="alert-modal" modal>
+		<paper-dialog id="alert-modal">
 			<p>
-				You have not set the folder to the watch yet. Please click the Settings icon in the top-right corner to set it.
+				<span>{{text}}</span>
+				<!-- You have not set the folder to the watch yet. Please click the Settings icon in the top-right corner to set it. -->
 			</p>
 			<div class="buttons">
 	      <paper-button dialog-confirm autofocus>OK, I got it</paper-button>
@@ -11,7 +12,13 @@
 	</template>
 	<script>
 		Polymer({
-      is: 'alert-modal'
+      is: 'alert-modal',
+      properties: {
+      	text: {
+          type: String,
+          notify: true
+        }
+      }
     });
 	</script>	
 </dom-module>

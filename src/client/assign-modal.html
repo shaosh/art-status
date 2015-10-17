@@ -95,6 +95,11 @@
       		};
       		request(options, function(error, response, body){
       			if(!error && response.statusCode === 200){
+              if(body.statusId === STATUSES.LOCKED || body.statusId === STATUSES.DONE){
+                document.getElementById('assign-modal').close();
+                that.domHost.showAlert('Assignment failed because this job is ' + body.status.toLowerCase());
+                return;
+              }
       				that.clearAll();
               that.job.username = body.username;
               that.job.assigneeId = body.assigneeId; 
