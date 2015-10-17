@@ -107,24 +107,26 @@
           value: ''
         }
       },
-      // observers: [
-      //   'updateStatusIcon(job.status)'
-      // ],
-      // updateStatusIcon: function(job){
-      //   if(!job){return;}
-      //   if(job.status === STATUSES.WORKING){
-      //     this.statusIcon = 'tab';
-      //   } 
-      //   else if(job.status === STATUSES.WAITING){
-      //     this.statusIcon = 'schedule';
-      //   }
-      //   else if(job.status === STATUSES.LOCKED){
-      //     this.statusIcon = 'announcement';
-      //   }
-      //   else{
-      //     this.statusIcon = 'check-circle';
-      //   }
-      // },
+      observers: [
+        'updateStatusIcon(job.status)'
+      ],
+      updateStatusIcon: function(status){
+        if(!status){return;}
+        console.log('updateStatusIcon', status)
+        var stat = status.toLowerCase();
+        if(stat === STATUSESTEXT.WORKING){
+          this.statusIcon = 'tab';
+        } 
+        else if(stat === STATUSESTEXT.WAITING){
+          this.statusIcon = 'schedule';
+        }
+        else if(stat === STATUSESTEXT.LOCKED){
+          this.statusIcon = 'lock';
+        }
+        else{
+          this.statusIcon = 'check-circle';
+        }
+      },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
           this.jobid = newValue.jobId;
@@ -134,18 +136,18 @@
           this.statusText = newValue.status.toLowerCase();
           this.status = dict[newValue.status.toLowerCase()];          
           
-          if(this.status === STATUSES.WORKING){
-            this.statusIcon = 'tab';
-          } 
-          else if(this.status === STATUSES.WAITING){
-            this.statusIcon = 'schedule';
-          }
-          else if(this.status === STATUSES.LOCKED){
-            this.statusIcon = 'lock';
-          }
-          else{
-            this.statusIcon = 'check-circle';
-          }
+          // if(this.status === STATUSES.WORKING){
+          //   this.statusIcon = 'tab';
+          // } 
+          // else if(this.status === STATUSES.WAITING){
+          //   this.statusIcon = 'schedule';
+          // }
+          // else if(this.status === STATUSES.LOCKED){
+          //   this.statusIcon = 'lock';
+          // }
+          // else{
+          //   this.statusIcon = 'check-circle';
+          // }
           //TODO: use api to get the url to the profile img
           var avatar = this.$$('.avatar');
           if(!!newValue.avatarurl){

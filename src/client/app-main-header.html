@@ -44,7 +44,7 @@
   <template>
     <paper-toolbar class="medium-tall">
       <div class="header-wrapper">
-        <div class="otherviewer">XXX is also viewing</div>
+        <div class="otherviewer"><span>{{viewerText}}</span></div>
         <div class="title-wrapper">
           <div class="title"><span>{{jobname}}</span></div>
           <iron-icon icon="av:library-books" id="relationIcon" on-click="showRelation"></iron-icon>
@@ -127,6 +127,16 @@
           type: Array,
           notify: true,
           value: []
+        },
+        viewers: {
+          type: Array,
+          notify: true,
+          observer: 'viewerObserver'
+        },
+        viewerText: {
+          type: String,
+          notify: true,
+          value: []
         }
       },
       setJobData: function(newValue, oldValue){
@@ -173,6 +183,16 @@
         if(!!this.relations && this.relations.length > 0){
           this.domHost.setOthers(this.relations, this.job);
         }        
+      },
+      viewerObserver: function(newValue, oldValue){
+        if(!!newValue && newValue.length > 0){
+          var text = newValue.join(', ');
+          var be = newValue.length === 1 ? ' is ' : ' are ';
+          this.viewerText = text + be + 'also viewing this job';
+        }
+        else{
+          this.viewerText = '';
+        }
       }
     });
   </script>

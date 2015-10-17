@@ -98,10 +98,10 @@
       </paper-header-panel>
       <paper-header-panel main mode="standard">
         <div class="paper-header">
-          <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}" company="{{selectedCompany}}"></app-main-header>
+          <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}" company="{{selectedCompany}}" viewers="{{viewers}}"></app-main-header>
         </div>
         <div class="content">
-          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}"></app-main-body>
+          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}" viewers="{{viewers}}"></app-main-body>
         </div>
       </paper-header-panel>
     </paper-drawer-panel>
@@ -425,7 +425,12 @@
           type: Boolean,
           notify: true,
           value: false
-        }      
+        },
+        viewers: {
+          type: Array,
+          notify: true,
+          value: []
+        }
       }
     });
   </script>

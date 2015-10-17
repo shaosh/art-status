@@ -146,6 +146,7 @@
         <div class="card-content">
           <p>Design Name: <span>{{jobname}}</span></p>
           <p>Primary Assigne: <span>{{username}}</span></p>
+          <p>Task Details: <span>{{description}}</span></p>
           <p>Task Status: <span>{{status}}</span></p>                  
         </div>
       </paper-card>
@@ -257,6 +258,10 @@
           type: String,
           notify: true
         },
+        description:{
+          type: String,
+          notify: true
+        },
         username: {
           type: String,
           notify: true
@@ -341,6 +346,11 @@
           notify: true,
           value: ''
         },
+        viewers: {
+          type: Array,
+          notify: true,
+          value: []
+        },
         colleagues: {
           type: Array, 
           notify: true,
@@ -395,6 +405,7 @@
           this.time = newValue.updatedAt;
           this.assigneeid = newValue.assigneeId;
           this.username = newValue.username;
+          this.description = newValue.description;
           this.status = newValue.status;
           
           if(dict[this.status.toLowerCase()] === STATUSES.DONE){
@@ -438,7 +449,13 @@
           var obj = body;
           if(!error && response.statusCode === 200){
             if(!!obj && !!obj.cards && obj.cards.length > 0 && obj.cards.length !== that.cards.length){
-              that.processCards(obj.cards);
+              that.job.status = obj.status;
+              that.job.assigneeId = obj.assigneeId;
+              that.job.username = obj.username;
+              that.job.email = obj.email;
+              that.job.updatedAt = obj.updatedAt;
+              that.job = JSON.parse(JSON.stringify(that.job));
+              that.setViewers(obj.viewers);
             }
             else if(!!obj && !!obj.cards && obj.cards.length === 0){
               that.cards = [];
@@ -1145,6 +1162,20 @@
         this.alertText = text;
         console.log('alert',document.getElementById('alert-modal'))
         document.getElementById('alert-modal').open();
+      },
+      setViewers: function(list){
+        if(!list || list.length === 0){
+          this.viewers = [];
+        }
+        else{
+          var array = [];
+          list.forEach(function(viewer){
+            array.push(viewer.username);
+          });
+          if(_.difference(this.viewers, array).length > 0){
+            this.viewers = array;
+          }          
+        }
       }
     });
 	</script>
