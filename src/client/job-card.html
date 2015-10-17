@@ -107,6 +107,24 @@
           value: ''
         }
       },
+      // observers: [
+      //   'updateStatusIcon(job.status)'
+      // ],
+      // updateStatusIcon: function(job){
+      //   if(!job){return;}
+      //   if(job.status === STATUSES.WORKING){
+      //     this.statusIcon = 'tab';
+      //   } 
+      //   else if(job.status === STATUSES.WAITING){
+      //     this.statusIcon = 'schedule';
+      //   }
+      //   else if(job.status === STATUSES.LOCKED){
+      //     this.statusIcon = 'announcement';
+      //   }
+      //   else{
+      //     this.statusIcon = 'check-circle';
+      //   }
+      // },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
           this.jobid = newValue.jobId;

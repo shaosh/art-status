@@ -89,7 +89,7 @@
             </div>
           </div>
           <div id="newjob">
-            <paper-button id="newjobButton" on-click="getUpdatedJobs" noink>You have <span>{{updateNum}}</span> new jobs.</paper-button>
+            <paper-button id="newjobButton" on-click="getUpdatedJobs" noink>You have <span>{{updateNum}}</span> job update(s).</paper-button>
           </div>
         </div>
         <template  id="jobRepeat" is="dom-repeat" items="{{displayJobs}}" sort="sortJob" filter="filterJob" observe="name">
@@ -125,7 +125,6 @@
             'userId': uid            
           }
         };
-        console.log('companyId', this.selectedCompany.id);
         request(options, function(error, response, body){
           console.log('refresh', body)
           if(!error && response.statusCode === 200){
@@ -161,11 +160,9 @@
           this.selectedJob = this.selectedJob || this.displayJobs[0];
           this.addSelectedBackground(this.selectedJob.jobId);
           // this.$.jobRepeat.render();
-          console.log('showall return', this.allJobs)
           return;
         }
         this.prevTab = LEFTTABS.ALL;
-        console.log('showall this.alljobs.length', this.allJobs)
         this.displayJobs = this.allJobs;
         this.selectedJob = this.selectedJob || this.displayJobs[0];
         this.addSelectedBackground(this.selectedJob.jobId);
@@ -226,27 +223,7 @@
       addSelectedClass: function(newValue, oldValue){
         if(!!newValue){
           this.addSelectedBackground(newValue.jobId);
-        }
-        
-        // var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
-        // if(typeof jobcards === 'undefined' || jobcards.length === 0){
-        //   return;
-        // }
-        
-        // for(var i = 0; i < jobcards.length; i++){
-        //   var idSpan = Polymer.dom(jobcards[i].childNodes[1]).querySelector('.jobid');
-        //   if(newValue.jobId === idSpan.getAttribute('data-jobid')){
-        //     if(jobcards[i].childNodes[1].classList.contains('selected')){
-        //     }
-        //     else{
-        //       this.unselectPrevJob();
-        //       jobcards[i].childNodes[1].toggleClass('selected');              
-        //     }
-        //     return;
-        //   }
-        // }
-        // this.unselectPrevJob();
-        // jobcards[0].childNodes[1].toggleClass('selected');
+        }        
       },
 
       addSelectedBackground: function(jobid){
@@ -281,16 +258,14 @@
         }
       },     
       changeCompany: function(newValue, oldValue){
-        console.log('newValue, oldValue', newValue, oldValue)
         if((!!newValue && !oldValue) || (!!newValue && !!oldValue && newValue.id !== oldValue.id)){
           this.loadDefaultTab = true;
         }
-        console.log('this.loadDefaultTab', this.loadDefaultTab)
       }, 
 
       jobsObserver: function(newValue, oldValue){
         var that = this,
-            interval = 20000;        
+            interval = 30000;        
         if(!!newValue && !!oldValue){
           this.mineJobs = [];
           newValue.forEach(function(job){
@@ -313,37 +288,21 @@
             this.loadDefaultTab = false;
           }
           else if(this.leftTab === LEFTTABS.ALL){
-            console.log(11112222)
             this.showAll();
           }
           else if(this.leftTab === LEFTTABS.MINE){
-            console.log(11113333)
             this.showMine();
           }
           else if(this.leftTab === LEFTTABS.OTHERS){
-            console.log(11114444)
             this.showOthers();
           }
-
-          // this.otherJobs = [];
-          // this.leftTab = this.setDefaultTab();          
-          // if(this.leftTab === LEFTTABS.ALL.toString()){
-          //   this.showAll();
-          // }
-          // else{
-          //   this.showMine();
-          // }
 
           if(!this.refreshRunning){
             setIntervalByTimeout(
               function(){that.getUpdateNum(localStorage.userId)}, interval
             );
             this.refreshRunning = true;
-          }
-          
-          
-          // setInterval(function(){
-          //   that.getUpdateNum(localStorage.userId)}, interval); 
+          }        
         }
       },
 
@@ -456,20 +415,6 @@
           type: Boolean,
           notify: true,
           value: false
-        },
-        filters: {
-          type: Array,
-          notify: true,
-          value: [
-            {
-              text: 'filter1',
-              filterText: '100000'
-            },
-            {
-              text: 'filter2',
-              filterText: '100005'
-            }
-          ]
         },
         filterText: {
           type: String,

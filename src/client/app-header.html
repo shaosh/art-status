@@ -75,6 +75,21 @@
         document.getElementById('login-modal').open();        
       },
       logout: function(){
+        var options = {
+          url: LOGOUT_URL,
+          headers: HEADER,
+          method: 'POST',
+          json: true,
+          body: {  
+            'userId': localStorage.userId
+          }
+        }
+        request(options, function(error, response, body){
+          if(!!error || response.statusCode !== 200){
+            outputError(!!error ? 'Logout Error' + error : response.statusCode);
+          }            
+        });
+
         localStorage.loginTime = '';
         localStorage.userId = '';
         localStorage.username = '';

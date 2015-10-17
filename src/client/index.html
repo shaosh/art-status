@@ -25,6 +25,13 @@
       DONE: 4
     };
 
+    const STATUSESTEXT = {
+      WORKING: 'working',
+      WAITING: 'waiting',
+      LOCKED: 'locked',
+      DONE: 'completed'
+    };
+
     const TABS = {
       HISTORY: 0,
       ASSIGN: 1,
@@ -63,9 +70,15 @@
       REJECT: 0
     };
 
+    const LOCK = {
+      UNLOCK: 0,
+      LOCK: 1
+    }
+
     const XAPIKEY = 'qqX3C5Ph1M8Eo2yLkcAZh2k4Luh3gCMj24EtEjsr';
     const APIURL_BASE = 'https://ww9m9v1irg.execute-api.us-east-1.amazonaws.com/v1';
     const LOGIN_URL = APIURL_BASE + '/art/login';
+    const LOGOUT_URL = APIURL_BASE + '/art/logout';
     const GETJOBS_URL = APIURL_BASE + '/job';
     const JOBREFRESH_URL = APIURL_BASE + '/job/refresh';
     const GETUSERS_URL = APIURL_BASE + '/job/users';

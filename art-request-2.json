@@ -1,4 +1,4 @@
-{
+
   "/art/login": {// user login
       "method": "post",
       "request-body": {
