@@ -176,8 +176,8 @@
             <div class="card-actions" style$="{{item.display}}">
               <paper-textarea class="cardComment" label="Enter your comment"></paper-textarea>
               <!-- <paper-button class="blue" tabindex="0" toggles>Start Review</paper-button> -->
-              <paper-button class="green approveButton" on-click="approveArt" data-version="{{item.version}}">Approve</paper-button>
-              <paper-button class="red rejectButton" on-click="rejectArt" data-version="{{item.version}}">Reject</paper-button>
+              <paper-button class="green approveButton" on-click="reviewArt" data-version="{{item.version}}" disabled="{{item.disabled}}">Approve</paper-button>
+              <paper-button class="red rejectButton" on-click="reviewArt" data-version="{{item.version}}" disabled="{{item.disabled}}">Reject</paper-button>
             </div>
           </paper-card>
         </template>				 
@@ -196,10 +196,10 @@
       <p>
         Changes has been detected in file <span>{{changedFile}}</span>. Do you want to commit this change to the repo?
       </p>  
-      <p>If you'd like to upload the PDF file for this change, click the button below to select the PDF file.</p> 
+      <p>You also need to upload the PDF file for this change. Click the button below to select the PDF file.</p> 
       <input type="file" id="changeModalInput">   
       <div class="buttons">
-        <paper-button dialog-confirm autofocus on-click="uploadChange">Yes, commit.</paper-button>
+        <paper-button dialog-confirm autofocus on-click="uploadChange" disabled id="changeCommitButton">Yes, commit.</paper-button>
         <paper-button dialog-dismiss autofocus>No, don't commit.</paper-button>
       </div>
     </paper-dialog>	
@@ -460,11 +460,13 @@
               that.setJobData(obj);
               if(dict[that.status.toLowerCase()] === STATUSES.DONE){
                 that.$.showCommentButton.style.display = 'none';
+                that.$.commentForm.style.display = 'none';
                 that.$.reopenWrapper.style.display = 'block';
               }
               else{
                 that.$.showCommentButton.style.display = 'block';
                 that.$.reopenWrapper.style.display = 'none';
+                that.$.commentForm.style.display = 'none';
               }
               // that.job.status = obj.status;
               // that.job.assigneeId = obj.assigneeId;
@@ -545,23 +547,112 @@
         this.addCard(STEPS.COMMENT, this.commentText, '', null, dict[this.status.toLowerCase()], '');  
         this.commentText = '';
       },
-      closeJob: function(e){
+      closeJob: function(){ 
+        var that = this;
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() !== STATUSESTEXT.DONE){
+              that.addCloseCard();
+            }
+            else{
+              that.showAlert('This job has already been closed.');
+            }
+          }, 
+          function(e){outputError(e)}
+        );
+      },
+      addCloseCard: function(){
         this.addCard(STEPS.DONE, this.commentText, '', null, STATUSES.DONE, '');  
         this.commentText = ''; 
       },
-      reopenJob: function(e){
+      reopenJob: function(){
+        var that = this;
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+              that.addReopenCard();
+            }
+            else{
+              that.showAlert('This job has already been opened.');
+            }
+          }, 
+          function(e){outputError(e)}
+        );
+      },
+      addReopenCard: function(){
         this.addCard(STEPS.REOPENED, this.commentText, '', null, STATUSES.WORKING, '');  
         this.commentText = ''; 
       },
-      approveArt: function(e){
-        var stepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
+      reviewArt: function(e){
+        var that = this,
+            stepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.ARTREVISION : STEPS.PROOF;
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
+              var isLast = that.isLastNonComment(stepid, e.model.item.index, job.cards);
+              // var reviewIdx = -1,
+              //     reviewId = stepid === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
+              // reviewIdx = that.getLastCardOfStep(reviewId, job.cards);
+
+              if(!!isLast){
+                var classes = Polymer.dom(e).localTarget.className;
+                if(classes.indexOf('approveButton') > -1){
+                  that.addApproveCard(stepid);
+                }
+                else{
+                  that.addRejectCard(stepid);
+                }                
+              }
+              else{
+                var reviewId = stepid === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
+                var item = that.getNextNonComment(reviewId, e.model.item.index, job.cards);
+                if(item === null){
+                  that.showAlert('This art revision/proof has already been reviewed.');
+                }
+                else{
+                  var text = item.approved === 0 ? 'rejected' : 'approved';
+                  that.showAlert('This art revision/proof has already been ' + text + ' by ' + item.username);
+                }                
+              }              
+            }
+            else if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+              that.showAlert('This job has already been closed.');
+            }
+            else{
+              that.showAlert('This job is locked. ' + that.getUserName(job.lockerId) + ' is revising it.');
+            }
+          }, 
+          function(e){outputError(e)}
+        );
+      },
+      addApproveCard: function(stepid){
         this.addCard(stepid, this.commentText, '', REVIEW.APPROVE, STATUSES.WORKING, e.model.item.version);  
         this.commentText = '';
       },
-      rejectArt: function(e){
+      addRejectCard: function(stepid){
         var stepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
         this.addCard(stepid, this.commentText, '', REVIEW.REJECT, STATUSES.WORKING, e.model.item.version);  
         this.commentText = '';
+      },
+      startArtRevision: function(){},
+      addStartArtRevisionCard: function(){
+        var text = localStorage.username + ' starts revising this job.'
+        this.addCard(STEPS.COMMENT, text, '', null, STATUSES.LOCKED, ''); 
+        // this.getCurrJob().then(
+        //   function(job){
+        //     if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+        //       that.showAlert('This job has already been closed.');
+        //     }
+        //     else if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+        //       that.showAlert('This job is locked. ' + that.getUserName(job.lockerId) + ' is revising it.');
+        //     }
+        //     else{
+        //       var text = localStorage.username + ' starts revising this job.'
+        //       that.addCard(STEPS.COMMENT, text, '', null, STATUSES.LOCKED, ''); 
+        //     }
+        //   }, 
+        //   function(e){outputError(e)}
+        // );        
       },
       addCard: function(step, comment, documentId, approve, status, version){
         var that = this,
@@ -687,6 +778,12 @@
           item.title = item.step;
           item.index = index;
           item.display = 'display:none';
+          if(that.status.toLowerCase() === STATUSESTEXT.DONE || that.status.toLowerCase() === STATUSESTEXT.LOCKED){
+            item.disabled = 'true';
+          }
+          else if(that.status.toLowerCase() === STATUSESTEXT.WORKING /*&& that.$.imageurlInput.disabled === true*/){
+            item.disabled = 'false';
+          }
           if(!!item.documentId){
             count++;
             item.version = count;
@@ -711,15 +808,15 @@
           if(list.length > 0){
             that.turnOnCardAction(list);              
             that.cards = list;
-            that.$$('.viewPanel').style.display = 'block';
+            // that.$$('.viewPanel').style.display = 'block';
             // that.$$('.uploadPanel').style.display = 'none';                
           } 
-          if(that.status.toLowerCase() === STATUSESTEXT.DONE || that.status.toLowerCase() === STATUSESTEXT.LOCKED){
-            that.toggleLockJob(LOCK.LOCK)
-          }
-          else if(that.status.toLowerCase() === STATUSESTEXT.WORKING /*&& that.$.imageurlInput.disabled === true*/){
-            that.toggleLockJob(LOCK.UNLOCK)
-          }
+          // if(that.status.toLowerCase() === STATUSESTEXT.DONE || that.status.toLowerCase() === STATUSESTEXT.LOCKED){
+          //   that.toggleLockJob(LOCK.LOCK)
+          // }
+          // else if(that.status.toLowerCase() === STATUSESTEXT.WORKING /*&& that.$.imageurlInput.disabled === true*/){
+          //   that.toggleLockJob(LOCK.UNLOCK)
+          // }
         });       
       },
       toggleLockJob: function(lock){
@@ -731,7 +828,7 @@
           for(var i = 0; i < appBtns.length; i++){
             appBtns[i].setAttribute('disabled', true);
             rejBtns[i].setAttribute('disabled', true);
-            cardCmts[i].setAttribute('disabled', true);
+            cardCmts[i].setAttribute('disabled', true);            
           }
           // document.getElementById('imageurlInput').setAttribute('disabled', true);
         }
@@ -746,22 +843,37 @@
       },
       turnOnCardAction: function(list){
         var proofReviewIndex = this.getLastCardOfStep(STEPS.PROOFREVIEW, list);
-        if(proofReviewIndex >= 0){
-          return;
-        }
         var proofIndex = this.getLastCardOfStep(STEPS.PROOF, list);
-        if(proofIndex >= 0){
+        if(proofIndex > proofReviewIndex){
           list[proofIndex].display = 'display:block';
           return;
         }
-        var reviewIndex = this.getLastCardOfStep(STEPS.REVIEW, list);
-        if(reviewIndex >= 0){
+        else if(proofReviewIndex >= 0){
           return;
         }
+        var reviewIndex = this.getLastCardOfStep(STEPS.REVIEW, list);
         var artrevisionIndex = this.getLastCardOfStep(STEPS.ARTREVISION, list);
-        if(artrevisionIndex >= 0){
+        if(artrevisionIndex > reviewIndex){
           list[artrevisionIndex].display = 'display:block';
         }
+
+        // if(proofReviewIndex >= 0){
+        //   return;
+        // }
+        // var proofIndex = this.getLastCardOfStep(STEPS.PROOF, list);
+        // if(proofIndex >= 0){
+        //   list[proofIndex].display = 'display:block';
+        //   return;
+        // }
+        
+        // var reviewIndex = this.getLastCardOfStep(STEPS.REVIEW, list);
+        // if(reviewIndex >= 0){
+        //   return;
+        // }
+        // var artrevisionIndex = this.getLastCardOfStep(STEPS.ARTREVISION, list);
+        // if(artrevisionIndex >= 0){
+        //   list[artrevisionIndex].display = 'display:block';
+        // }
       },
       tabObserver: function(newValue, oldValue){
         var that = this;
@@ -775,14 +887,53 @@
               alert(jobid + '.cdr does not exist in ' + localStorage.sourceFolderPath);
               return;
             }
-            console.log('start copying');
-            this.copy(sourceFile, targetFile).then(
-              function(res){return that.openInCDR(res)},
-              function(e){outputError(e)}
-            ).then(
-              function(res){that.watch(res)},
-              function(e){outputError(e)}
-            );
+            this.startCopyFlow();
+            // this.getCurrJob().then(
+            //   function(job){
+            //     if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+            //       that.showAlert('This job has already been closed.');
+            //     }
+            //     else if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+            //       that.showAlert('This job is locked. ' + that.getUserName(job.lockerId) + ' is revising it.');
+            //     }
+            //     else{
+            //       var item = that.getLastNonComment(job.cards);
+            //       if(item.stepId === STEPS.REVIEW && item.approved === REVIEW.REJECT){
+            //         that.showToast('Start copying CDR file to local.');
+            //         return that.copy(sourceFile, targetFile);
+            //       }
+            //       else if(item.stepId === STEPS.REVIEW && item.approved === REVIEW.APPROVE){
+            //         that.showAlert('This job has already been approved by ' + item.username + '. No more art revision is allowed.');
+            //       }
+            //       else if(item.stepId === STEPS.PROOF || item.stepId === STEPS.PROOFREVIEW){
+            //         that.showAlert('This job has already entered proof phase. No more art revision is allowed.');
+            //       }
+            //       else if(item.stepId === STEPS.ARTREVISION){
+            //         that.showAlert('The art revision submitted by ' + item.username + ' is pending review. You are not allowed to start a new revision before the previous one gets reviewed.');
+            //       }                  
+            //     }
+            //   }, 
+            //   function(e){outputError(e)}
+            // ).then(
+            //   function(res){
+            //     that.addStartArtRevisionCard();
+            //     return that.openInCDR(res)
+            //   },
+            //   function(e){outputError(e)}
+            // ).then(
+            //   function(res){that.watch(res)},
+            //   function(e){outputError(e)}
+            // );
+
+
+            // console.log('start copying');
+            // this.copy(sourceFile, targetFile).then(
+            //   function(res){return that.openInCDR(res)},
+            //   function(e){outputError(e)}
+            // ).then(
+            //   function(res){that.watch(res)},
+            //   function(e){outputError(e)}
+            // );
           }
           else{
             document.getElementById('setting-modal').open();
@@ -792,12 +943,46 @@
           document.getElementById('assign-modal').open();
         }
         else if(newValue === TABS.UPLOAD){
-          document.getElementById('upload-modal').open();
-          var input = document.getElementById('uploadModalInput');
-          input.onchange = function(){
-            that.enableUploadButton(input, 'proofUploadButton');
-          };
+          this.startUploadProofFlow();
+          // this.getCurrJob().then(
+          //   function(job){
+          //     if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+          //       that.showAlert('This job has already been closed.');
+          //     }
+          //     else if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+          //       that.showAlert('This job is locked. ' + that.getUserName(job.lockerId) + ' is revising it.');
+          //     }
+          //     else{
+          //       var item = that.getLastNonComment(job.cards);
+          //       if((item.stepId === STEPS.REVIEW && item.approved === REVIEW.APPROVE) ||
+          //         (item.stepId === STEPS.PROOFREVIEW && item.approved === REVIEW.REJECT)){
+          //         document.getElementById('upload-modal').open();
+          //         var input = document.getElementById('uploadModalInput');
+          //         input.onchange = function(){
+          //           that.enableUploadButton(input, 'proofUploadButton');
+          //         };
+          //       }
+          //       else if(item.stepId === STEPS.PROOFREVIEW || item.approved === REVIEW.APPROVE){
+          //         that.showAlert('A proof has already been approved. You do not need to upload another proof.');
+          //       }
+          //       else if(item.stepId === STEPS.PROOF){
+          //         that.showAlert('A proof has been submitted by ' + item.username + '. You are not allowed to submit a new proof before the previous one gets reviewed.');
+          //       }
+          //       else{
+          //         that.showAlert('This job is still under revision or review. You cannot upload a proof until a revision gets approved.');
+          //       }    
+          //     }
+          //   }
+          // )
         }
+
+
+        //   document.getElementById('upload-modal').open();
+        //   var input = document.getElementById('uploadModalInput');
+        //   input.onchange = function(){
+        //     that.enableUploadButton(input, 'proofUploadButton');
+        //   };
+        // }
 
         if(newValue === TABS.MESSAGE){
           this.showMsgContainer();
@@ -810,22 +995,103 @@
         var that = this;
         if(!!input.value && input.value.substr(-4) === '.pdf'){
           var button = document.getElementById(buttonId);
-          button.removeAttribute('disabled');   
-          button.onclick = function(){
-            var step = STEPS.ARTREVISION;
-            if(that.tab === TABS.UPLOAD){
+          button.removeAttribute('disabled');
+          if(that.tab === TABS.UPLOAD){
+            button.onclick = function(){
+              var step = STEPS.ARTREVISION;
               if(that.$.proofCheckbox.checked){
                 step = STEPS.PROOF;
               }
-            }
-            that.uploadFile(input.value, step);
-            button.setAttribute('disabled', true);
-            input.value = '';
-          }       
+              that.uploadFile(input.value, step);
+              button.setAttribute('disabled', true);
+              input.value = '';
+            }       
+          }   
+          // button.onclick = function(){
+          //   var step = STEPS.ARTREVISION;
+          //   if(that.tab === TABS.UPLOAD){
+          //     if(that.$.proofCheckbox.checked){
+          //       step = STEPS.PROOF;
+          //     }
+          //   }
+          //   that.uploadFile(input.value, step);
+          //   button.setAttribute('disabled', true);
+          //   input.value = '';
+          // }       
         }        
         else{
           document.getElementById(buttonId).setAttribute('disabled', true);
         }
+      },
+      startUploadProofFlow: function(){
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+              that.showAlert('This job has already been closed.');
+            }
+            else if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+              that.showAlert('This job is locked. ' + that.getUserName(job.lockerId) + ' is revising it.');
+            }
+            else{
+              var item = that.getLastNonComment(job.cards);
+              if((item.stepId === STEPS.REVIEW && item.approved === REVIEW.APPROVE) ||
+                (item.stepId === STEPS.PROOFREVIEW && item.approved === REVIEW.REJECT)){
+                document.getElementById('upload-modal').open();
+                var input = document.getElementById('uploadModalInput');
+                input.onchange = function(){
+                  that.enableUploadButton(input, 'proofUploadButton');
+                };
+              }
+              else if(item.stepId === STEPS.PROOFREVIEW || item.approved === REVIEW.APPROVE){
+                that.showAlert('A proof has already been approved. You do not need to upload another proof.');
+              }
+              else if(item.stepId === STEPS.PROOF){
+                that.showAlert('A proof has been submitted by ' + item.username + '. You are not allowed to submit a new proof before the previous one gets reviewed.');
+              }
+              else{
+                that.showAlert('This job is still under revision or review. You cannot upload a proof until a revision gets approved.');
+              }    
+            }
+          }
+        )
+      },
+      startCopyFlow: function(){
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+              that.showAlert('This job has already been closed.');
+            }
+            else if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+              that.showAlert('This job is locked. ' + that.getUserName(job.lockerId) + ' is revising it.');
+            }
+            else{
+              var item = that.getLastNonComment(job.cards);
+              if(item.stepId === STEPS.REVIEW && item.approved === REVIEW.REJECT){
+                that.showToast('Start copying CDR file to local.');
+                return that.copy(sourceFile, targetFile);
+              }
+              else if(item.stepId === STEPS.REVIEW && item.approved === REVIEW.APPROVE){
+                that.showAlert('This job has already been approved by ' + item.username + '. No more art revision is allowed.');
+              }
+              else if(item.stepId === STEPS.PROOF || item.stepId === STEPS.PROOFREVIEW){
+                that.showAlert('This job has already entered proof phase. No more art revision is allowed.');
+              }
+              else if(item.stepId === STEPS.ARTREVISION){
+                that.showAlert('The art revision submitted by ' + item.username + ' is pending review. You are not allowed to start a new revision before the previous one gets reviewed.');
+              }                  
+            }
+          }, 
+          function(e){outputError(e)}
+        ).then(
+          function(res){
+            that.addStartArtRevisionCard();
+            return that.openInCDR(res)
+          },
+          function(e){outputError(e)}
+        ).then(
+          function(res){that.watch(res)},
+          function(e){outputError(e)}
+        );
       },
       copy: function(src, dst){
         var that = this,
@@ -835,8 +1101,8 @@
             defer.reject('Fail to copy file: ' + err);
             return;
           }
-          console.log('finish copying');
-          that.toggleLock(LOCK.LOCK);
+          // console.log('finish copying');
+          // that.toggleLock(LOCK.LOCK);
           defer.resolve(dst);
         });
         return defer.promise;
@@ -845,6 +1111,7 @@
         var cdrapp = '"' + localStorage.coreldrawPath + '\\' + CDRAPPNAME + '"',
             defer = Q.defer(),
             that = this;
+        this.showToast('Start openting the CDR file in CorelDraw.');
         console.log('opening...');
         cmd.exec(cdrapp + ' ' + '"' + dst + '"', function(error, stdout, stderr){
           if (!!error) {
@@ -864,7 +1131,29 @@
         this.showToast('Start watching ' + dst);
         watcher.on('change', function(path){
           that.changedFile = path;
-          that.openChangeModal();
+
+          this.getCurrJob().then(
+            function(job){
+              if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+                var item = that.getLastNonComment(job.cards);
+                if(item.stepId === STEPS.REVIEW && item.approved === REVIEW.REJECT){
+                  that.openChangeModal();
+                  var input = document.getElementById('changeModalInput');
+                  input.onchange = function(){
+                    that.enableUploadButton(input, 'changeCommitButton');
+                  };
+                }           
+              }
+            }, 
+            function(e){outputError(e)}
+          )
+
+          // that.openChangeModal();
+
+          // var input = document.getElementById('changeModalInput');
+          // input.onchange = function(){
+          //   that.enableUploadButton(input, 'changeCommitButton');
+          // };
         });
       },
       upload: function(e){
@@ -891,7 +1180,7 @@
               function(e){outputError(e);}                
             )
             .then(
-              function(res){that._renderPdfCard(res, step);},
+              function(res){that._renderPdfCard(res, step, STATUSES.WORKING);},
               function(e){outputError(e);}
             );
     		}
@@ -903,14 +1192,13 @@
               function(e){outputError(e);}                
             )
             .then(
-              function(res){that._renderPdfCard(res, step);},
+              function(res){that._renderPdfCard(res, step, STATUSES.WORKING);},
               function(e){outputError(e);}
             );
     		}
       },
-      _renderPdfCard: function(docid, step){
-        var that = this;
-        this.addCard(step, '', docid, null, dict[this.status.toLowerCase()], '');
+      _renderPdfCard: function(docid, step, status){
+        this.addCard(step, '', docid, null, status, '');
       },
 
       _getSession: function(id, obj){
@@ -1095,7 +1383,8 @@
             src = localStorage.targetFolderPath + '\\' + jobid + '.cdr',
             dst = localStorage.sourceFolderPath + '\\' + jobid + '.cdr',
             that = this,
-            input = document.getElementById('changeModalInput');
+            input = document.getElementById('changeModalInput'),
+            button = document.getElementById('changeCommitButton');
 
         fsextra.copy(src, dst, function(err){
           if(!!err){
@@ -1104,12 +1393,15 @@
           }
           that.showToast('Commit complete');
         });
+        this.uploadFile(input.value, STEPS.ARTREVISION);
+        button.setAttribute('disabled', true);
+        input.value = '';
 
-        if(!!input.value && input.value.substr(-4) === '.pdf'){
-          this.uploadFile(input.value, STEPS.ARTREVISION);
-          button.setAttribute('disabled', true);
-          input.value = '';
-        }
+        // if(!!input.value && input.value.substr(-4) === '.pdf'){
+        //   this.uploadFile(input.value, STEPS.ARTREVISION);
+        //   button.setAttribute('disabled', true);
+        //   input.value = '';
+        // }
       },
       sortCard: function(a, b){
         return moment(b.updatedAt).diff(moment(a.updatedAt));
@@ -1167,6 +1459,18 @@
         }
         return -1;
       },
+      getLastNonComment: function(list){
+        if(!list || list.length === 0){
+          return null;
+        }
+        var nonComments = [STEPS.REVIEW, STEPS.PROOF, STEPS.PROOFREVIEW, STEPS.ARTREVISION];
+        for(var i = list.length - 1; i >= 0; i--){
+          if(nonComments.indexOf(list[i].stepId)){
+            return list[i];
+          }
+        }
+        return null;
+      },
       getLastCardOfStep: function(cardStep, list){
         if(!list || list.length === 0){
           return -1;
@@ -1178,9 +1482,41 @@
         }
         return -1;
       },
+      isLastNonComment: function(cardStep, index, list){
+        if(!list || list.length === 0){
+          return false;
+        }
+        var nonComments = [STEPS.REVIEW, STEPS.PROOF, STEPS.PROOFREVIEW, STEPS.ARTREVISION];
+        var item = null,
+            idx = -1;
+        for(var i = list.length - 1; i >= 0; i--){
+          if(nonComments.indexOf(list[i].stepId)){
+            item = list[i];
+            idx = i;
+            break;
+          }
+        }
+        if(item === null){
+          return false;
+        }
+        else if(item.stepId === cardStep && idx === index){
+          return true;
+        }
+        return false;
+      },
+      getNextNonComment: function(cardStep, startIdx, list){
+        if(!list || list.length === 0){
+          return null;
+        }
+        for(var i = startIdx; i < list.length; i++){
+          if(list[i].stepId === cardStep){
+            return list[i];
+          }
+        }
+        return null;
+      },
       showAlert: function(text){
         this.alertText = text;
-        console.log('alert',document.getElementById('alert-modal'))
         document.getElementById('alert-modal').open();
       },
       setViewers: function(list){
@@ -1196,6 +1532,14 @@
             this.viewers = array;
           }          
         }
+      },
+      getUserName: function(id){
+        for(var i = 0; i < this.users.length; i++){
+          if(this.users[i].id === id){
+            return this.users[i].name;
+          }
+        }
+        return null;
       }
     });
 	</script>
