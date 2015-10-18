@@ -236,7 +236,7 @@
           type: Object,
           value: null,
           notify: true,
-          observer: 'setJobData'
+          observer: 'jobObserver'
         },
         jobs: {
           type: Array,
@@ -397,26 +397,27 @@
           dialog.open();
         }
       },
-      setJobData: function(newValue, oldValue){
+      jobObserver: function(newValue, oldValue){
         var that = this;
         if(!!newValue){
-          this.jobid = newValue.jobId;
-          this.jobname = newValue.name;
-          this.time = newValue.updatedAt;
-          this.assigneeid = newValue.assigneeId;
-          this.username = newValue.username;
-          this.description = newValue.description;
-          this.status = newValue.status;
+          // this.jobid = newValue.jobId;
+          // this.jobname = newValue.name;
+          // this.time = newValue.updatedAt;
+          // this.assigneeid = newValue.assigneeId;
+          // this.username = newValue.username;
+          // this.description = newValue.description;
+          // this.status = newValue.status;
           
-          if(dict[this.status.toLowerCase()] === STATUSES.DONE){
-            this.$.showCommentButton.style.display = 'none';
-            this.$.reopenWrapper.style.display = 'block';
-          }
-          else{
-            this.$.showCommentButton.style.display = 'block';
-            this.$.reopenWrapper.style.display = 'none';
-          }
+          // if(dict[this.status.toLowerCase()] === STATUSES.DONE){
+          //   this.$.showCommentButton.style.display = 'none';
+          //   this.$.reopenWrapper.style.display = 'block';
+          // }
+          // else{
+          //   this.$.showCommentButton.style.display = 'block';
+          //   this.$.reopenWrapper.style.display = 'none';
+          // }
           if(!oldValue || newValue.jobId !== oldValue.jobId){
+            this.jobid = newValue.jobId;
             this.getCards();
           }          
 
@@ -428,10 +429,17 @@
             );
             this.getCardsRunning = true;
           }
-
-          // setIntervalByTimeout(function(){that.getCards()}, interval);
-          // setInterval(function(){
-          //   that.getCards()}, interval);
+        }
+      },
+      setJobData: function(obj){
+        if(!!obj){
+          this.job.jobname = this.jobname = obj.name;
+          this.job.updatedAt = this.time = obj.updatedAt;
+          this.job.assigneeId = this.assigneeid = obj.assigneeId;
+          this.job.username = this.username = obj.username;
+          this.job.description = this.description = obj.description;
+          this.job.status = this.status = obj.status;
+          this.job = JSON.parse(JSON.stringify(this.job));
         }
       },
       getCards: function(){
@@ -448,16 +456,27 @@
         request(options, function(error, response, body){
           var obj = body;
           if(!error && response.statusCode === 200){
-            if(!!obj && !!obj.cards && obj.cards.length > 0 && obj.cards.length !== that.cards.length){
-              that.job.status = obj.status;
-              that.job.assigneeId = obj.assigneeId;
-              that.job.username = obj.username;
-              that.job.email = obj.email;
-              that.job.updatedAt = obj.updatedAt;
-              that.job = JSON.parse(JSON.stringify(that.job));
+            if(!!obj && !!obj.cards && obj.cards.length > 0 && obj.cards.length !== that.cards.length){             
+              that.setJobData(obj);
+              if(dict[that.status.toLowerCase()] === STATUSES.DONE){
+                that.$.showCommentButton.style.display = 'none';
+                that.$.reopenWrapper.style.display = 'block';
+              }
+              else{
+                that.$.showCommentButton.style.display = 'block';
+                that.$.reopenWrapper.style.display = 'none';
+              }
+              // that.job.status = obj.status;
+              // that.job.assigneeId = obj.assigneeId;
+              // that.job.username = obj.username;
+              // that.job.email = obj.email;
+              // that.job.updatedAt = obj.updatedAt;
+              // that.job = JSON.parse(JSON.stringify(that.job));
               that.setViewers(obj.viewers);
+              that.processCards(obj.cards);
             }
             else if(!!obj && !!obj.cards && obj.cards.length === 0){
+              that.setJobData(obj);
               that.cards = [];
               // that.$$('.uploadPanel').style.display = 'block';
               // that.$$('.viewPanel').style.display = 'none';
@@ -590,6 +609,7 @@
                 that.$.commentForm.style.display = 'none';
                 that.$.reopenWrapper.style.display = 'none';
               }
+              that.setJobData(body);
               that.processCards(body.cards);              
             }
           }

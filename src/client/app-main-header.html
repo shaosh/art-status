@@ -139,6 +139,17 @@
           value: []
         }
       },
+      // observers: [
+      //   'updateJobData(job.status, job.name, job.updatedAt, job.username)'
+      // ],
+      // updateJobData: function(status, name, updatedAt, username){
+      //   console.log('updateJobData', status, name, updatedAt, username);
+      //   this.jobname = name;
+      //   this.time = moment(updatedAt).format("MMM DD, YYYY, h:mm:ss a");
+      //   this.assignee = username;
+      //   this.status = status;
+      //   this.statusTitle = this.status + '. Updated at ' + this.time; 
+      // },
       setJobData: function(newValue, oldValue){
         if(!!newValue){
           this.jobid = newValue.id;
