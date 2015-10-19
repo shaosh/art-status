@@ -425,8 +425,7 @@
             this.getCards();
           }          
 
-          var interval = 60000;
-
+          var interval = 15000;
           if(!this.getCardsRunning){
             setIntervalByTimeout(
               function(){that.getCards()}, interval
@@ -459,6 +458,7 @@
           that = this;
         request(options, function(error, response, body){
           var obj = body;
+          console.log('getCards body', body)
           if(!error && response.statusCode === 200){
             if(!!obj && !!obj.cards && obj.cards.length > 0 && obj.cards.length !== that.cards.length){             
               that.setJobData(obj);
@@ -478,7 +478,7 @@
               // that.job.email = obj.email;
               // that.job.updatedAt = obj.updatedAt;
               // that.job = JSON.parse(JSON.stringify(that.job));
-              that.setViewers(obj.viewers);
+              // that.setViewers(obj.viewers);
               that.processCards(obj.cards);
             }
             else if(!!obj && !!obj.cards && obj.cards.length === 0){
@@ -497,6 +497,9 @@
               // that.$$('.uploadPanel').style.display = 'block';
               // that.$$('.viewPanel').style.display = 'none';
             }
+            if((that.viewers.length !== obj.viewers.length) || _.difference(that.viewers, obj.viewers).length > 0){
+              that.setViewers(obj.viewers);
+            }             
           }
           else{
             outputError('GetCards Error: ' + !!error ?  error : response.statusCode);
@@ -558,8 +561,19 @@
         }
       },
       submitComment: function(e){
-        this.addCard(STEPS.COMMENT, this.commentText, '', null, dict[this.status.toLowerCase()], '');  
-        this.commentText = '';
+        var that = this;
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() !== STATUSESTEXT.DONE){
+              that.addCard(STEPS.COMMENT, that.commentText, '', null, dict[that.status.toLowerCase()], '');  
+              that.commentText = '';
+            }
+            else{
+              that.showAlert('This job has already been closed.');
+            }
+          }, 
+          function(e){outputError(e)}
+        );        
       },
       closeJob: function(){ 
         var that = this;
@@ -610,7 +624,6 @@
               //     reviewId = stepid === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
               // reviewIdx = that.getLastCardOfStep(reviewId, job.cards);
               if(!!isLast){
-                console.log('isApprove', isApprove);
                 if(!!isApprove){
                   that.addApproveCard(nextStepid, e.model.item.version);
                 }
@@ -1104,7 +1117,6 @@
             }
             else{
               var item = that.getLastNonComment(job.cards);
-              console.log('item', item)
               if(item === null || (item !== null && item.stepId === STEPS.REVIEW && item.approve === REVIEW.REJECT)){
                 that.showToast('Start copying CDR file to local.');
                 that.toggleLock(LOCK.LOCK);
@@ -1586,11 +1598,14 @@
         else{
           var array = [];
           list.forEach(function(viewer){
-            array.push(viewer.username);
+            if(viewer.username !== localStorage.username){
+              array.push(viewer.username);              
+            }
           });
-          if(_.difference(this.viewers, array).length > 0){
-            this.viewers = array;
-          }          
+          this.viewers = array;
+          // if(_.difference(this.viewers, array).length > 0){
+          //   this.viewers = array;
+          // }          
         }
       },
       getUserName: function(id){

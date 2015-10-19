@@ -105,6 +105,15 @@
           type: String,
           notify: true,
           value: ''
+        },
+        updatedAt: {
+          type: String,
+          notify: true
+        },
+        updateTimeRunning: {
+          type: Boolean,
+          notify: true,
+          value: false
         }
       },
       observers: [
@@ -131,6 +140,7 @@
         if(!!newValue){
           this.jobid = newValue.jobId;
           this.jobname = newValue.name;
+          this.updatedAt = newValue.updatedAt;
           this.fromnow = moment(newValue.updatedAt).fromNow();
           this.username = newValue.username;
           this.statusText = newValue.status.toLowerCase();
@@ -175,10 +185,15 @@
               that = this;
 
           var updateTime = function(){
-            that.fromnow = moment(newValue.updatedAt).fromNow();
+            that.fromnow = moment(that.updatedAt).fromNow();
             console.log(that.fromnow);
           };
-          setIntervalByTimeout(updateTime, interval);
+          // setIntervalByTimeout(updateTime, interval);
+
+          if(!this.updateTimeRunning){
+            setIntervalByTimeout(updateTime, interval);
+            this.updateTimeRunning = true;
+          }
         }
       } 
     })
