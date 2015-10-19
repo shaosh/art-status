@@ -239,7 +239,7 @@
               "viewUrl": {
                 "type": "string"
               },
-              "approved": {
+              "approve": {
                 "type": "int"// 1 is approve, 0 is reject, if some steps don't have approve/reject, this will be null
               },
               "name": { // card title
