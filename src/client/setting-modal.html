@@ -10,7 +10,7 @@
 			<custom-validator id="cdrValidator" validator-name="cdrValidator"></custom-validator>
       <custom-validator id="targetFolderValidator" validator-name="targetFolderValidator"></custom-validator>
       <custom-validator id="sourceFolderValidator" validator-name="sourceFolderValidator"></custom-validator>
-			<paper-input id="cdrInput" label="Set the path to the folder which contains the CorelDRW.exe" value="{{coreldrawPath}}" auto-validate error-message="{{cdrErrMsg}}" validator='cdrValidator'>
+			<paper-input id="cdrInput" label="Set the path to the folder which contains the CorelDRW.exe or CorelDRW.app" value="{{coreldrawPath}}" auto-validate error-message="{{cdrErrMsg}}" validator='cdrValidator'>
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 			</paper-input>
       <paper-input id="sourceFolderInput" label="Set the folder to download CDR files from" value="{{sourceFolderPath}}" auto-validate error-message="{{sourceFolderErrMsg}}" validator='sourceFolderValidator'>
@@ -43,7 +43,8 @@
 		var isValid = require('../../node_modules/is-valid-path'),
 				fileExists = require('../../node_modules/file-exists'),
 				pathExists = require('../../node_modules/path-exists'),
-				CDRNAME = 'CorelDRW.exe',
+				CDRNAMEEXE = 'CorelDRW.exe',
+        CDRNAMEAPP = 'CorelDRW.app',
 				INVALIDPATH = 'Invalid path or path not exist';
 		Polymer({
       is: 'setting-modal',
@@ -152,25 +153,42 @@
       },
       save: function(e){
       	if(!!this.coreldrawPath){
-      		localStorage.coreldrawPath = this.coreldrawPath;
+      		localStorage.coreldrawPath = this.coreldrawPath.toLowerCase();
+          var cdrname = this.getCdrappName(localStorage.coreldrawPath);
+          if(!!cdrname){
+            localStorage.cdrappName = localStorage.coreldrawPath + SLASH + cdrname;
+          }
       	}
       	if(!!this.targetFolderPath){
-      		localStorage.targetFolderPath = this.targetFolderPath;
+      		localStorage.targetFolderPath = this.targetFolderPath.toLowerCase();
       	}
         if(!!this.sourceFolderPath){
-          localStorage.sourceFolderPath = this.sourceFolderPath;
+          localStorage.sourceFolderPath = this.sourceFolderPath.toLowerCase();
         }
         if(!!this.defaultTab || this.defaultTab === 0){
           localStorage.defaultTab = this.defaultTab;
         }        
+      },
+      getCdrappName: function(path){
+        var name = '';
+        if(fileExists((path + SLASH + CDRNAMEEXE).toLowerCase())){
+          name = CDRNAMEEXE.toLowerCase();
+        }
+        else if(fileExists((path + SLASH + CDRNAMEAPP).toLowerCase())){
+          name = CDRNAMEAPP.toLowerCase();
+        }
+        return name;
+      },
+      cdrExists: function(path){
+        return fileExists((path + SLASH + CDRNAMEEXE).toLowerCase()) || fileExists((path + SLASH + CDRNAMEAPP).toLowerCase());
       },
       validateCdr: function(){
       	var result;
 				if(this.coreldrawPath === ''){
 					result = true;
 				}
-				else if(!!isValid(this.coreldrawPath) && !!pathExists.sync(this.coreldrawPath)){
-					if(fileExists(this.coreldrawPath + '\\' + CDRNAME)){
+				else if(!!isValid(this.coreldrawPath) && !!pathExists.sync(this.coreldrawPath.toLowerCase())){
+					if(this.cdrExists(this.coreldrawPath)){
 						result = true;
 					}
 					else{
@@ -192,7 +210,7 @@
       	if(this.targetFolderPath === ''){
 					result = true;
 				}
-				else if(!!isValid(this.targetFolderPath) && !!pathExists.sync(this.targetFolderPath)){
+				else if(!!isValid(this.targetFolderPath) && !!pathExists.sync(this.targetFolderPath.toLowerCase())){
 					result = true;					
 				}
 				else{
@@ -208,7 +226,7 @@
         if(this.sourceFolderPath === ''){
           result = true;
         }
-        else if(!!isValid(this.sourceFolderPath) && !!pathExists.sync(this.sourceFolderPath)){
+        else if(!!isValid(this.sourceFolderPath) && !!pathExists.sync(this.sourceFolderPath.toLowerCase())){
           result = true;          
         }
         else{

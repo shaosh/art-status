@@ -224,14 +224,17 @@
 		function clearInput() {
       // document.getElementById('imageurlInput').value = '';
     }    
-    var boxViewLib = require('../../node_modules/node-box-view');
+    var boxViewLib = require('../../node_modules/node-box-view'),
+        isValid = require('../../node_modules/is-valid-path'),
+        fileExists = require('../../node_modules/file-exists'),
+        pathExists = require('../../node_modules/path-exists');
 
     var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7',
         boxView = new boxViewLib(myKey), 
         docUrl = 'https://view-api.box.com/1/documents/',
         PDF = 'pdf',
-        DEFAULTPATH = '/artapp/temp/',
-        CDRAPPNAME = 'CorelDRW.exe';
+        DEFAULTPATH = '/artapp/temp/';
+        // CDRAPPNAME = 'CorelDRW.exe';
 
 		Polymer({
       is: 'app-main-body',
@@ -907,13 +910,16 @@
         //   list[artrevisionIndex].display = 'display:block';
         // }
       },
+      verifyRequiredPathFile: function(){
+        return (!!localStorage.coreldrawPath && !!localStorage.targetFolderPath && !!localStorage.sourceFolderPath && !!localStorage.cdrappName && !!isValid(localStorage.coreldrawPath) && !!isValid(localStorage.targetFolderPath) && !!isValid(localStorage.sourceFolderPath) && !!pathExists.sync(localStorage.coreldrawPath) && !!pathExists.sync(localStorage.targetFolderPath) && !!pathExists.sync(localStorage.sourceFolderPath) && !!fileExists(localStorage.cdrappName));
+      },
       tabObserver: function(newValue, oldValue){
         var that = this;
         if(newValue === TABS.WATCH){
-          if(!!localStorage.coreldrawPath && !!localStorage.targetFolderPath && !!localStorage.sourceFolderPath){
+          if(!!this.verifyRequiredPathFile()){
             var jobid = this.job.name.substring(0, 6),
-                sourceFile = localStorage.sourceFolderPath + '\\' + jobid + '.cdr',
-                targetFile = localStorage.targetFolderPath + '\\' + jobid + '.cdr';
+                sourceFile = localStorage.sourceFolderPath + SLASH + jobid + '.cdr',
+                targetFile = localStorage.targetFolderPath + SLASH + jobid + '.cdr';
 
             if(!fileExists(sourceFile)){
               alert(jobid + '.cdr does not exist in ' + localStorage.sourceFolderPath);
@@ -971,6 +977,7 @@
             // );
           }
           else{
+            this.showToast('Path to CorelDraw, source folder, target folder or CorelDraw name may be wrong.');
             document.getElementById('setting-modal').open();
           }
         }
@@ -1169,7 +1176,7 @@
         return defer.promise;
       },
       openInCDR: function(dst){
-        var cdrapp = '"' + localStorage.coreldrawPath + '\\' + CDRAPPNAME + '"',
+        var cdrapp = '"' + localStorage.cdrappName + '"',
             defer = Q.defer();
         console.log('opening...');
         cmd.exec(cdrapp + ' ' + '"' + dst + '"', function(error, stdout, stderr){
@@ -1438,8 +1445,8 @@
       },  
       uploadChange: function(){
         var jobid = this.job.name.substring(0, 6),
-            src = localStorage.targetFolderPath + '\\' + jobid + '.cdr',
-            dst = localStorage.sourceFolderPath + '\\' + jobid + '.cdr',
+            src = localStorage.targetFolderPath + SLASH + jobid + '.cdr',
+            dst = localStorage.sourceFolderPath + SLASH + jobid + '.cdr',
             that = this,
             input = document.getElementById('changeModalInput'),
             button = document.getElementById('changeCommitButton');
