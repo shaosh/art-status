@@ -697,7 +697,6 @@
         this.addCard(stepid, this.commentText, '', REVIEW.REJECTNUM, STATUSES.WORKING, version);  
         this.commentText = '';
       },
-      startArtRevision: function(){},
       addStartArtRevisionCard: function(){
         var text = localStorage.username + ' starts revising this job. It locks this job.';
         this.addCard(STEPS.COMMENT, text, '', null, STATUSES.LOCKED, ''); 
@@ -1223,14 +1222,14 @@
               }                  
             }
             throw new Error('Improper status to start copy. Abort promise chain');
-            return null
+            return null;
           }, 
           function(e){outputError(e)}
         ).then(
           function(res){
             if(!res){
               throw new Error('Improper status to start copy. Abort promise chain');
-              return null
+              return null;
             }
             that.addStartArtRevisionCard();
             return that.openInCDR(res)
