@@ -88,9 +88,16 @@
       --paper-checkbox-unchecked-color: var(--paper-light-blue-900);
       --paper-checkbox-unchecked-ink-color: var(--paper-light-blue-900);
     }
-    #change-modal, #upload-modal{
+    #change-modal, #upload-modal, #manual-modal{
       min-height: 300px;
       min-width: 400px;
+    }
+    #manual-modal p{
+      margin-top:30px;
+      margin-bottom: 5px;
+    }
+    #manual-modal input{
+      margin-top: 5px;
     }
     .loading{
       height: 100px;
@@ -124,6 +131,11 @@
     }
     div.buttons{
       margin-top: 20px;
+    }
+    p#manualModalErrMsg{
+      color: red;
+      display:none;
+      margin-top: 5px!important;
     }
 	</style>
 	<template>
@@ -215,7 +227,23 @@
       <input type="file" id="uploadModalInput"><br>
       <!-- <paper-checkbox class="blue" id="proofCheckbox">Upload this file as Proof</paper-checkbox>    -->
       <div class="buttons">
-        <paper-button dialog-confirm autofocus  id="proofUploadButton" disabled>Yes, upload.</paper-button>
+        <paper-button dialog-confirm autofocus id="proofUploadButton" disabled>Yes, upload.</paper-button>
+        <paper-button dialog-dismiss autofocus>No, don't upload.</paper-button>
+      </div>
+    </paper-dialog> 
+    <paper-dialog id="manual-modal" modal>
+      <h2>Upload Art Revision</h2>
+      <p>
+        Select a CDR file to upload
+      </p>   
+      <input type="file" id="manualModalCdrInput"><br>
+      <p id="manualModalErrMsg">The CDR file has to be "<6-Digit-Order-Number-Of-Current-Job>.cdr"</p>
+      <p>
+        Select a PDF file to upload
+      </p>   
+      <input type="file" id="manualModalPdfInput"><br>
+      <div class="buttons">
+        <paper-button dialog-confirm autofocus id="manualUploadButton" disabled>Yes, upload.</paper-button>
         <paper-button dialog-dismiss autofocus>No, don't upload.</paper-button>
       </div>
     </paper-dialog> 	
@@ -984,7 +1012,10 @@
         else if(newValue === TABS.ASSIGN){
           document.getElementById('assign-modal').open();
         }
-        else if(newValue === TABS.UPLOAD){
+        else if(newValue === TABS.MANUAL){
+          this.startManualUploadFlow();
+        }
+        else if(newValue === TABS.UPLOADPROOF){
           this.startUploadProofFlow();
           // this.getCurrJob().then(
           //   function(job){
@@ -1035,10 +1066,10 @@
       },
       enableUploadButton: function(input, buttonId){
         var that = this;
-        if(!!input.value && input.value.substr(-4) === '.pdf'){
+        if(!!input.value && input.value.substr(-4).toLowerCase() === '.pdf'){
           var button = document.getElementById(buttonId);
           button.removeAttribute('disabled');
-          if(that.tab === TABS.UPLOAD){
+          if(that.tab === TABS.UPLOADPROOF){
             button.onclick = function(){
               var step = STEPS.PROOF;
               // var step = STEPS.ARTREVISION;
@@ -1052,7 +1083,7 @@
           }   
           // button.onclick = function(){
           //   var step = STEPS.ARTREVISION;
-          //   if(that.tab === TABS.UPLOAD){
+          //   if(that.tab === TABS.UPLOADPROOF){
           //     if(that.$.proofCheckbox.checked){
           //       step = STEPS.PROOF;
           //     }
@@ -1065,6 +1096,57 @@
         else{
           document.getElementById(buttonId).setAttribute('disabled', true);
         }
+      },
+      enableManualUploadButton: function(inputCdr, inputPdf){
+        var that = this,
+            cdrname = inputCdr.value,
+            pdfname = inputPdf.value,
+            expectCdrname = this.job.name.substring(0, 6) + '.cdr',
+            button = document.getElementById('manualUploadButton'),
+            errmsg = document.getElementById('manualModalErrMsg');
+        if(!!cdrname && expectCdrname !== cdrname.substr(-10).toLowerCase()){
+          errmsg.style.display = 'block';
+          button.setAttribute('disabled', true);
+        }
+        else{
+          errmsg.style.display = 'none';
+        }
+
+        if(!!cdrname && expectCdrname === cdrname.substr(-10).toLowerCase() && !!pdfname && pdfname.substr(-4).toLowerCase() === '.pdf'){
+          button.removeAttribute('disabled');
+          errmsg.style.display = 'none';
+          button.onclick = function(){
+            that.manualUpload(inputCdr, inputPdf, button);
+          };
+        }
+        else{
+          button.setAttribute('disabled', true);
+        }
+      },
+      startManualUploadFlow: function(){
+        var that = this;
+        this.getCurrJob().then(
+          function(job){
+            if(job.status.toLowerCase() === STATUSESTEXT.DONE){
+              that.showAlert('This job has already been closed.');
+            }
+            else if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
+              that.showAlert('You cannot upload revision without starting any revisions. Or this job has already been approved.');
+            }
+            else{
+              document.getElementById('manual-modal').open();
+              var inputCdr = document.getElementById('manualModalCdrInput');
+              var inputPdf = document.getElementById('manualModalPdfInput');
+              inputCdr.onchange = function(){
+                that.enableManualUploadButton(inputCdr, inputPdf);
+              };
+              inputPdf.onchange = function(){
+                that.enableManualUploadButton(inputCdr, inputPdf);
+              };
+            }
+          },
+          function(e){outputError(e)}
+        );
       },
       startUploadProofFlow: function(){
         var that = this;
@@ -1104,7 +1186,8 @@
                 that.showAlert('This job is not ready for proof. You cannot upload a proof until a revision gets approved.');
               }
             }
-          }
+          },
+          function(e){outputError(e)}
         )
       },
       startCopyFlow: function(sourceFile, targetFile){
@@ -1475,6 +1558,30 @@
         //   button.setAttribute('disabled', true);
         //   input.value = '';
         // }
+      },
+      manualUpload: function(inputCdr, inputPdf, button){
+        var src = inputCdr.value,
+            dst = localStorage.sourceFolderPath + SLASH + this.job.name.substring(0, 6) + '.cdr',
+            that = this;
+            // input = document.getElementById('changeModalInput'),
+            // button = document.getElementById('changeCommitButton');
+
+        fsextra.copy(src, dst, function(err){
+          if(!!err){
+            console.log('Fail to copy file from' + src + ' to ' + dst + ': ' + err);
+            return;
+          }
+          that.showToast('Commit complete');
+          that.toggleLock(LOCK.UNLOCK).then(
+            function(){
+              that.uploadFile(inputPdf.value, STEPS.ARTREVISION);
+              button.setAttribute('disabled', true);
+              inputCdr.value = '';
+              inputPdf.value = '';
+            },
+            function(e){}
+          );
+        });
       },
       sortCard: function(a, b){
         return moment(b.updatedAt).diff(moment(a.updatedAt));
