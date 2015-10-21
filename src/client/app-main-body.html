@@ -1,5 +1,6 @@
 <link rel="import" href="alert-modal.html">
 <link rel="import" href="assign-modal.html">
+<link rel="import" href="uploading-modal.html">
 <link rel="import" href="msg-card.html">
 
 <dom-module id="app-main-body">
@@ -99,7 +100,7 @@
     #manual-modal input{
       margin-top: 5px;
     }
-    .loading{
+   /* .loading{
       height: 100px;
       width: 100px;
       top: 50%;
@@ -113,7 +114,7 @@
       float: left;
       display: none;
       margin-left:20px;
-    }
+    }*/
     iframe{
     	width: 480px; 
     	height: 270px; 
@@ -173,7 +174,7 @@
         <img class="loading" src="img/loading.gif" />
 			</div> -->
 			<div class="viewPanel"> 
-        <img class="loading" src="img/loading.gif" />  
+        <!-- <img class="loading" src="img/loading.gif" />   -->
         <template is="dom-repeat" items="{{cards}}" sort="sortCard">
           <paper-card class="cardItem" >
             <div class="header">
@@ -190,7 +191,7 @@
               </template>
             </div>
             <div class="card-actions" style$="{{item.display}}">
-              <paper-textarea class="cardComment" label="Enter your comment"></paper-textarea>
+              <paper-textarea class="cardComment" label="Enter your comment" value="{{item.pdfComment}}"></paper-textarea>
               <!-- <paper-button class="blue" tabindex="0" toggles>Start Review</paper-button> -->
               <paper-button class="green approveButton" on-click="reviewArt" data-version="{{item.version}}" disabled?="{{item.disabled}}">Approve</paper-button>
               <paper-button class="red rejectButton" on-click="reviewArt" data-version="{{item.version}}" disabled?="{{item.disabled}}">Reject</paper-button>
@@ -207,6 +208,7 @@
     </div>
     <alert-modal text="{{alertText}}"></alert-modal>
     <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}"></assign-modal>
+    <uploading-modal></uploading-modal>
     <paper-dialog id="change-modal" modal>
       <h2>Changes Detected</h2>
       <p>
@@ -659,10 +661,10 @@
               // reviewIdx = that.getLastCardOfStep(reviewId, job.cards);
               if(!!isLast){
                 if(!!isApprove){
-                  that.addApproveCard(nextStepid, e.model.item.version);
+                  that.addApproveCard(nextStepid, e.model.item.version, e.model.item.pdfComment);
                 }
                 else{
-                  that.addRejectCard(nextStepid, e.model.item.version);
+                  that.addRejectCard(nextStepid, e.model.item.version, e.model.item.pdfComment);
                 }                
               }
               else{
@@ -692,12 +694,14 @@
           function(e){outputError(e)}
         );
       },
-      addApproveCard: function(stepid, version){
-        this.addCard(stepid, this.commentText, '', REVIEW.APPROVENUM, STATUSES.WORKING, version);  
+      addApproveCard: function(stepid, version, pdfComment){
+        console.log('app', pdfComment)
+        this.addCard(stepid, pdfComment, '', REVIEW.APPROVENUM, STATUSES.WORKING, version);  
         this.commentText = '';
       },
-      addRejectCard: function(stepid, version){
-        this.addCard(stepid, this.commentText, '', REVIEW.REJECTNUM, STATUSES.WORKING, version);  
+      addRejectCard: function(stepid, version, pdfComment){
+        console.log('rej', pdfComment)
+        this.addCard(stepid, pdfComment, '', REVIEW.REJECTNUM, STATUSES.WORKING, version);  
         this.commentText = '';
       },
       addStartArtRevisionCard: function(){
@@ -801,11 +805,11 @@
           }
           else if(item.stepId === STEPS.REVIEW || item.stepId === STEPS.PROOFREVIEW ){
             item.text = item.username + ' marked the pending ';
-            var ver = '';
+            var ver = '';            
             if(!!item.comment && item.comment.split('$$$').length > 1){
               var splitComment = item.comment.split('$$$');
               ver = splitComment[splitComment.length - 1];
-              item.comment = item.comment.substring(0, splitComment.length - ver.length - 3);
+              item.comment = item.comment.substring(0, item.comment.length - ver.length - 3);
             }
 
             if(item.stepId === STEPS.REVIEW){
@@ -815,22 +819,28 @@
               item.text = item.text + 'proof #' + ver + ' as ';
             }
             if(!!item.approve){
-              item.text = item.text + 'approved.';
+              item.text = item.text + 'approved';
             }
             else {
-              item.text = item.text + 'rejected.';
+              item.text = item.text + 'rejected';
             }
             if(!!item.comment){
-              item.text = item.text + ' Comment: ' + item.comment;
-            }          
+              item.text = item.text + ': ' + item.comment;
+            }    
+            else{
+              item.text = item.text + '.';
+            }      
           }
           else if(item.stepId === STEPS.PROOF){
             item.text = item.username + ' uploaded a proof.';
           }
           else if(item.stepId === STEPS.DONE){
-            item.text = item.username + ' closed this issue.' 
+            item.text = item.username + ' closed this issue' 
             if(!!item.comment){
-              item.text = item.text + ' Comment: ' + item.comment;
+              item.text = item.text + ': ' + item.comment;
+            }
+            else{
+              item.text = item.text + '.';
             }
           }
           else if(item.stepId === STEPS.REQUEST){
@@ -842,6 +852,7 @@
           item.time = moment(item.updatedAt).format("MMM DD, YYYY, h:mm:ss a");
           item.title = item.step;
           item.index = index;
+          item.pdfComment = '';
           item.display = 'display:none';
           if(that.status.toLowerCase() === STATUSESTEXT.DONE || that.status.toLowerCase() === STATUSESTEXT.LOCKED){
             item.disabled = 'true';
@@ -1517,11 +1528,13 @@
         return result;
       },
       _uploading: function(){
-        this.$$('.loading').style.display = 'block';
+        document.getElementById('uploading-modal').open();
+        // this.$$('.loading').style.display = 'block';
         // this.$.imageurlInput.setAttribute('disabled', true);
       },
       _removeUploading: function(){
-        this.$$('.loading').style.display = 'none';
+        document.getElementById('uploading-modal').close();
+        // this.$$('.loading').style.display = 'none';
         // this.$.imageurlInput.removeAttribute('disabled');
         this.imageurl = '';
       },    
@@ -1592,7 +1605,7 @@
           }
           that.showToast('Commit complete');
 
-          that.uploadFile(input.value, STEPS.ARTREVISION)
+          that.uploadFile(inputPdf.value, STEPS.ARTREVISION)
           .then(
             function(){that.toggleLock(LOCK.UNLOCK);},
             function(e){outputError(e)}

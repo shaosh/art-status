@@ -1,0 +1,21 @@
+<dom-module id="uploading-modal">
+	<style>
+		#uploading-modal{
+			background-color: rgba(0,0,0,0);
+		}
+		.loading: {
+			height: 100px;
+      width: 100px;
+		}
+	</style>
+	<template>
+		<paper-dialog id="uploading-modal" modal>
+			<img class="loading" src="img/loading.gif" />
+		</paper-dialog> 
+	</template>
+	<script>
+		Polymer({
+      is: 'uploading-modal'
+    })
+	</script>
+</dom-module>
