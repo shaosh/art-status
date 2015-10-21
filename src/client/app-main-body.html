@@ -635,12 +635,10 @@
         );
       },
       addApproveCard: function(stepid, version, pdfComment){
-        console.log('app', pdfComment)
         this.addCard(stepid, pdfComment, '', REVIEW.APPROVENUM, STATUSES.WORKING, version);  
         this.commentText = '';
       },
       addRejectCard: function(stepid, version, pdfComment){
-        console.log('rej', pdfComment)
         this.addCard(stepid, pdfComment, '', REVIEW.REJECTNUM, STATUSES.WORKING, version);  
         this.commentText = '';
       },
