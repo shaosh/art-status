@@ -759,7 +759,7 @@
           }
           else if(item.stepId === STEPS.DONE){
             item.text = item.username + ' closed this issue' 
-            if(!!item.comment){
+            if(!!item.comment && item.comment !== 'undefined'){
               item.text = item.text + ': ' + item.comment;
             }
             else{

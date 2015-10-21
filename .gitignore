@@ -35,5 +35,9 @@ nwjs-v0.12.3-win-x64
 
 *.zip
 *.rar
+*.dll
+*.exe
+*.pak
+*.nw
 
 
