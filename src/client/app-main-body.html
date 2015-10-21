@@ -1599,7 +1599,8 @@
           ).then(
             function(){
               button.setAttribute('disabled', true);
-              input.value = '';
+              inputCdr.value = '';
+-             inputPdf.value = '';
             },
             function(e){outputError(e)}
           );
