@@ -114,13 +114,15 @@
               });
               that.jobs = temp;
 			        button.style.display = 'none';
-			        button.nextElementSibling.style.display = 'block';              
-			        document.querySelector('#toast').innerHTML = 'Assigned the job to ' + name;
-      				document.querySelector('#toast').show();
+			        button.nextElementSibling.style.display = 'block';  
+              that.domHost.showToast('Assigned the job to ' + name);            
+			       //  document.querySelector('#toast').innerHTML = 'Assigned the job to ' + name;
+      				// document.querySelector('#toast').show();
       			}
       			else{
-      				document.querySelector('#toast').innerHTML = 'Failed to assign the job';
-      				document.querySelector('#toast').show();
+              that.domHost.showToast('Failed to assign the job');       
+      				// document.querySelector('#toast').innerHTML = 'Failed to assign the job';
+      				// document.querySelector('#toast').show();
       			}
       		});
       	}
