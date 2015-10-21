@@ -1324,7 +1324,7 @@
       	
     		if(validurl.isUri(url)){
           this._uploading();
-    			this._uploadFromUrl(url, {fileName: filename + '.' + PDF})
+    			return this._uploadFromUrl(url, {fileName: filename + '.' + PDF})
             .then(              
               function(res){return that._checkStatus(res);},
               function(e){outputError(e);}                
@@ -1336,7 +1336,7 @@
     		}
     		else{
           this._uploading();
-    			this._uploadLocalFile(url, {fileName: filename + '.' + PDF})
+    			return this._uploadLocalFile(url, {fileName: filename + '.' + PDF})
             .then(
               function(res){return that._checkStatus(res);},
               function(e){outputError(e);}                
@@ -1543,15 +1543,31 @@
             return;
           }
           that.showToast('Commit complete');
-          that.toggleLock(LOCK.UNLOCK).then(
+
+          that.uploadFile(input.value, STEPS.ARTREVISION).then(
+            function(){that.toggleLock(LOCK.UNLOCK)},
+            function(e){outputError(e)}
+          ).then(
             function(){
-              that.uploadFile(input.value, STEPS.ARTREVISION);
               button.setAttribute('disabled', true);
               input.value = '';
             },
-            function(e){}
+            function(e){outputError(e)}
           );
+          
+
+
+          // that.toggleLock(LOCK.UNLOCK).then(
+          //   function(){
+          //     that.uploadFile(input.value, STEPS.ARTREVISION);
+          //     button.setAttribute('disabled', true);
+          //     input.value = '';
+          //   },
+          //   function(e){}
+          // );
         });
+
+
         // this.uploadFile(input.value, STEPS.ARTREVISION);
         // button.setAttribute('disabled', true);
         // input.value = '';
@@ -1575,15 +1591,27 @@
             return;
           }
           that.showToast('Commit complete');
-          that.toggleLock(LOCK.UNLOCK).then(
+
+          that.uploadFile(input.value, STEPS.ARTREVISION)
+          .then(
+            function(){that.toggleLock(LOCK.UNLOCK);},
+            function(e){outputError(e)}
+          ).then(
             function(){
-              that.uploadFile(inputPdf.value, STEPS.ARTREVISION);
               button.setAttribute('disabled', true);
-              inputCdr.value = '';
-              inputPdf.value = '';
+              input.value = '';
             },
-            function(e){}
+            function(e){outputError(e)}
           );
+          // that.toggleLock(LOCK.UNLOCK).then(
+          //   function(){
+          //     that.uploadFile(inputPdf.value, STEPS.ARTREVISION);
+          //     button.setAttribute('disabled', true);
+          //     inputCdr.value = '';
+          //     inputPdf.value = '';
+          //   },
+          //   function(e){}
+          // );
         });
       },
       sortCard: function(a, b){
