@@ -1,7 +1,7 @@
-<link rel="import" href="alert-modal.html">
-<link rel="import" href="assign-modal.html">
-<link rel="import" href="uploading-modal.html">
-<link rel="import" href="msg-card.html">
+<link rel="import" href="./alert-modal.html">
+<link rel="import" href="./assign-modal.html">
+<link rel="import" href="./uploading-modal.html">
+<link rel="import" href="./msg-card.html">
 
 <dom-module id="app-main-body">
 	<style>
@@ -226,10 +226,10 @@
     </paper-dialog> 	
 	</template>
 	<script>
-    var boxViewLib = require('../../node_modules/node-box-view'),
-        isValid = require('../../node_modules/is-valid-path'),
-        fileExists = require('../../node_modules/file-exists'),
-        pathExists = require('../../node_modules/path-exists');
+    var boxViewLib = require('./node_modules/node-box-view'),
+        isValid = require('./node_modules/is-valid-path'),
+        fileExists = require('./node_modules/file-exists'),
+        pathExists = require('./node_modules/path-exists');
 
     var myKey = '9ucmktt493ndyfnp9lvpwmsfky8dmtc7',
         boxView = new boxViewLib(myKey), 

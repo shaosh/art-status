@@ -2,9 +2,9 @@
 <html>
 <head>
 	<title>Art Desktop App</title>
-	<script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <link rel="import" href="elements.html">
-	<link rel="import" href="app-page.html">
+	<script src="./bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="./elements.html">
+	<link rel="import" href="./app-page.html">
 
 	<style>
   	* {
@@ -99,20 +99,20 @@
       'User-Agent': 'request'
     };
 
-    var validurl = require('../../node_modules/valid-url'),
-        boxViewLib = require('../../node_modules/node-box-view'),
-        moment = require('../../node_modules/moment'),
-        Q = require('../../node_modules/q'),
-        request = require('../../node_modules/request'),  
+    var validurl = require('./node_modules/valid-url'),
+        boxViewLib = require('./node_modules/node-box-view'),
+        moment = require('./node_modules/moment'),
+        Q = require('./node_modules/q'),
+        request = require('./node_modules/request'),  
         fs = require('fs'),
-        fsextra = require('../../node_modules/fs-extra'), 
-        isValid = require('../../node_modules/is-valid-path'),
-        fileExists = require('../../node_modules/file-exists'),
-        pathExists = require('../../node_modules/path-exists'),
+        fsextra = require('./node_modules/fs-extra'), 
+        isValid = require('./node_modules/is-valid-path'),
+        fileExists = require('./node_modules/file-exists'),
+        pathExists = require('./node_modules/path-exists'),
         cmd = require('child_process'),
-        chokidar = require('../../node_modules/chokidar'),
-        validator = require('../../node_modules/validator'),
-        _ = require('../../node_modules/underscore'),
+        chokidar = require('./node_modules/chokidar'),
+        validator = require('./node_modules/validator'),
+        _ = require('./node_modules/underscore'),
         crypt = require('crypto'); //Chrome has a variable called crypto, so must use another name
 
     var dict = [];

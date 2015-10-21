@@ -1,4 +1,4 @@
-<link rel="import" href="custom-validator.html">
+<link rel="import" href="./custom-validator.html">
 <dom-module id="setting-modal">
 	<style>
 		paper-input{
@@ -40,9 +40,9 @@
     </paper-dialog>
 	</template>
 	<script>		
-		var isValid = require('../../node_modules/is-valid-path'),
-				fileExists = require('../../node_modules/file-exists'),
-				pathExists = require('../../node_modules/path-exists'),
+		var isValid = require('./node_modules/is-valid-path'),
+				fileExists = require('./node_modules/file-exists'),
+				pathExists = require('./node_modules/path-exists'),
 				CDRNAMEEXE = 'CorelDRW.exe',
         CDRNAMEAPP = 'CorelDRW.app',
 				INVALIDPATH = 'Invalid path or path not exist';
