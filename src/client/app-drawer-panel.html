@@ -159,14 +159,12 @@
           this.displayJobs = this.allJobs;
           this.selectedJob = this.selectedJob || this.displayJobs[0];
           this.addSelectedBackground(this.selectedJob.jobId);
-          // this.$.jobRepeat.render();
           return;
         }
         this.prevTab = LEFTTABS.ALL;
         this.displayJobs = this.allJobs;
         this.selectedJob = this.selectedJob || this.displayJobs[0];
         this.addSelectedBackground(this.selectedJob.jobId);
-        // this.getUpdatedJobs();
       },
 
       showMine: function(companyChanged){
@@ -212,7 +210,6 @@
         this.unselectPrevJob();
         card.toggleClass('selected');
         this.selectedJob = e.model.item;
-        // this.selectedTab = 0;
         window.location.hash = '#/' + this.selectedCompany.company + '/' + this.selectedJob.jobId;     
       },      
 
@@ -274,7 +271,6 @@
             }
           });
           this.allJobs = newValue;
-          // this.displayJobs = this.allJobs;
           this.mineJobsNum = this.mineJobs.length;
           if(!!this.loadDefaultTab){
             this.leftTab = this.setDefaultTab(); 

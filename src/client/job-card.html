@@ -121,7 +121,6 @@
       ],
       updateStatusIcon: function(status){
         if(!status){return;}
-        console.log('updateStatusIcon', status)
         var stat = status.toLowerCase();
         if(stat === STATUSESTEXT.WORKING){
           this.statusIcon = 'tab';
@@ -144,21 +143,7 @@
           this.fromnow = moment(newValue.updatedAt).fromNow();
           this.username = newValue.username;
           this.statusText = newValue.status.toLowerCase();
-          this.status = dict[newValue.status.toLowerCase()];          
-          
-          // if(this.status === STATUSES.WORKING){
-          //   this.statusIcon = 'tab';
-          // } 
-          // else if(this.status === STATUSES.WAITING){
-          //   this.statusIcon = 'schedule';
-          // }
-          // else if(this.status === STATUSES.LOCKED){
-          //   this.statusIcon = 'lock';
-          // }
-          // else{
-          //   this.statusIcon = 'check-circle';
-          // }
-          //TODO: use api to get the url to the profile img
+          this.status = dict[newValue.status.toLowerCase()];  
           var avatar = this.$$('.avatar');
           if(!!newValue.avatarurl){
             avatar.style.backgroundImage = 'url(' + newValue.avatarurl + ')';
@@ -186,9 +171,7 @@
 
           var updateTime = function(){
             that.fromnow = moment(that.updatedAt).fromNow();
-            console.log(that.fromnow);
           };
-          // setIntervalByTimeout(updateTime, interval);
 
           if(!this.updateTimeRunning){
             setIntervalByTimeout(updateTime, interval);
