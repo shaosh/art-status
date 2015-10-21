@@ -1413,7 +1413,8 @@
             deferred.reject(error);
           }
           else{
-            defer.resolve(JSON.parse(res));
+            var result = typeof res === 'string' ? JSON.parse(res) : res;
+            defer.resolve(result);
           }
         });
         return defer.promise;
