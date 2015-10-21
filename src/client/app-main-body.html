@@ -610,8 +610,11 @@
         var that = this;
         this.getCurrJob().then(
           function(job){
-            if(job.status.toLowerCase() !== STATUSESTEXT.DONE){
+            if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
               that.addCloseCard();
+            }
+            else if(job.status.toLowerCase() === STATUSESTEXT.LOCKED){
+              that.showAlert('This job has been locked by ' + that.getUserName(job.lockerId) + '. It needs to be unlocked before closing.');
             }
             else{
               that.showAlert('This job has already been closed.');
