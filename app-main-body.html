@@ -123,6 +123,10 @@
       display:none;
       margin-top: 5px!important;
     }
+    #job-desc{
+      margin-top:-29px;
+      margin-left:100px;
+    }
 	</style>
 	<template>
 		<div id="mainContainer">
@@ -146,8 +150,8 @@
         </div>
         <div class="card-content">
           <p>Design Name: <span>{{jobname}}</span></p>
-          <p>Primary Assigne: <span>{{username}}</span></p>
-          <p>Task Details: <span>{{description}}</span></p>
+          <p>Primary Assignee: <span>{{username}}</span></p>
+          <p>Task Details: <div id="job-desc"></div></p>
           <p>Task Status: <span>{{status}}</span></p>                  
         </div>
       </paper-card>
@@ -425,9 +429,11 @@
           this.job.updatedAt = this.time = obj.updatedAt;
           this.job.assigneeId = this.assigneeid = obj.assigneeId;
           this.job.username = this.username = obj.username;
-          this.job.description = this.description = obj.description.replace(/@@/g, '<br>');
+          this.job.description = this.description = obj.description;          
           this.job.status = this.status = obj.status;
           this.job = JSON.parse(JSON.stringify(this.job));
+          var desc = obj.description.replace(/@@/g, '<br>');
+          document.getElementById('job-desc').innerHTML = desc;
         }
       },
       getCards: function(){
@@ -500,7 +506,7 @@
           }
           else{
             outputError('GetCurrJob Error: ' + !!error ?  error : response.statusCode);
-            defer.reject('GetCurrJob Error: ' + !!error ?  error : response.statusCode)
+            defer.reject('GetCurrJob Error: ' + !!error ?  error : response.statusCode);
           }
         });
         return defer.promise;

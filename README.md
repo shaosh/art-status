@@ -14,8 +14,8 @@
   3. The Order must be named in format of [6-digit-order-number] - [order name(can be anything you want)].
   4. The pdf file must have extension name ".pdf".
 5. Latest App Download Link:
-	* URL: http://pan.baidu.com/s/1v6Y8Q
-	* Password: hjhz
+	* URL: http://pan.baidu.com/s/1dD5AsNZ
+	* Password: fljd
 	* Steps to download: 
 	  1. Go to the link
 	  2. Put the password in the textbox and click the blue button
