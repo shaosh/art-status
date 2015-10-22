@@ -425,7 +425,7 @@
           this.job.updatedAt = this.time = obj.updatedAt;
           this.job.assigneeId = this.assigneeid = obj.assigneeId;
           this.job.username = this.username = obj.username;
-          this.job.description = this.description = obj.description;
+          this.job.description = this.description = obj.description.replace(/@@/g, '<br>');
           this.job.status = this.status = obj.status;
           this.job = JSON.parse(JSON.stringify(this.job));
         }
@@ -841,7 +841,7 @@
         }
       },
       verifyRequiredPathFile: function(){
-        return (!!localStorage.coreldrawPath && !!localStorage.targetFolderPath && !!localStorage.sourceFolderPath && !!localStorage.cdrappName && !!isValid(localStorage.coreldrawPath) && !!isValid(localStorage.targetFolderPath) && !!isValid(localStorage.sourceFolderPath) && !!pathExists.sync(localStorage.coreldrawPath) && !!pathExists.sync(localStorage.targetFolderPath) && !!pathExists.sync(localStorage.sourceFolderPath) && !!fileExists(localStorage.cdrappName));
+        return (!!localStorage.coreldrawPath && !!localStorage.targetFolderPath && !!localStorage.sourceFolderPath && !!localStorage.cdrappName && !!pathExists.sync(localStorage.coreldrawPath) && !!pathExists.sync(localStorage.targetFolderPath) && !!pathExists.sync(localStorage.sourceFolderPath) && !!fileExists(localStorage.cdrappName));
       },
       tabObserver: function(newValue, oldValue){
         var that = this;

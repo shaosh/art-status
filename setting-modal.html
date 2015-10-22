@@ -40,8 +40,7 @@
     </paper-dialog>
 	</template>
 	<script>		
-		var isValid = require('./node_modules/is-valid-path'),
-				fileExists = require('./node_modules/file-exists'),
+		var fileExists = require('./node_modules/file-exists'),
 				pathExists = require('./node_modules/path-exists'),
 				CDRNAMEEXE = 'CorelDRW.exe',
         CDRNAMEAPP = 'CorelDRW.app',
@@ -187,7 +186,7 @@
 				if(this.coreldrawPath === ''){
 					result = true;
 				}
-				else if(!!isValid(this.coreldrawPath) && !!pathExists.sync(this.coreldrawPath.toLowerCase())){
+				else if(!!pathExists.sync(this.coreldrawPath.toLowerCase())){
 					if(this.cdrExists(this.coreldrawPath)){
 						result = true;
 					}
@@ -210,7 +209,7 @@
       	if(this.targetFolderPath === ''){
 					result = true;
 				}
-				else if(!!isValid(this.targetFolderPath) && !!pathExists.sync(this.targetFolderPath.toLowerCase())){
+				else if(!!pathExists.sync(this.targetFolderPath.toLowerCase())){
 					result = true;					
 				}
 				else{
@@ -226,7 +225,7 @@
         if(this.sourceFolderPath === ''){
           result = true;
         }
-        else if(!!isValid(this.sourceFolderPath) && !!pathExists.sync(this.sourceFolderPath.toLowerCase())){
+        else if(!!pathExists.sync(this.sourceFolderPath.toLowerCase())){
           result = true;          
         }
         else{
