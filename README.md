@@ -11,5 +11,13 @@
 4. Note:
   1. The CorelDrw folder path in the Setting modal has to be the path of folder which contains the CorelDRW.exe or CorelDRW.app, but not the path to CorelDRW.exe or CorelDRW.app.
   2. The .cdr file must be named in format of <6-digit-order-number>.cdr. E.g., the cdr file for Order 100007 has to be 100007.cdr. 
-  3. The Order must be named in format of <6-digit-order-number> \- <order name>.
+  3. The Order must be named in format of <6-digit-order-number> -- <order name>.
   4. The pdf file must have extension name ".pdf".
+5. Latest App Download Link:
+	* URL: http://pan.baidu.com/s/1v6Y8Q
+	* Password: hjhz
+	* Steps to download: 
+	  1. Go to the link
+	  2. Put the password in the textbox and click the blue button
+	  3. Click the gray button with text "(96M)"
+	  4. Click the right gray button in the popup to start download

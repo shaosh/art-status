@@ -39,5 +39,7 @@ nwjs-v0.12.3-win-x64
 *.exe
 *.pak
 *.nw
+*.dat
+*.evb
 
 
