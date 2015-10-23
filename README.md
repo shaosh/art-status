@@ -13,11 +13,7 @@
   2. The .cdr file must be named in format of [6-digit-order-number].cdr. E.g., the cdr file for Order 100007 has to be 100007.cdr. 
   3. The Order must be named in format of [6-digit-order-number] - [order name(can be anything you want)].
   4. The pdf file must have extension name ".pdf".
-5. Latest App Download Link:
-	* URL: http://pan.baidu.com/s/1dD5AsNZ
-	* Password: fljd
-	* Steps to download: 
-	  1. Go to the link
-	  2. Put the password in the textbox and click the blue button
-	  3. Click the gray button with text "(96M)"
-	  4. Click the right gray button in the popup to start download
+5. Latest Version:
+  * 10222015_1: https://drive.google.com/open?id=0B6CgclqTFikGX2UybnpyTTg3MHc
+    * Fixed Issue: #3, #5, #14
+6. Previous Version:
