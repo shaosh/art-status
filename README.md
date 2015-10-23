@@ -1,4 +1,5 @@
 # art-status
+
 1. UserName: kevin, david, alex
 	 * UserEmails: kevin_he@gmail.com, david.edward73@designashirt.com, alexst@hotmail.com
 2. Password: 123456
@@ -14,7 +15,8 @@
   3. The Order must be named in format of [6-digit-order-number] - [order name(can be anything you want)].
   4. The pdf file must have extension name ".pdf".
 5. Latest Version:
-  * 10222015_2: https://drive.google.com/open?id=0B6CgclqTFikGTVhQZ1dnaEtMOGs
-    * Fixed Issue: #9, #16
+  * 10222015_3: https://drive.google.com/open?id=0B6CgclqTFikGTVhQZ1dnaEtMOGs
+    * Fixed Issue: #11, #15, #17
 6. Previous Version:
-  * 10222015_1: Fixed Issue: #3, #5, #14
+  * 10222015_1: Fixed Issue: #2, #3, #5, #14
+  * 10222015_2: Fixed Issue: #9, #16

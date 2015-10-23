@@ -29,6 +29,7 @@
 		.checkIcon{
 			color: #7EC1F4;
 			display:none;
+      cursor: pointer;
 		}
 		.addIcon:hover{
 			cursor: pointer;
@@ -44,7 +45,7 @@
           	<span class="userName" data-userid$="{{item.userId}}">{{item.username}}</span>
           	<span class="assignButton">
           		<iron-icon class="addIcon" icon="add-circle-outline" on-click="assign"></iron-icon>
-          		<iron-icon class="checkIcon" icon="check-circle"></iron-icon>
+          		<iron-icon class="checkIcon" icon="check-circle" on-click="cancel"></iron-icon>
           	</span>
           </div>
         </template>
@@ -74,36 +75,42 @@
         }
       },
       assign: function(e){
-      	if(!!this.job){
-      		var button = Polymer.dom(e).localTarget;
-      		var span = button.parentElement.previousElementSibling;
-      		var id = span.getAttribute('data-userid');
+        this.setAssignee(e, true);
+      },
+      cancel: function(e){
+        this.setAssignee(e, false);
+      },
+      setAssignee: function(e, assign){
+        if(!!this.job){
+          var button = Polymer.dom(e).localTarget;
+          var span = button.parentElement.previousElementSibling;
+          var id = !!assign ? span.getAttribute('data-userid') : '';
 
-      		var name = span.innerHTML;
-      		var that = this;
-      		var options = {
-      			url: CARD_URL.replace('{jobId}', this.job.jobId),
-      			headers: HEADER,
-      			method: 'POST',
-      			json: true,
-      			body: {
-      				"job": {
-		             "status": dict[this.job.status.toLowerCase()],
-		             "assigneeId": id
-		          }
-      			}
-      		};
-      		request(options, function(error, response, body){
-      			if(!error && response.statusCode === 200){
+          var name = span.innerHTML;
+          var that = this;
+          var options = {
+            url: CARD_URL.replace('{jobId}', this.job.jobId),
+            headers: HEADER,
+            method: 'POST',
+            json: true,
+            body: {
+              "job": {
+                 "status": dict[this.job.status.toLowerCase()],
+                 "assigneeId": id
+              }
+            }
+          };
+          request(options, function(error, response, body){
+            if(!error && response.statusCode === 200){
               if(body.statusId === STATUSES.LOCKED || body.statusId === STATUSES.DONE){
                 document.getElementById('assign-modal').close();
                 that.domHost.showAlert('Assignment failed because this job is ' + body.status.toLowerCase());
                 return;
               }
-      				that.clearAll();
-              that.job.username = body.username;
-              that.job.assigneeId = body.assigneeId; 
-              that.job.email = body.email;
+              that.clearAll();
+              that.job.username = body.username || '';
+              that.job.assigneeId = body.assigneeId || '';
+              that.job.email = body.email || '';
               that.job = JSON.parse(JSON.stringify(that.job));
               var temp = [];
               that.jobs.forEach(function(job){
@@ -113,16 +120,21 @@
                 temp.push(job);
               });
               that.jobs = temp;
-			        button.style.display = 'none';
-			        button.nextElementSibling.style.display = 'block';  
-              that.domHost.showToast('Assigned the job to ' + name);
-      			}
-      			else{
+              button.style.display = 'none';
+              if(!!assign){
+                button.nextElementSibling.style.display = 'block';  
+                that.domHost.showToast('Assigned the job to ' + name);
+              }
+              else{
+                button.previousElementSibling.style.display = 'block';  
+                that.domHost.showToast('The assignee of this job has been removed.');
+              }              
+            }
+            else{
               that.domHost.showToast('Failed to assign the job');
-      			}
-      		});
-      	}
-      	
+            }
+          });
+        }        
       },
       renderAssignee: function(newValue, oldValue){
     		this.clearAll();

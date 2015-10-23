@@ -109,9 +109,9 @@
     }
     #toast{
       position:absolute;
-      width: 200px;
+      width: 300px;
       left: 50%;
-      margin-left: -100px;
+      margin-left: -150px;
       text-align: center;
       background: #4285f4;
     }
@@ -457,6 +457,7 @@
                 that.$.showCommentButton.style.display = 'none';
                 that.$.commentForm.style.display = 'none';
                 that.$.reopenWrapper.style.display = 'block';
+                that.$.reopenButton.removeAttribute('disabled');
               }
               else{
                 that.$.showCommentButton.style.display = 'block';
@@ -472,6 +473,7 @@
                 that.$.showCommentButton.style.display = 'none';
                 that.$.commentForm.style.display = 'none';
                 that.$.reopenWrapper.style.display = 'block';
+                that.$.reopenButton.removeAttribute('disabled');
               }
               else{
                 that.$.showCommentButton.style.display = 'block';
@@ -589,6 +591,7 @@
       },
       reopenJob: function(){
         var that = this;
+        this.$.reopenButton.setAttribute('disabled', true);
         this.getCurrJob().then(
           function(job){
             if(job.status.toLowerCase() === STATUSESTEXT.DONE){
@@ -694,7 +697,8 @@
             if(!!body && !!body.cards && body.cards.length > 0){
               if(dict[body.status.toLowerCase()] === STATUSES.DONE){
                 that.$.commentForm.style.display = 'none';
-                that.$.reopenWrapper.style.display = 'block';               
+                that.$.reopenWrapper.style.display = 'block';   
+                that.$.reopenButton.removeAttribute('disabled');            
                 that.status = STATUSESTEXT.DONE;
               }
               else{

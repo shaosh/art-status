@@ -183,7 +183,7 @@
       },
       validateCdr: function(){
       	var result;
-				if(this.coreldrawPath === ''){
+				if(this.coreldrawPath === '' && this.cdrExists(localStorage.coreldrawPath)){
 					result = true;
 				}
 				else if(!!pathExists.sync(this.coreldrawPath.toLowerCase())){
@@ -206,7 +206,7 @@
       },
       validateTargetFolder: function(){
       	var result;
-      	if(this.targetFolderPath === ''){
+      	if(this.targetFolderPath === '' && cdrExists(localStorage.targetFolderPath)){
 					result = true;
 				}
 				else if(!!pathExists.sync(this.targetFolderPath.toLowerCase())){
@@ -222,7 +222,7 @@
       },
       validateSourceFolder: function(){
         var result;
-        if(this.sourceFolderPath === ''){
+        if(this.sourceFolderPath === '' && cdrExists(localStorage.sourceFolderPath)){
           result = true;
         }
         else if(!!pathExists.sync(this.sourceFolderPath.toLowerCase())){
