@@ -113,7 +113,7 @@
 
       getUpdateNum: function(userid){        
         var that = this,
-            uid = this.leftTab === LEFTTABS.MINE ? userid : null;
+            type = this.leftTab === LEFTTABS.MINE ? 'me' : 'all' ;
 
         var options = {
           url: JOBREFRESH_URL,
@@ -122,7 +122,8 @@
           json: true,
           body: {
             'companyId': this.selectedCompany.id,
-            'userId': uid            
+            'userId': userid,
+            'type': type
           }
         };
         request(options, function(error, response, body){

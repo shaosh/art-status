@@ -544,17 +544,26 @@
       },
       submitComment: function(e){
         var that = this;
+        this.$.sumbitCommentButton.setAttribute('disabled', true);
+        if(!this.commentText){
+          return;
+        }
         this.getCurrJob().then(
           function(job){
             if(job.status.toLowerCase() !== STATUSESTEXT.DONE){
               that.addCard(STEPS.COMMENT, that.commentText, '', null, dict[that.status.toLowerCase()], '');  
               that.commentText = '';
+             
             }
             else{
+              
               that.showAlert('This job has already been closed.');
             }
           }, 
-          function(e){outputError(e)}
+          function(e){
+            outputError(e); 
+            that.commentText = '';
+          }
         );        
       },
       closeJob: function(){ 
