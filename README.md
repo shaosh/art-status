@@ -15,7 +15,7 @@
   3. The Order must be named in format of [6-digit-order-number] - [order name(can be anything you want)].
   4. The pdf file must have extension name ".pdf".
 5. Latest Version:
-  * 10222015_3: https://drive.google.com/open?id=0B6CgclqTFikGTVhQZ1dnaEtMOGs
+  * 10222015_3: https://drive.google.com/open?id=0B6CgclqTFikGMy1JZ0lxdmdOU3M
     * Fixed Issue: #11, #15, #17
 6. Previous Version:
   * 10222015_1: Fixed Issue: #2, #3, #5, #14
