@@ -625,6 +625,9 @@
             stepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.ARTREVISION : STEPS.PROOF,
             nextStepid = e.model.item.stepId === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW,
             isApprove = Polymer.dom(e).localTarget.className.indexOf('approveButton') > -1;
+        var button = Polymer.dom(e).localTarget;
+        button.setAttribute('disabled', true);
+        button.parentElement.style.display = 'none';
         this.getCurrJob().then(
           function(job){
             if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
@@ -883,7 +886,7 @@
                 targetFile = localStorage.targetFolderPath + SLASH + jobid + '.cdr';
 
             if(!fileExists(sourceFile)){
-              alert(jobid + '.cdr does not exist in ' + localStorage.sourceFolderPath);
+              that.showAlert(jobid + '.cdr does not exist in ' + localStorage.sourceFolderPath);
               return;
             }
             this.startCopyFlow(sourceFile, targetFile);
