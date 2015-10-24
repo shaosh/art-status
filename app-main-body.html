@@ -630,6 +630,7 @@
         button.parentElement.style.display = 'none';
         this.getCurrJob().then(
           function(job){
+            button.removeAttribute('disabled');
             if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
               var isLast = that.isLastNonComment(stepid, e.model.item.index, job.cards);
               if(!!isLast){
@@ -935,7 +936,7 @@
         var that = this,
             cdrname = inputCdr.value,
             pdfname = inputPdf.value,
-            expectCdrname = this.job.name.substring(0, 6) + '.cdr',
+            expectCdrname = this.job.name.substring(0, 6).toLowerCase() + '.cdr',
             button = document.getElementById('manualUploadButton'),
             errmsg = document.getElementById('manualModalErrMsg');
         if(!!cdrname && expectCdrname !== cdrname.substr(-10).toLowerCase()){
