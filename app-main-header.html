@@ -57,7 +57,7 @@
         <iron-icon icon="communication:message"></iron-icon>
         <paper-tooltip>Main Panel</paper-tooltip>
       </paper-tab>
-      <paper-tab>
+      <paper-tab on-click="openAssignModal">
         <iron-icon icon="social:person-add"></iron-icon>
         <paper-tooltip>Assign Designer</paper-tooltip>
       </paper-tab>
@@ -202,7 +202,13 @@
         else{
           this.viewerText = '';
         }
-      }
+      },
+      openAssignModal: function(){
+        if(this.tab !== TABS.ASSIGN || document.getElementById('assign-modal').style.display !== 'none'){
+          return;
+        }
+        document.getElementById('assign-modal').open();
+      },
     });
   </script>
 </dom-module>
