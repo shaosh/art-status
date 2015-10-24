@@ -10,6 +10,15 @@
       left: 0;
       z-index: 9999;
     }
+    #appblock{
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 10;
+      background-color: black;
+    } 
   </style>
 
 	<template>
@@ -18,6 +27,7 @@
 	      <app-drawer-panel jobs="{{currJobs}}" selected-job="{{selectedJob}}" users="{{users}}" selected-company="{{selectedCompany}}"></app-drawer-panel>
 	    </div>      
 	  </app-header>
+    <div id="appblock"></div>
     <login-modal></login-modal>
 	</template>
 
@@ -28,15 +38,17 @@
       ready: function(){
         var that = this;
         if(!!localStorage.username && !!localStorage.userId && !!localStorage.loginTime && moment().diff(moment(localStorage.loginTime), 'days') <= 1){
+          document.getElementById('appblock').style.display = 'none';
           if(!this.username){
             this.username = localStorage.username;
           }
           this.getData();
         }
         else{
+          document.getElementById('appblock').style.display = 'block';
           document.getElementById('login-modal').open();
         }  
-      },        
+      },   
 
       getData: function(){
         var that = this;

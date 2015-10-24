@@ -148,11 +148,11 @@
         <div class="header">
           Task Overview
         </div>
-        <div class="card-content">
+        <div class="card-content" style="padding-bottom:30px">
           <p>Design Name: <span>{{jobname}}</span></p>
-          <p>Primary Assignee: <span>{{username}}</span></p>
-          <p>Task Details: <div id="job-desc"></div></p>
-          <p>Task Status: <span>{{status}}</span></p>                  
+          <p>Primary Assignee: <span>{{username}}</span></p>          
+          <p>Task Status: <span>{{status}}</span></p>       
+          <p>Task Details: <div id="job-desc"></div></p>           
         </div>
       </paper-card>
 			<div class="viewPanel"> 
@@ -187,7 +187,7 @@
       </template>
     </div>
     <alert-modal text="{{alertText}}"></alert-modal>
-    <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}"></assign-modal>
+    <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}" username="{{username}}"></assign-modal>
     <uploading-modal></uploading-modal>
     <paper-dialog id="change-modal" modal>
       <h2>Changes Detected</h2>
@@ -424,6 +424,7 @@
         }
       },
       setJobData: function(obj){
+        var that = this;
         if(!!obj){
           this.job.jobname = this.jobname = obj.name;
           this.job.updatedAt = this.time = obj.updatedAt;
@@ -433,8 +434,19 @@
           this.job.status = this.status = obj.status;
           this.job = JSON.parse(JSON.stringify(this.job));
           var desc = obj.description.replace(/@@/g, '<br>');
-          document.getElementById('job-desc').innerHTML = desc;
+          document.getElementById('job-desc').innerHTML = desc;  
+          this.updateJobViewPanel(this.job);
         }
+      },
+      updateJobViewPanel: function(newjob){
+        var temp = [];
+        this.jobs.forEach(function(job){
+          if(job.jobId === newjob.jobId){
+            job = newjob;
+          }
+          temp.push(job);
+        });
+        this.jobs = temp;
       },
       getCards: function(){
         var options = {
@@ -571,7 +583,7 @@
       closeJob: function(){ 
         var that = this;
         this.getCurrJob().then(
-          function(job){
+          function(job){            
             if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
               that.addCloseCard();
             }

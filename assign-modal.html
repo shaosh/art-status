@@ -72,6 +72,10 @@
         job: {
         	type: Object,
           notify: true
+        }, 
+        username: {
+          type: String, 
+          notify: true
         }
       },
       assign: function(e){
@@ -109,17 +113,11 @@
               }
               that.clearAll();
               that.job.username = body.username || '';
+              that.username = body.username || '';
               that.job.assigneeId = body.assigneeId || '';
               that.job.email = body.email || '';
               that.job = JSON.parse(JSON.stringify(that.job));
-              var temp = [];
-              that.jobs.forEach(function(job){
-                if(job.jobId === that.job.jobId){
-                  job = that.job;
-                }
-                temp.push(job);
-              });
-              that.jobs = temp;
+              that.domHost.updateJobViewPanel(that.job);
               button.style.display = 'none';
               if(!!assign){
                 button.nextElementSibling.style.display = 'block';  

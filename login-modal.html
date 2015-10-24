@@ -6,14 +6,14 @@
 		paper-dialog{
 			width:50%;
 			height:50%;
-		}
+		}		
 		#errMsg{
 			display: none;
 			color: red;
 		}
-	</style>
+	</style>	
 	<template>
-		<paper-dialog id="login-modal" modal>
+		<paper-dialog id="login-modal" modal autoFitOnAttach>
 			<paper-input id="idInput" label="User ID/Email" value="{{userid}}" error-message="{{idErrMsg}}" on-keypress="keySubmit">
 				<paper-icon-button suffix on-click="clearInput" icon="clear" alt="clear" title="clear" tabindex="0"></paper-icon-button>
 			</paper-input>
@@ -92,6 +92,7 @@
         				document.getElementById('loginCloseButton').removeAttribute('disabled');
         				that.$.errMsg.style.display = 'none';
         				that.password = '';
+        				document.getElementById('appblock').style.display = 'none';
         				document.getElementById('login-modal').close();
               }
               else{

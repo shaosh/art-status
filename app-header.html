@@ -13,7 +13,7 @@
 	</style>
 	
   <template>
-    <paper-header-panel mode="seamed">
+    <paper-header-panel mode="seamed" id="app-header">
       <paper-toolbar>
         <div>{{username}}</div>
     	  <div class="horizontal-center">
@@ -75,6 +75,8 @@
         localStorage.username = '';
         document.getElementById('login-modal').open();
         document.getElementById('loginCloseButton').setAttribute('disabled', true);
+        document.getElementById('appblock').style.display = 'block';
+
         for(var i = 0; i < timeouts.length; i++){
           clearTimeout(timeouts[i]);
         }

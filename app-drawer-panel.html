@@ -225,7 +225,7 @@
       },
 
       addSelectedBackground: function(jobid){
-        this.$.jobRepeat.render();
+        this.renderJobRepeat();
         var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
         if(typeof jobcards === 'undefined' || jobcards.length === 0){
           return;
@@ -326,7 +326,7 @@
 
       filterChanged: function(newValue, oldValue){
         if(!!newValue || (!!oldValue && newValue === '')){
-          this.$.jobRepeat.render();
+          this.renderJobRepeat();
           var selectedJobCard = document.querySelector('.job-card.selected');
           if(!selectedJobCard){
             return;
@@ -341,7 +341,10 @@
           }
         }
       },
-    
+
+      renderJobRepeat: function(){
+        this.$.jobRepeat.render();
+      },
       properties: {
         jobs:{
           type: Array,
