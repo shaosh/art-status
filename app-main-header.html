@@ -156,6 +156,7 @@
           this.assignee = newValue.username;
           this.status = newValue.status;
           this.statusTitle = this.status + '. Updated at ' + this.time; 
+          this.tab = TABS.HISTORY;
           this.getRelation();
         }
       },
@@ -190,7 +191,7 @@
       },
       showRelation: function(){
         if(!!this.relations && this.relations.length > 0){
-          this.domHost.setOthers(this.relations, this.job);
+          this.domHost.setOthers(this.job);
         }        
       },
       viewerObserver: function(newValue, oldValue){

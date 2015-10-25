@@ -97,7 +97,7 @@
       </paper-header-panel>
       <paper-header-panel main mode="standard">
         <div class="paper-header">
-          <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}" company="{{selectedCompany}}" viewers="{{viewers}}"></app-main-header>
+          <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}" company="{{selectedCompany}}" viewers="{{viewers}}" relations="{{otherJobs}}"></app-main-header>
         </div>
         <div class="content">
           <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}" viewers="{{viewers}}"></app-main-body>
@@ -176,7 +176,19 @@
         this.prevTab = LEFTTABS.MINE;
         this.displayJobs = this.mineJobs;
         if(this.mineJobs.length > 0){
-          this.selectedJob = this.selectedJob || this.displayJobs[0];
+          var contain = false;
+          for(var i = 0; i < this.mineJobs.length; i++){
+            if(this.mineJobs[i].jobId === this.selectedJob.jobId){
+              contain = true;
+              break;
+            }
+          }
+          if(!contain){
+            this.addSelectedBackground('');
+          }
+          else{
+            this.addSelectedBackground(this.selectedJob.jobId);
+          }
         }        
       },
 
@@ -185,18 +197,14 @@
           return;
         }
         this.prevTab = LEFTTABS.OTHERS;
-        if(this.otherJobs.length > 0){
-          this.displayJobs = this.otherJobs;
-          this.selectedJob = this.selectedJob || this.displayJobs[0];
-        }        
+        this.displayJobs = this.otherJobs;
+        this.addSelectedBackground(this.selectedJob.jobId);
       },
 
-      setOthers: function(list, job){
-        if(list.length > 0){
-          this.displayJobs = list;
-          this.selectedJob = job;  
-          this.addSelectedBackground(job.jobId);        
-        }
+      setOthers: function(job){
+        this.displayJobs = this.otherJobs;
+        this.selectedJob = job;  
+        this.addSelectedBackground(job.jobId);        
         this.leftTab = LEFTTABS.OTHERS;
         this.prevTab = LEFTTABS.OTHERS;
       },
@@ -225,6 +233,11 @@
 
       addSelectedBackground: function(jobid){
         this.renderJobRepeat();
+        if(jobid === ''){
+          this.unselectPrevJob();
+          return;
+        }
+
         var jobcards = Polymer.dom(this.root).querySelectorAll('job-card');
         if(typeof jobcards === 'undefined' || jobcards.length === 0){
           return;
