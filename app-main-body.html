@@ -426,7 +426,7 @@
       setJobData: function(obj){
         var that = this;
         if(!!obj){
-          this.job.jobname = this.jobname = obj.name;
+          this.job.jobname = this.jobname = obj.name.replace(/^request : /i, '');
           this.job.updatedAt = this.time = obj.updatedAt;
           this.job.assigneeId = this.assigneeid = obj.assigneeId;
           this.job.username = this.username = obj.username;
@@ -972,6 +972,12 @@
               document.getElementById('manual-modal').open();
               var inputCdr = document.getElementById('manualModalCdrInput');
               var inputPdf = document.getElementById('manualModalPdfInput');
+              var button = document.getElementById('manualUploadButton');
+              var errmsg = document.getElementById('manualModalErrMsg');
+              inputCdr.value = '';
+              inputPdf.value = '';
+              errmsg.style.display = 'none';
+              button.setAttribute('disabled', true);
               inputCdr.onchange = function(){
                 that.enableManualUploadButton(inputCdr, inputPdf);
               };
@@ -1110,7 +1116,7 @@
         var watcher = chokidar.watch(dst, {
           persistent: true
         });
-        this.showToast('Start watching ' + dst);
+        this.showToast('Start watching ' + path.basename(dst));
         watcher.on('change', function(path){
           that.changedFile = path;
           that.getCurrJob().then(
