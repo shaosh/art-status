@@ -1265,6 +1265,7 @@
             function(e){
               outputError(e);
               that.showToast('Fail to Complete Upload');
+              throw new Error('Fail to Complete Upload. Abort promise chain');
               that._removeUploading();
               defer.reject(e);
             }
@@ -1288,6 +1289,7 @@
       	boxView.uploadFile(path, option, function(err, res){
       		if(!!err){
             that.showToast('Fail to Complete Upload');
+            throw new Error('Fail to Complete Upload. Abort promise chain');
             that._removeUploading();
     				var error = 'Unable to upload from local path: ' + err;
       			deferred.reject(error);
