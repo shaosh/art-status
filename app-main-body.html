@@ -1,6 +1,7 @@
 <link rel="import" href="./alert-modal.html">
 <link rel="import" href="./assign-modal.html">
 <link rel="import" href="./uploading-modal.html">
+<link rel="import" href="./loading-modal.html">
 <link rel="import" href="./msg-card.html">
 
 <dom-module id="app-main-body">
@@ -189,6 +190,7 @@
     <alert-modal text="{{alertText}}"></alert-modal>
     <assign-modal users="{{users}}" job="{{job}}" assigneeid="{{assigneeid}}" jobs="{{jobs}}" username="{{username}}"></assign-modal>
     <uploading-modal></uploading-modal>
+    <loading-modal></loading-modal>
     <paper-dialog id="change-modal" modal>
       <h2>Changes Detected</h2>
       <p>
@@ -459,6 +461,7 @@
           }
         },
           that = this;
+        console.log('request body', options);
         request(options, function(error, response, body){
           var obj = body;
           console.log('getCards body', body)
@@ -838,6 +841,7 @@
             that.turnOnCardAction(list);              
             that.cards = list;              
           } 
+          that.domHost.removeLoading();
         });       
       },
       toggleLockJob: function(lock){

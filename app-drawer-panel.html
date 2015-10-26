@@ -7,37 +7,30 @@
     paper-tab{
       background: #5E6FC7;
       color:#fff;
-    }
-    
+    }    
     :host{
       --paper-tabs-selection-bar-color: #7EC1F4;
-    }
-    
+    }    
     #newjob{
       padding: 10px 20px;
       text-align: center;
       background-color: #F2FD8E;
       display: none;
     }
-
     #newjobButton:hover{
       color: #132584;
       font-weight: bold;
-    }
-    
+    }    
     .drawer{
       box-sizing:content-box;
-    }
-    
+    }    
     #showFilterButton{
       width: 100%;
     }
-
     #filterWrapper{
       display: none;
       overflow: hidden;
     }
-
     #filterInput{
       float: left;
       width:75%;
@@ -45,7 +38,6 @@
       box-sizing: border-box;
       height: 60px;
     }
-
     #hideFilterButton{
       width: 15%;
       float: right;
@@ -54,16 +46,16 @@
       height: 60px;
       padding-top: 18px;
     }
-
     job-card{
       cursor: pointer;
     }
-
     .content{
       width:100%;
       height:auto;
     }
-    
+    paper-header-panel.drawer{
+      position:relative;
+    }    
   </style>
   
   <template>
@@ -227,8 +219,22 @@
 
       addSelectedClass: function(newValue, oldValue){
         if(!!newValue){
+          console.log('new old', newValue, oldValue)
+          if(!!oldValue && newValue.jobId !== oldValue.jobId){
+            this.loading();
+          }          
           this.addSelectedBackground(newValue.jobId);
         }        
+      },
+
+      loading: function(){
+        var dialog = document.getElementById('loading-modal');
+        if (!!dialog) {
+          dialog.open();
+        }
+      },
+      removeLoading: function(){
+        document.getElementById('loading-modal').close();
       },
 
       addSelectedBackground: function(jobid){
