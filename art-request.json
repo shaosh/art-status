@@ -2,8 +2,8 @@
   "/art/login": {// user login
       "method": "post",
       "request-body": {
-        "username": "admin",
-        "password": "gjaI2vynOT0kyHGi2pioTYcy6Sc",
+        "username": "kevin",
+        "password": "gjaI2vynOT0kyHGi2pioTYcy6Sc=",
         "email": "admin-art@designashirt.com" // username or email can only choose one
       },
       "response": {
@@ -33,9 +33,9 @@
   "/art/signup": {
     "method": "post",
     "request-body": {
-      "username": "admin",
-      "password": "gjaI2vynOT0kyHGi2pioTYcy6Sc",
-      "email": "admin-art@designashirt.com"
+      "username": "kevin",
+      "password": "gjaI2vynOT0kyHGi2pioTYcy6Sc=",
+      "email": "kevin_he@gmail.com"
     },
     "response": {
       "signup": {
@@ -101,7 +101,8 @@
     "method": "post",
     "request-body": {
       "companyId": 2,
-      "userId": "367a99bd7a594904a49afa52d35a74d4" //default userId is null, this will refresh all job list that updated; if has userId, then just refresh job updated of mine.
+      "userId": "367a99bd7a594904a49afa52d35a74d4",
+      "type": "all" // another type is me
     },
     "response": {
       "count": {
@@ -126,7 +127,7 @@
       }
     }
   },
-  "/job/{userId}/follow": { // follow/unfollow a job
+  "/job/follow/{userId}": { // follow/unfollow a job
       "method": "post",
       "request-body": {
         "jobId": "367a99bd7a594904a49afa52d35a74d4",   //required
@@ -263,15 +264,17 @@
         "request-body": { // anyone of the following params is ok
           "job": {
              "status": 1, // from 1~4
-             "assigneeId": "57jil99bd7a594904a49afa52d35a74d4"
+             "assigneeId": "57jil99bd7a594904a49afa52d35a74d4"// if assigneeId = "", will works for delete assignee
           },
           "card":{
-            "updaterId": "hkgkjbdasfy97869dsfaf",
-            "step": 1, // from 1 ~ 11
+            "updaterId": "hkgkjbdasfy97869dsfaf", // if
             "comment": "this need to be fixed",
+            "feedback": "XXXXXXXX",
+            "step": 1, // from 1 ~ 12
             "documentId": "e50e0481a74e4e9082ed659965c6890d",
             "viewUrl": "string",
-            "approve": 1 //1 is approve, 0 is reject
+            "approve": 1, //1 is approve, 0 is reject
+            "pending": true // turn on/off proof or customer review pending status
           }
         },
         "response": {
@@ -369,7 +372,7 @@
         }
       }
   },
-  "/job/{userId}": { // get job list of mine
+  "/job/me/{userId}": { // get job list of mine
       "method": "get",
       "response": [{
         "jobId": {

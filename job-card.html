@@ -122,11 +122,12 @@
       updateStatusIcon: function(status){
         if(!status){return;}
         var stat = status.toLowerCase();
-        if(stat === STATUSESTEXT.WORKING){
+        if(stat === STATUSESTEXT.WORKING && !!this.username){
           this.statusIcon = 'tab';
         } 
-        else if(stat === STATUSESTEXT.WAITING){
+        else if(stat === STATUSESTEXT.WORKING && !this.username){
           this.statusIcon = 'schedule';
+          this.statusText = 'job received';
         }
         else if(stat === STATUSESTEXT.LOCKED){
           this.statusIcon = 'lock';
