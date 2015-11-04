@@ -80,6 +80,21 @@
     paper-button.green:hover {
       background: var(--paper-green-50);
     }
+    .cardVersion span.green, .cardVersion span.red, .cardVersion span.orange{
+       border-radius:5px;
+       padding:2px;
+       margin-left:5px;
+       color: white;
+    }
+    .cardVersion span.green{
+      background:var(--paper-green-500);
+    }
+    .cardVersion span.red{
+      background:var(--paper-red-500);
+    }
+    .cardVersion span.orange{
+      background:var(--paper-amber-500);
+    }
     #proofCheckbox{
       margin-bottom:20px;
       display:block;
@@ -160,25 +175,27 @@
         <template is="dom-repeat" items="{{cards}}" sort="sortCard">
           <paper-card class="cardItem" >
             <div class="header">
-              <span>{{item.title}}</span>
+              <span>{{item.title}}</span>              
             </div>
             <div class="card-content">
               <p>{{item.time}}</p>
               <p>{{item.text}}</p>
               <p style$="{{item.feedbackDisplay}}">Customer Review:&nbsp;<span>{{item.feedback}}</span></p>
               <template is="dom-if" if="{{isPdf(item.documentId)}}">
-                <div>Version: #<span class="verSpan">{{item.version}}</span></div>
+                <div class="cardVersion">Version: #<span class="verSpan">{{item.version}}</span>
+                  <span class$="{{item.badgeClass}}" style$="{{item.badgeDisplay}}">{{item.badgeText}}</span>
+                </div>
                 <div class="iframe-wrapper">
                   <iframe src="{{item.viewurl}}" allowfullscreen="allowfullscreen"></iframe>
                 </div>
               </template>
             </div>
             <div class="card-actions" style$="{{item.display}}">
-              <paper-textarea class="cardComment" label="Enter your comment" value="{{item.pdfComment}}"></paper-textarea>
+              <paper-textarea class="cardComment" label="Enter your comment" value="{{item.pdfComment}}" style$="{{item.commentInputDisplay}}"></paper-textarea>
               <paper-textarea class="customerComment" label="Enter customer's feedback" value="{{item.feedbackInput}}" style$="{{item.feedbackInputDisplay}}"></paper-textarea>
               <paper-button class="green feedbackButton" on-click="receiveFeedback" disabled?="{{item.feedbackDisabled}}" style$="{{item.feedbackButtonDisplay}}">{{item.feedbackStatus}}</paper-button>
-              <paper-button class="green approveButton" on-click="reviewArt" data-version="{{item.version}}" disabled?="{{item.disabled}}">Approve</paper-button>
-              <paper-button class="red rejectButton" on-click="reviewArt" data-version="{{item.version}}" disabled?="{{item.disabled}}">Request Change</paper-button>
+              <paper-button class="green approveButton" on-click="reviewArt" data-version="{{item.version}}" disabled?="{{item.disabled}}" style$="{{item.reviewButtonDisplay}}">Approve</paper-button>
+              <paper-button class="red rejectButton" on-click="reviewArt" data-version="{{item.version}}" disabled?="{{item.disabled}}" style$="{{item.reviewButtonDisplay}}">Request Change</paper-button>
             </div>
           </paper-card>
         </template>				 
@@ -464,7 +481,6 @@
           }
         },
           that = this;
-        console.log('request body', options);
         request(options, function(error, response, body){
           var obj = body;
           console.log('getCards body', body)
@@ -487,6 +503,7 @@
             else if(!!obj && !!obj.cards && obj.cards.length === 0){
               that.setJobData(obj);
               that.cards = [];
+              that.domHost.removeLoading();
               if(dict[that.status.toLowerCase()] === STATUSES.DONE){
                 that.$.showCommentButton.style.display = 'none';
                 that.$.commentForm.style.display = 'none';
@@ -499,11 +516,15 @@
                 that.$.commentForm.style.display = 'none';
               }
             }
+            else{
+              that.domHost.removeLoading();
+            }
             if((that.viewers.length !== obj.viewers.length) || _.difference(that.viewers, obj.viewers).length > 0){
               that.setViewers(obj.viewers);
             }             
           }
           else{
+            that.domHost.removeLoading();
             outputError('GetCards Error: ' + !!error ?  error : response.statusCode);
           }
         });
@@ -767,11 +788,14 @@
           item.feedbackDisplay = 'display:none';
           item.feedbackInputDisplay = 'display:none'; 
           item.feedbackButtonDisplay = 'display:none';  
+          item.commentInputDisplay = 'display:block';
+          item.reviewButtonDisplay = 'display:inline-block';
+          item.badgeDisplay = 'display:none';
           if(item.stepId === STEPS.COMMENT){
             item.text = 'From ' + item.username  + ':\n' + item.comment;
           }
           else if(item.stepId === STEPS.ARTREVISION){
-            item.text = item.username + ' made a revision to the art.';
+            item.text = item.username + ' made a revision to the art.';            
           }
           else if(item.stepId === STEPS.REVIEW || item.stepId === STEPS.PROOFREVIEW ){
             item.text = item.username + ' marked the pending ';            
@@ -809,7 +833,7 @@
           }
           else if(item.stepId === STEPS.PROOF){
             item.text = item.username + ' uploaded a proof.';
-            item.feedbackInputDisplay = 'display:block'; 
+            item.feedbackInputDisplay = item.commentInputDisplay = item.reviewButtonDisplay = 'display:none'; 
             item.feedbackButtonDisplay = 'display:inline-block'; 
             item.feedbackStatus = item.step + '...';
             item.feedbackDisabled = 'false';    
@@ -818,9 +842,11 @@
           else if(item.stepId === STEPS.CUSTOMERREVIEWRECEIVED){
             item.text = item.username + ' uploaded a proof.';
             item.feedbackInputDisplay = 'display:block'; 
-            item.feedbackButtonDisplay = 'display:inline-block'; 
+            item.feedbackButtonDisplay = 'display:none'; 
             item.feedbackStatus = item.step;
             item.feedbackDisabled = 'true';
+            item.commentInputDisplay = 'display:block';
+            item.reviewButtonDisplay = 'display:inline-block';
             // item.disabled = 'false';      
           }
           else if(item.stepId === STEPS.DONE){
@@ -849,7 +875,6 @@
           else if(that.status.toLowerCase() === STATUSESTEXT.WORKING){
             item.disabled = 'false';
           }
-          console.log('item.disabled', item.disabled, item.feedbackDisabled, item)
 
           if(!!item.documentId){
             count++;
@@ -868,9 +893,9 @@
           });          
         }).done(function(){
           if(list.length > 0){
-            that.turnOnCardAction(list);              
+            that.turnOnCardAction(list);  
+            that.setReviewBadge(list);            
             that.cards = list;    
-            console.log('that cards', that.cards)          
           } 
           that.domHost.removeLoading();
         });       
@@ -909,6 +934,36 @@
         if(artrevisionIndex > reviewIndex){
           list[artrevisionIndex].display = 'display:block';
         }
+      },
+      setReviewBadge: function(list){
+        if(!list){
+          return;
+        }
+        var that = this;
+        list.forEach(function(item){
+          if(item.stepId === STEPS.ARTREVISION || item.stepId === STEPS.PROOF || item.stepId === STEPS.CUSTOMERREVIEWRECEIVED){
+            item.badgeDisplay = 'display:inline-block';
+            var reviewCard = {};
+            if(item.stepId === STEPS.ARTREVISION){
+              reviewCard = that.getNextNonComment(STEPS.REVIEW, item.index, list);
+            }
+            else{
+              reviewCard = that.getNextNonComment(STEPS.PROOFREVIEW, item.index, list);
+            }
+            if(reviewCard === null){
+              item.badgeText = REVIEW.REVIEWPENDINGTEXT;
+              item.badgeClass = 'orange';
+            }
+            else if(reviewCard.approve === REVIEW.APPROVE){
+              item.badgeText = REVIEW.APPROVETEXT;
+              item.badgeClass = 'green';
+            }
+            else{
+              item.badgeText = REVIEW.REJECTTEXT;
+              item.badgeClass = 'red';
+            }
+          }
+        });
       },
       verifyRequiredPathFile: function(){
         return (!!localStorage.coreldrawPath && !!localStorage.targetFolderPath && !!localStorage.sourceFolderPath && !!localStorage.cdrappName && !!pathExists.sync(localStorage.coreldrawPath) && !!pathExists.sync(localStorage.targetFolderPath) && !!pathExists.sync(localStorage.sourceFolderPath) && !!fileExists(localStorage.cdrappName));
@@ -1525,7 +1580,7 @@
           }
         }
         return -1;
-      },
+      },      
       isLastNonComment: function(cardStep, index, list){
         if(!list || list.length === 0){
           return false;
@@ -1593,14 +1648,19 @@
 
         this.getCurrJob().then(
           function(job){
-            button.removeAttribute('disabled');
+            // button.removeAttribute('disabled');
             if(job.status.toLowerCase() === STATUSESTEXT.WORKING){
               var isLast = that.isLastNonComment(stepid, e.model.item.index, job.cards);
               if(!!isLast){
                 that.addCard(stepid, '', '', null, STATUSES.WORKING, e.model.item.version, false, '');
                 // Polymer.dom(e).localTarget.setAttribute('disabled', true);
+                button.style.display = 'none';
                 button.nextElementSibling.removeAttribute('disabled');
+                button.nextElementSibling.display = 'inline-block';
                 button.nextElementSibling.nextElementSibling.removeAttribute('disabled');
+                button.nextElementSibling.nextElementSibling.display = 'inline-block';
+                button.previousElementSibling.display = 'block';
+                button.previousElementSibling.previousElementSibling.display = 'block';
               }
               else{
                 var reviewId = stepid === STEPS.ARTREVISION ? STEPS.REVIEW : STEPS.PROOFREVIEW;
