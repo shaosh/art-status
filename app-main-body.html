@@ -991,9 +991,11 @@
           document.getElementById('assign-modal').open();
         }
         else if(newValue === TABS.MANUAL){
+          this.domHost.loading();
           this.startManualUploadFlow();
         }
         else if(newValue === TABS.UPLOADPROOF){
+          this.domHost.loading();
           this.startUploadProofFlow();
         }
 
@@ -1052,6 +1054,7 @@
         var that = this;
         this.getCurrJob().then(
           function(job){
+            that.domHost.removeLoading();
             if(job.status.toLowerCase() === STATUSESTEXT.DONE){
               that.showAlert('This job has already been closed.');
             }
@@ -1076,13 +1079,17 @@
               };
             }
           },
-          function(e){outputError(e)}
+          function(e){
+            that.domHost.removeLoading();
+            outputError(e)
+          }
         );
       },
       startUploadProofFlow: function(){
         var that = this;
         this.getCurrJob().then(
           function(job){
+            that.domHost.removeLoading();
             if(job.status.toLowerCase() === STATUSESTEXT.DONE){
               that.showAlert('This job has already been closed.');
             }
@@ -1118,7 +1125,10 @@
               }
             }
           },
-          function(e){outputError(e)}
+          function(e){
+            that.domHost.removeLoading();
+            outputError(e)
+          }
         )
       },
       startCopyFlow: function(sourceFile, targetFile){

@@ -2,6 +2,9 @@
 	<style>
 		#loading-modal{
 			background-color: rgba(0,0,0,0);
+			overflow:initial;
+			min-height: 220px;
+			min-width: 182px;
 		}
 		.loading: {
 			height: 100px;
@@ -10,7 +13,7 @@
 	</style>
 	<template>
 		<paper-dialog id="loading-modal" modal>
-			<img class="loading" src="./img/loading.gif" />
+			<img class="loading" src="./img/loading.gif">
 		</paper-dialog> 
 	</template>
 	<script>
