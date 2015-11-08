@@ -385,6 +385,14 @@
           notify: true,
           value: []
         },
+        alljobs:{
+          type: Array, 
+          notify: true
+        },
+        minejobs:{
+          type: Array, 
+          notify: true
+        },
         colleagues: {
           type: Array, 
           notify: true,
@@ -462,13 +470,31 @@
       },
       updateJobViewPanel: function(newjob){
         var temp = [];
+        var tempall = [];
+        var tempmine = [];
         this.jobs.forEach(function(job){
           if(job.jobId === newjob.jobId){
             job = newjob;
           }
           temp.push(job);
-        });
+        });        
         this.jobs = temp;
+        
+        this.alljobs.forEach(function(job){
+          if(job.jobId === newjob.jobId){
+            job = newjob;
+          }
+          tempall.push(job);
+        });
+        this.alljobs = tempall;
+
+        this.minejobs.forEach(function(job){
+          if(job.jobId === newjob.jobId){
+            job = newjob;
+          }
+          tempmine.push(job);
+        });
+        this.minejobs = tempmine;
       },
       getCards: function(){
         var options = {

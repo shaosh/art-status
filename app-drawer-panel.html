@@ -92,7 +92,7 @@
           <app-main-header job="{{selectedJob}}" tab="{{selectedTab}}" company="{{selectedCompany}}" viewers="{{viewers}}" relations="{{otherJobs}}"></app-main-header>
         </div>
         <div class="content">
-          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}" viewers="{{viewers}}"></app-main-body>
+          <app-main-body job="{{selectedJob}}" tab="{{selectedTab}}" users="{{users}}" jobs="{{displayJobs}}" alljobs="{{allJobs}}" minejobs="{{mineJobs}}" viewers="{{viewers}}"></app-main-body>
         </div>
       </paper-header-panel>
     </paper-drawer-panel>
@@ -370,7 +370,8 @@
         },
         allJobs: {
           type: Array,
-          value: []
+          value: [],
+          notify:true
         },
         mineJobs: {
           type: Array,
