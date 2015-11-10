@@ -362,6 +362,17 @@
       renderJobRepeat: function(){
         this.$.jobRepeat.render();
       },
+
+      updateAppPageJobs: function(job){
+        this.domHost.updateJobs(job);
+      },
+
+      updateMineJobs: function(){
+        this.mineJobsNum = this.mineJobs.length;
+        if(this.leftTab === LEFTTABS.MINE){
+          this.showMine(false);          
+        }
+      },
       properties: {
         jobs:{
           type: Array,

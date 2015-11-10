@@ -254,6 +254,15 @@
         this.username = name;
       },
 
+      updateJobs: function(job){
+        for(var i = 0; i < this.jobs.length; i++){
+          if(this.jobs[i].jobId === job.jobId){
+            this.jobs[i] = job;
+            return;
+          }
+        }
+      },
+
       properties: {
         selectedCompany: {
           type: Object,          

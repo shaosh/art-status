@@ -487,14 +487,15 @@
           tempall.push(job);
         });
         this.alljobs = tempall;
+        this.domHost.updateAppPageJobs(newjob);
 
-        this.minejobs.forEach(function(job){
-          if(job.jobId === newjob.jobId){
-            job = newjob;
-          }
-          tempmine.push(job);
+        this.alljobs.forEach(function(job){
+          if(job.assigneeId === localStorage.userId){
+            tempmine.push(job);
+          }          
         });
         this.minejobs = tempmine;
+        this.domHost.updateMineJobs();
       },
       getCards: function(){
         var options = {
