@@ -115,6 +115,7 @@
               that.job.username = body.username || '';
               that.username = body.username || '';
               that.job.assigneeId = body.assigneeId || '';
+              that.assigneeid = that.job.assigneeId;
               that.job.email = body.email || '';
               that.job = JSON.parse(JSON.stringify(that.job));
               that.domHost.updateJobViewPanel(that.job);

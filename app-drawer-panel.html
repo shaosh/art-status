@@ -163,6 +163,18 @@
         if(this.prevTab === LEFTTABS.MINE && companyChanged !== true){
           this.displayJobs = this.mineJobs;
           this.selectedJob = this.selectedJob || this.displayJobs[0];
+          if(this.mineJobs.length > 0){
+            var contain = false;
+            for(var i = 0; i < this.mineJobs.length; i++){
+              if(this.mineJobs[i].jobId === this.selectedJob.jobId){
+                contain = true;
+                break;
+              }
+            }
+            if(!contain){
+              this.addSelectedBackground('');
+            }
+          }        
           return;
         }
         this.prevTab = LEFTTABS.MINE;
@@ -368,6 +380,7 @@
       },
 
       updateMineJobs: function(){
+        var jobRemoveFromMine = this.mineJObsNum > this.mineJobs.length;
         this.mineJobsNum = this.mineJobs.length;
         if(this.leftTab === LEFTTABS.MINE){
           this.showMine(false);          

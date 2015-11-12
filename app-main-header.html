@@ -172,7 +172,6 @@
             }
           };
         request(options, function(error, response, body){
-            console.log('relation', body);            
             if(!error && response.statusCode === 200){
               if(!!body && body.length > 0){
                 that.relations = body;
