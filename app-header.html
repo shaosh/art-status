@@ -18,11 +18,14 @@
     	  <div class="horizontal-center">
           <company-selector companies="{{companies}}" selected-company="{{selectedCompany}}"></company-selector>
         </div>
-        <div>          
+        <div>        
+          <paper-icon-button icon="fullscreen" id="fullScreenIcon" on-click="fullscreen"></paper-icon-button>
+          <paper-tooltip for="fullScreenIcon">FullScreen</paper-tooltip>
+          <paper-icon-button icon="fullscreen-exit" id="exitFullScreenIcon" on-click="exitfullscreen"></paper-icon-button>
+          <paper-tooltip for="exitFullScreenIcon">Exit FullScreen</paper-tooltip>
+
           <paper-icon-button icon="settings" id="settingsIcon" onclick="clickHandler(event)" data-dialog="setting-modal"></paper-icon-button>
           <paper-tooltip for="settingsIcon">Settings</paper-tooltip>
-          <paper-icon-button icon="swap-horiz" id="changeuserIcon" on-click="openLogin"></paper-icon-button>
-          <paper-tooltip for="changeuserIcon">Change User</paper-tooltip>
           <paper-icon-button icon="exit-to-app" id="logoutIcon" on-click="logout"></paper-icon-button>
           <paper-tooltip for="logoutIcon">Log Out</paper-tooltip>
         </div>
@@ -79,6 +82,12 @@
         for(var i = 0; i < timeouts.length; i++){
           clearTimeout(timeouts[i]);
         }
+      },
+      fullscreen: function(){
+        fullScreen();
+      },
+      exitfullscreen: function(){
+        exitFullScreen();
       }
     });    
   </script>

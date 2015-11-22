@@ -22,8 +22,9 @@
 			</paper-input>
 			<div id="errMsg">Failed to authenticate</div>      
       <div class="buttons">
+      	<paper-button autofocus on-click="exitFull" id='exitButton'>Exit FullScreen</paper-button>
         <paper-button autofocus on-click="submit" id='submitButton' disabled>Submit</paper-button>
-        <paper-button autofocus dialog-dismiss id="loginCloseButton">Close</paper-button>
+        <paper-button autofocus dialog-dismiss id="loginCloseButton">Close</paper-button>        
       </div>
     </paper-dialog>
 	</template>
@@ -113,6 +114,9 @@
 				else{
 					this.$.submitButton.setAttribute('disabled', true);
 				}
+      },
+      exitFull: function(){
+      	exitFullScreen();
       }
 		})
 	</script>

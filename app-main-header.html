@@ -156,6 +156,7 @@
           this.assignee = newValue.username;
           this.status = newValue.status;
           this.statusTitle = this.status + '. Updated at ' + this.time; 
+          // this.statusTitle = this.status + '. Updated by ' + this.assignee + ' at ' + this.time; 
           this.tab = TABS.HISTORY;
           this.getRelation();
         }

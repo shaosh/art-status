@@ -56,6 +56,13 @@
     paper-header-panel.drawer{
       position:relative;
     }    
+    #nojobText{
+      position: absolute;
+      top: 0;
+      color: red;
+      left: 100px;
+      display:none;
+    }
   </style>
   
   <template>
@@ -67,7 +74,7 @@
               <span id="allTab">ALL</span>&nbsp;(<span>{{jobs.length}}</span>)
             </paper-tab>            
             <paper-tab on-click="showMine">MINE&nbsp;(<span>{{mineJobsNum}}</span>)</paper-tab>
-            <paper-tab on-click="showOthers">OTHERS</paper-tab>
+            <paper-tab on-click="showOthers">MISCELLANEOUS</paper-tab>
           </paper-tabs>
           <div id="jobFilter">
             <paper-button tabindex="0" id="showFilterButton" noink on-click="showFilter">
@@ -86,6 +93,7 @@
         <template  id="jobRepeat" is="dom-repeat" items="{{displayJobs}}" sort="sortJob" filter="filterJob" observe="name">
           <job-card job="{{item}}" on-click="selectJob"></job-card>
         </template>
+        <p id="nojobText">No jobs</p>
       </paper-header-panel>
       <paper-header-panel main mode="standard">
         <div class="paper-header">
@@ -356,6 +364,19 @@
       filterChanged: function(newValue, oldValue){
         if(!!newValue || (!!oldValue && newValue === '')){
           this.renderJobRepeat();
+          var jobcards = document.getElementsByTagName('job-card');
+          var nojobText = document.getElementById('nojobText');
+          if((!jobcards) || (!!jobcards && jobcards.length === 0)){
+            if(!!nojobText){
+              document.getElementById('nojobText').style.display = 'block';
+              return;
+            }            
+          }
+          else{
+            if(!!nojobText){
+              document.getElementById('nojobText').style.display = 'none';
+            }     
+          }
           var selectedJobCard = document.querySelector('.job-card.selected');
           if(!selectedJobCard){
             return;
@@ -386,6 +407,20 @@
           this.showMine(false);          
         }
       },
+
+      displayJobsObserver: function(newValue, oldValue){
+        var nojobText = document.getElementById('nojobText');
+        if(!!newValue && newValue.length > 0){
+          if(!!nojobText){
+            document.getElementById('nojobText').style.display = 'none';
+          }     
+        }
+        else{
+          if(!!nojobText){
+            document.getElementById('nojobText').style.display = 'block';
+          }
+        }
+      },
       properties: {
         jobs:{
           type: Array,
@@ -410,7 +445,8 @@
         displayJobs: {
           type: Array,
           notify: true,
-          value: []
+          value: [],
+          observer: 'displayJobsObserver'
         },
         selectedJob: {
           type: Object,
